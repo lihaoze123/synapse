@@ -24,7 +24,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByParentIdOrderByCreatedAtAsc(Long parentId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"user", "post"})
-    Optional<Comment> findByIdWithUser(Long id);
+    @Query("SELECT c FROM Comment c WHERE c.id = :id")
+    Optional<Comment> findByIdWithUser(@Param("id") Long id);
 
     @Query("SELECT c.user.id FROM Comment c WHERE c.id = :commentId")
     Optional<Long> findUserIdById(@Param("commentId") Long commentId);

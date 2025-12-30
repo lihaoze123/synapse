@@ -101,6 +101,10 @@ public class CommentService {
         Comment comment = commentRepository.findByIdWithUser(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
+        if (comment.getIsDeleted()) {
+            throw new IllegalArgumentException("Cannot edit a deleted comment");
+        }
+
         comment.setContent(request.getContent());
         Comment saved = commentRepository.save(comment);
         return CommentDto.fromEntity(saved);
