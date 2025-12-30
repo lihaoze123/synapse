@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { authService } from "../services/auth";
 import type { User } from "../types";
 
@@ -8,13 +8,8 @@ export function useAuth() {
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 
-	const user = useMemo(() => {
-		return authService.getUser() as User | null;
-	}, []);
-
-	const isAuthenticated = useMemo(() => {
-		return authService.isAuthenticated();
-	}, []);
+	const user = authService.getUser() as User | null;
+	const isAuthenticated = authService.isAuthenticated();
 
 	const loginMutation = useMutation({
 		mutationFn: authService.login,
