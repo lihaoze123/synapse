@@ -65,6 +65,15 @@ export const postsService = {
 		throw new Error(response.data.message || "Failed to create post");
 	},
 
+	async updatePost(id: number, data: CreatePostRequest): Promise<Post> {
+		const response = await api.put<ApiResponse<Post>>(`/posts/${id}`, data);
+
+		if (response.data.success && response.data.data) {
+			return response.data.data;
+		}
+		throw new Error(response.data.message || "Failed to update post");
+	},
+
 	async deletePost(id: number): Promise<void> {
 		const response = await api.delete<ApiResponse<void>>(`/posts/${id}`);
 

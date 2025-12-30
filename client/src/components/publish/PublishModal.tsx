@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAllTags } from "@/hooks";
 import { cn } from "@/lib/utils";
-import type { PostType } from "@/types";
+import type { Post, PostType } from "@/types";
 import ArticleEditor from "./ArticleEditor";
 import MomentEditor from "./MomentEditor";
 import SnippetEditor from "./SnippetEditor";
@@ -17,6 +17,9 @@ interface PublishModalProps {
 	onPublish: (data: PublishData) => void;
 	isPublishing?: boolean;
 	error?: string;
+	// Edit mode props
+	mode?: "create" | "edit";
+	initialData?: Post;
 }
 
 export interface PublishData {
@@ -40,16 +43,32 @@ export default function PublishModal({
 	onPublish,
 	isPublishing = false,
 	error,
+	mode = "create",
+	initialData,
 }: PublishModalProps) {
 	const [activeType, setActiveType] = useState<PostType>(initialType);
 	const [tags, setTags] = useState<string[]>([]);
 
+	const isEditMode = mode === "edit";
+	const modalTitle = isEditMode ? "编辑内容" : "发布内容";
+	const buttonText = isPublishing
+		? isEditMode
+			? "保存中..."
+			: "发布中..."
+		: isEditMode
+			? "保存"
+			: "发布";
+
 	// Sync activeType with initialType when modal opens
 	useEffect(() => {
 		if (open) {
-			setActiveType(initialType);
+			if (isEditMode && initialData) {
+				setActiveType(initialData.type);
+			} else {
+				setActiveType(initialType);
+			}
 		}
-	}, [open, initialType]);
+	}, [open, initialType, isEditMode, initialData]);
 
 	// Fetch tags for suggestions only when modal is open
 	const { data: allTags } = useAllTags(open);
@@ -69,6 +88,39 @@ export default function PublishModal({
 	// Article state
 	const [articleTitle, setArticleTitle] = useState("");
 	const [articleContent, setArticleContent] = useState("");
+
+	// Pre-fill form data when editing
+	useEffect(() => {
+		if (open && isEditMode && initialData) {
+			// Set tags
+			setTags(initialData.tags.map((t) => t.name));
+
+			// Set content based on type
+			switch (initialData.type) {
+				case "MOMENT":
+					setMomentContent(initialData.content);
+					break;
+				case "SNIPPET":
+					setSnippetTitle(initialData.title || "");
+					setSnippetCode(initialData.content);
+					setSnippetLanguage(initialData.language || "javascript");
+					break;
+				case "ARTICLE":
+					setArticleTitle(initialData.title || "");
+					setArticleContent(initialData.content);
+					break;
+			}
+		} else if (open && !isEditMode) {
+			// Reset form for create mode
+			setMomentContent("");
+			setSnippetTitle("");
+			setSnippetCode("");
+			setSnippetLanguage("javascript");
+			setArticleTitle("");
+			setArticleContent("");
+			setTags([]);
+		}
+	}, [open, isEditMode, initialData]);
 
 	const resetForm = () => {
 		setMomentContent("");
@@ -135,7 +187,7 @@ export default function PublishModal({
 					{/* Header */}
 					<div className="flex items-center justify-between border-b border-border px-4 py-3">
 						<DialogPrimitive.Title className="text-lg font-semibold">
-							发布内容
+							{modalTitle}
 						</DialogPrimitive.Title>
 						<DialogPrimitive.Close
 							className="rounded-lg p-1 hover:bg-muted transition-colors"
@@ -145,25 +197,27 @@ export default function PublishModal({
 						</DialogPrimitive.Close>
 					</div>
 
-					{/* Tabs */}
-					<div className="flex border-b border-border">
-						{TABS.map(({ type, icon: Icon, label }) => (
-							<button
-								key={type}
-								type="button"
-								onClick={() => setActiveType(type)}
-								className={cn(
-									"flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors",
-									activeType === type
-										? "border-b-2 border-primary text-primary"
-										: "text-muted-foreground hover:text-foreground",
-								)}
-							>
-								<Icon className="h-4 w-4" />
-								{label}
-							</button>
-						))}
-					</div>
+					{/* Tabs - hide in edit mode since type cannot be changed */}
+					{!isEditMode && (
+						<div className="flex border-b border-border">
+							{TABS.map(({ type, icon: Icon, label }) => (
+								<button
+									key={type}
+									type="button"
+									onClick={() => setActiveType(type)}
+									className={cn(
+										"flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors",
+										activeType === type
+											? "border-b-2 border-primary text-primary"
+											: "text-muted-foreground hover:text-foreground",
+									)}
+								>
+									<Icon className="h-4 w-4" />
+									{label}
+								</button>
+							))}
+						</div>
+					)}
 
 					{/* Content */}
 					<div className="max-h-[60vh] overflow-y-auto p-4">
@@ -208,7 +262,7 @@ export default function PublishModal({
 					<div className="border-t border-border px-4 py-3">
 						{error && (
 							<div className="mb-3 p-2 text-sm text-red-600 bg-red-50 rounded-lg">
-								发布失败：{error}
+								{isEditMode ? "保存失败" : "发布失败"}：{error}
 							</div>
 						)}
 						<div className="flex items-center justify-end gap-2">
@@ -219,7 +273,7 @@ export default function PublishModal({
 								onClick={handlePublish}
 								disabled={!canPublish() || isPublishing}
 							>
-								{isPublishing ? "发布中..." : "发布"}
+								{buttonText}
 							</Button>
 						</div>
 					</div>

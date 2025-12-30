@@ -5,5 +5,6 @@ export {
 	useFilteredPosts,
 	usePost,
 	usePosts,
+	useUpdatePost,
 } from "./usePosts";
 export { useAllTags, usePopularTags } from "./useTags";
