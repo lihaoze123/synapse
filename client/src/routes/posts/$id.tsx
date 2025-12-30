@@ -16,8 +16,8 @@ import { CodeBlock } from "@/components/common";
 import PublishModal, {
 	type PublishData,
 } from "@/components/publish/PublishModal";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Card } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useAuth, useDeletePost, usePost, useUpdatePost } from "@/hooks";
 import type { PostType } from "@/types";
 
@@ -237,6 +237,25 @@ function PostDetailPage() {
 									<Markdown
 										remarkPlugins={[remarkGfm]}
 										rehypePlugins={[rehypeSanitize]}
+										components={{
+											pre({ children }) {
+												return <>{children}</>;
+											},
+											code(props) {
+												const { children, className } = props;
+												const match = /language-(\w+)/.exec(className || "");
+												if (match) {
+													return (
+														<CodeBlock
+															code={String(children).replace(/\n$/, "")}
+															language={match[1]}
+															maxLines={500}
+														/>
+													);
+												}
+												return <code className={className}>{children}</code>;
+											},
+										}}
 									>
 										{post.content}
 									</Markdown>
