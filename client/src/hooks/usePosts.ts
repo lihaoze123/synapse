@@ -41,6 +41,19 @@ export function useCreatePost() {
 	});
 }
 
+export function useUpdatePost() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ id, data }: { id: number; data: CreatePostRequest }) =>
+			postsService.updatePost(id, data),
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
+			queryClient.invalidateQueries({ queryKey: ["post", variables.id] });
+		},
+	});
+}
+
 export function useDeletePost() {
 	const queryClient = useQueryClient();
 

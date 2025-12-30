@@ -1,17 +1,24 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Calendar,
 	Code,
+	Edit,
 	FileText,
 	MessageCircle,
+	Trash2,
 } from "lucide-react";
+import { useState } from "react";
 import Markdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "@/components/common";
+import PublishModal, {
+	type PublishData,
+} from "@/components/publish/PublishModal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Card } from "@/components/ui/card";
-import { usePost } from "@/hooks";
+import { useAuth, useDeletePost, usePost, useUpdatePost } from "@/hooks";
 import type { PostType } from "@/types";
 
 export const Route = createFileRoute("/posts/$id")({
@@ -32,6 +39,50 @@ function PostDetailPage() {
 	const postId = Number.parseInt(id, 10);
 	const isValidId = !Number.isNaN(postId) && postId > 0;
 	const { data: post, isLoading, error } = usePost(isValidId ? postId : 0);
+	const { user: currentUser } = useAuth();
+	const navigate = useNavigate();
+
+	const updatePost = useUpdatePost();
+	const deletePost = useDeletePost();
+
+	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+	const [editError, setEditError] = useState("");
+
+	// Check if current user is the author
+	const isAuthor = currentUser && post && currentUser.id === post.user.id;
+
+	const handleEdit = () => {
+		setEditError("");
+		setIsEditModalOpen(true);
+	};
+
+	const handleUpdatePost = (data: PublishData) => {
+		updatePost.mutate(
+			{ id: postId, data },
+			{
+				onSuccess: () => {
+					setIsEditModalOpen(false);
+				},
+				onError: (err) => {
+					setEditError(err.message || "保存失败，请重试");
+				},
+			},
+		);
+	};
+
+	const handleDeleteConfirm = () => {
+		deletePost.mutate(postId, {
+			onSuccess: () => {
+				setIsDeleteDialogOpen(false);
+				navigate({ to: "/" });
+			},
+			onError: (err) => {
+				console.error("Delete failed:", err);
+				setIsDeleteDialogOpen(false);
+			},
+		});
+	};
 
 	if (!isValidId) {
 		return (
@@ -105,39 +156,63 @@ function PostDetailPage() {
 					)}
 
 					<div className="p-6">
-						{/* Header */}
-						<div className="flex items-center gap-3 mb-4">
-							{/* Author avatar */}
-							<div className="shrink-0">
-								{post.user.avatarUrl ? (
-									<img
-										src={post.user.avatarUrl}
-										alt={`${post.user.username} 的头像`}
-										className="h-10 w-10 rounded-full object-cover"
-									/>
-								) : (
-									<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-										{post.user.username.charAt(0).toUpperCase()}
-									</div>
-								)}
-							</div>
+						{/* Header with edit/delete buttons */}
+						<div className="flex items-start gap-3 mb-4">
+							<div className="flex-1 flex items-center gap-3">
+								{/* Author avatar */}
+								<div className="shrink-0">
+									{post.user.avatarUrl ? (
+										<img
+											src={post.user.avatarUrl}
+											alt={`${post.user.username} 的头像`}
+											className="h-10 w-10 rounded-full object-cover"
+										/>
+									) : (
+										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+											{post.user.username.charAt(0).toUpperCase()}
+										</div>
+									)}
+								</div>
 
-							<div className="flex-1 min-w-0">
-								<div className="font-medium">{post.user.username}</div>
-								<div className="flex items-center gap-2 text-sm text-muted-foreground">
-									<TypeIcon className={`h-3.5 w-3.5 ${config.color}`} />
-									<span>{config.label}</span>
-									<span>·</span>
-									<Calendar className="h-3.5 w-3.5" />
-									<time dateTime={post.createdAt}>
-										{new Date(post.createdAt).toLocaleDateString("zh-CN", {
-											year: "numeric",
-											month: "long",
-											day: "numeric",
-										})}
-									</time>
+								<div className="flex-1 min-w-0">
+									<div className="font-medium">{post.user.username}</div>
+									<div className="flex items-center gap-2 text-sm text-muted-foreground">
+										<TypeIcon className={`h-3.5 w-3.5 ${config.color}`} />
+										<span>{config.label}</span>
+										<span>·</span>
+										<Calendar className="h-3.5 w-3.5" />
+										<time dateTime={post.createdAt}>
+											{new Date(post.createdAt).toLocaleDateString("zh-CN", {
+												year: "numeric",
+												month: "long",
+												day: "numeric",
+											})}
+										</time>
+									</div>
 								</div>
 							</div>
+
+							{/* Edit/Delete buttons - only for author */}
+							{isAuthor && (
+								<div className="flex items-center gap-2">
+									<button
+										type="button"
+										onClick={handleEdit}
+										className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+									>
+										<Edit className="h-4 w-4" />
+										编辑
+									</button>
+									<button
+										type="button"
+										onClick={() => setIsDeleteDialogOpen(true)}
+										className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+									>
+										<Trash2 className="h-4 w-4" />
+										删除
+									</button>
+								</div>
+							)}
 						</div>
 
 						{/* Title for articles and snippets */}
@@ -192,6 +267,29 @@ function PostDetailPage() {
 					</div>
 				</Card>
 			</div>
+
+			{/* Edit Modal */}
+			<PublishModal
+				open={isEditModalOpen}
+				onOpenChange={setIsEditModalOpen}
+				mode="edit"
+				initialData={post}
+				onPublish={handleUpdatePost}
+				isPublishing={updatePost.isPending}
+				error={editError}
+			/>
+
+			{/* Delete Confirmation Dialog */}
+			<ConfirmDialog
+				open={isDeleteDialogOpen}
+				onOpenChange={setIsDeleteDialogOpen}
+				title="确认删除"
+				description="删除后无法恢复，确定要删除这篇帖子吗？"
+				confirmLabel="删除"
+				variant="destructive"
+				onConfirm={handleDeleteConfirm}
+				isConfirming={deletePost.isPending}
+			/>
 		</div>
 	);
 }
