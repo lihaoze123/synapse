@@ -75,16 +75,16 @@ export default function CodeBlock({
 
 	return (
 		<div className={cn("group relative", className)}>
-			<div className="overflow-hidden rounded-lg border border-border bg-[#1e1e1e]">
+			<div className="overflow-hidden rounded-lg border border-border bg-white">
 				{/* Header */}
-				<div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-3 py-1.5">
-					<span className="text-xs font-medium text-white/60">
+				<div className="flex items-center justify-between border-b border-black/10 bg-black/5 px-3 py-1.5">
+					<span className="text-xs font-medium text-black/60">
 						{displayLanguage}
 					</span>
 					<button
 						type="button"
 						onClick={handleCopy}
-						className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+						className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-black/60 transition-colors hover:bg-black/10 hover:text-black"
 					>
 						{copied ? (
 							<>
@@ -108,7 +108,7 @@ export default function CodeBlock({
 							light: "github-light",
 							dark: "github-dark",
 						}}
-						defaultColor="dark"
+						defaultColor="light"
 						showLineNumbers={showLineNumbers}
 						transformers={[
 							transformerNotationDiff(),
@@ -122,8 +122,8 @@ export default function CodeBlock({
 
 				{/* Truncation indicator */}
 				{truncated && (
-					<div className="border-t border-white/10 bg-white/5 px-3 py-1.5 text-center">
-						<span className="text-xs text-white/50">
+					<div className="border-t border-black/10 bg-black/5 px-3 py-1.5 text-center">
+						<span className="text-xs text-black/50">
 							... 还有 {lines.length - maxLines} 行
 						</span>
 					</div>

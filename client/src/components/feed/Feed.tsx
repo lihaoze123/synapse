@@ -23,10 +23,9 @@ export default function Feed({
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 
 	// Store handler in ref to avoid recreating observer on every render
-	const handleObserverRef =
-		useRef<((entries: IntersectionObserverEntry[]) => void) | undefined>(
-			undefined,
-		);
+	const handleObserverRef = useRef<
+		((entries: IntersectionObserverEntry[]) => void) | undefined
+	>(undefined);
 	handleObserverRef.current = (entries: IntersectionObserverEntry[]) => {
 		const [entry] = entries;
 		if (
