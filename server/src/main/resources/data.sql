@@ -108,7 +108,7 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 }
-```', 'Spring Boot 快速入门教程', '/uploads/spring-cover.png', 1);
+```', 'Spring Boot 快速入门教程', 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=400&fit=crop', 1);
 
 -- Article 2: JS Async
 INSERT INTO posts (type, title, content, summary, cover_image, user_id) VALUES
@@ -139,7 +139,7 @@ async function fetchData() {
         console.error(err);
     }
 }
-```', '深入理解 JS 异步编程', '/uploads/js-async.png', 2);
+```', '深入理解 JS 异步编程', 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&h=400&fit=crop', 2);
 
 -- Moment 1
 INSERT INTO posts (type, content, user_id) VALUES
