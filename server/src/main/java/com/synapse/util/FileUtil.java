@@ -1,0 +1,86 @@
+package com.synapse.util;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Set;
+import java.util.UUID;
+
+@Component
+public class FileUtil {
+
+    private static final String UPLOAD_DIR = "uploads";
+    private static final Set<String> ALLOWED_TYPES = Set.of(
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp"
+    );
+    private static final long MAX_SIZE = 10 * 1024 * 1024; // 10MB
+
+    public FileUtil() {
+        createUploadDirectory();
+    }
+
+    private void createUploadDirectory() {
+        Path uploadPath = Paths.get(UPLOAD_DIR);
+        if (!Files.exists(uploadPath)) {
+            try {
+                Files.createDirectories(uploadPath);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create upload directory", e);
+            }
+        }
+    }
+
+    public String saveFile(MultipartFile file) throws IOException {
+        validateFile(file);
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = getExtension(originalFilename);
+        String newFilename = UUID.randomUUID().toString() + extension;
+
+        Path filePath = Paths.get(UPLOAD_DIR, newFilename);
+        Files.copy(file.getInputStream(), filePath);
+
+        return newFilename;
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        if (file.getSize() > MAX_SIZE) {
+            throw new IllegalArgumentException("File size exceeds 10MB limit");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("Only JPEG, PNG, GIF, and WebP images are allowed");
+        }
+    }
+
+    private String getExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return ".png";
+        }
+        return filename.substring(filename.lastIndexOf("."));
+    }
+
+    public void deleteFile(String filename) {
+        if (filename == null || filename.isEmpty()) {
+            return;
+        }
+        try {
+            Path filePath = Paths.get(UPLOAD_DIR, filename);
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            // Log error but don't throw - deletion failure is not critical
+        }
+    }
+}
