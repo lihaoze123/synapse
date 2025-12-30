@@ -9,6 +9,8 @@ import com.synapse.entity.User;
 import com.synapse.repository.CommentRepository;
 import com.synapse.repository.PostRepository;
 import com.synapse.repository.UserRepository;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,9 +44,9 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public CommentDto getComment(Long id) {
-        Comment comment = commentRepository.findById(id)
+        Comment comment = commentRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
-        return CommentDto.fromEntityWithReplies(comment);
+        return CommentDto.fromEntity(comment);
     }
 
     @Transactional
@@ -59,8 +61,12 @@ public class CommentService {
         int replyDepth = 0;
 
         if (request.getParentId() != null) {
-            parentComment = commentRepository.findById(request.getParentId())
+            parentComment = commentRepository.findByIdWithUser(request.getParentId())
                     .orElseThrow(() -> new IllegalArgumentException("Parent comment not found"));
+
+            if (parentComment.getIsDeleted()) {
+                throw new IllegalArgumentException("Cannot reply to a deleted comment");
+            }
 
             if (!parentComment.getPost().getId().equals(postId)) {
                 throw new IllegalArgumentException("Parent comment does not belong to this post");
@@ -85,12 +91,15 @@ public class CommentService {
 
     @Transactional
     public CommentDto updateComment(Long commentId, Long userId, UpdateCommentRequest request) {
-        Comment comment = commentRepository.findById(commentId)
+        Long ownerUserId = commentRepository.findUserIdById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
-        if (!comment.getUser().getId().equals(userId)) {
+        if (!ownerUserId.equals(userId)) {
             throw new IllegalArgumentException("Not authorized to edit this comment");
         }
+
+        Comment comment = commentRepository.findByIdWithUser(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
         comment.setContent(request.getContent());
         Comment saved = commentRepository.save(comment);
@@ -99,12 +108,15 @@ public class CommentService {
 
     @Transactional
     public void deleteComment(Long commentId, Long userId) {
-        Comment comment = commentRepository.findById(commentId)
+        Long ownerUserId = commentRepository.findUserIdById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
-        if (!comment.getUser().getId().equals(userId)) {
+        if (!ownerUserId.equals(userId)) {
             throw new IllegalArgumentException("Not authorized to delete this comment");
         }
+
+        Comment comment = commentRepository.findByIdWithUser(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
         // Soft delete
         comment.setIsDeleted(true);
@@ -115,7 +127,12 @@ public class CommentService {
     private int calculateReplyDepth(Comment comment) {
         int depth = 0;
         Comment current = comment;
+        Set<Long> visited = new HashSet<>();
+
         while (current.getParent() != null) {
+            if (!visited.add(current.getId())) {
+                throw new IllegalStateException("Circular reference detected in comment hierarchy");
+            }
             depth++;
             current = current.getParent();
             if (depth > MAX_REPLY_DEPTH) {

@@ -26,6 +26,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @EntityGraph(attributePaths = {"user", "post"})
     Optional<Comment> findByIdWithUser(Long id);
 
+    @Query("SELECT c.user.id FROM Comment c WHERE c.id = :commentId")
+    Optional<Long> findUserIdById(@Param("commentId") Long commentId);
+
+    @Query("SELECT c.isDeleted FROM Comment c WHERE c.id = :commentId")
+    Optional<Boolean> findIsDeletedById(@Param("commentId") Long commentId);
+
     @Query("SELECT c FROM Comment c WHERE c.user.id = :userId AND c.isDeleted = false")
     @EntityGraph(attributePaths = {"post"})
     Page<Comment> findByUserId(@Param("userId") Long userId, Pageable pageable);
