@@ -1,19 +1,55 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { authService } from "../services/auth";
+import { setAuthErrorHandler } from "../services/api";
 import type { User } from "../types";
 
 export function useAuth() {
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 
-	const user = authService.getUser() as User | null;
-	const isAuthenticated = authService.isAuthenticated();
+	// Query to validate token on mount
+	const { data: validatedUser, isLoading: isValidating } = useQuery({
+		queryKey: ["auth", "validate"],
+		queryFn: async () => {
+			const token = authService.getToken();
+			if (!token) {
+				return null;
+			}
+			try {
+				return await authService.fetchCurrentUser();
+			} catch {
+				// Token is invalid, clear it
+				authService.logout();
+				return null;
+			}
+		},
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		retry: false,
+	});
+
+	const user = (validatedUser || authService.getUser()) as User | null;
+	const isAuthenticated = !!user;
+
+	// Register 401 error handler with navigation
+	useEffect(() => {
+		const handleAuthError = () => {
+			queryClient.clear();
+			navigate({ to: "/login", replace: true });
+		};
+
+		setAuthErrorHandler(handleAuthError);
+
+		return () => {
+			setAuthErrorHandler(null);
+		};
+	}, [queryClient, navigate]);
 
 	const loginMutation = useMutation({
 		mutationFn: authService.login,
 		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["auth"] });
 			queryClient.invalidateQueries({ queryKey: ["user"] });
 			navigate({ to: "/" });
 		},
@@ -22,6 +58,7 @@ export function useAuth() {
 	const registerMutation = useMutation({
 		mutationFn: authService.register,
 		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["auth"] });
 			queryClient.invalidateQueries({ queryKey: ["user"] });
 			navigate({ to: "/" });
 		},
@@ -29,13 +66,14 @@ export function useAuth() {
 
 	const logout = useCallback(() => {
 		authService.logout();
-		queryClient.invalidateQueries({ queryKey: ["user"] });
-		navigate({ to: "/login" });
+		queryClient.clear();
+		navigate({ to: "/login", replace: true });
 	}, [queryClient, navigate]);
 
 	return {
 		user,
 		isAuthenticated,
+		isValidating,
 		login: loginMutation.mutateAsync,
 		register: registerMutation.mutateAsync,
 		logout,

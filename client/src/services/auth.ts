@@ -46,6 +46,18 @@ export const authService = {
 		localStorage.removeItem("user");
 	},
 
+	async fetchCurrentUser() {
+		const response = await api.get<ApiResponse<AuthResponse["user"]>>(
+			"/auth/me",
+		);
+		if (response.data.success && response.data.data) {
+			const user = response.data.data;
+			localStorage.setItem("user", JSON.stringify(user));
+			return user;
+		}
+		throw new Error(response.data.message || "Failed to fetch user");
+	},
+
 	getToken(): string | null {
 		return localStorage.getItem("token");
 	},
