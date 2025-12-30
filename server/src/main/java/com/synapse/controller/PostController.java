@@ -44,6 +44,18 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<Page<PostDto>>> searchPosts(
+            @RequestParam String keyword,
+            @RequestParam(required = false) PostType type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        Pageable pageable = PageRequest.of(page, safeSize);
+        Page<PostDto> posts = postService.searchPosts(keyword, type, pageable);
+        return ResponseEntity.ok(ApiResponse.success(posts));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PostDto>> getPost(@PathVariable Long id) {
         try {

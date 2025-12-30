@@ -164,4 +164,20 @@ public class PostService {
         Post saved = postRepository.save(post);
         return PostDto.fromEntity(saved);
     }
+
+    @Transactional(readOnly = true)
+    public Page<PostDto> searchPosts(String keyword, PostType type, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        Page<Post> posts;
+        if (type != null) {
+            posts = postRepository.searchByKeywordAndType(keyword.trim(), type, pageable);
+        } else {
+            posts = postRepository.searchByKeyword(keyword.trim(), pageable);
+        }
+
+        return posts.map(PostDto::fromEntity);
+    }
 }
