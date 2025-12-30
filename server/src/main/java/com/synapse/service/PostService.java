@@ -2,6 +2,7 @@ package com.synapse.service;
 
 import com.synapse.dto.CreatePostRequest;
 import com.synapse.dto.PostDto;
+import com.synapse.dto.UpdatePostRequest;
 import com.synapse.entity.Post;
 import com.synapse.entity.PostType;
 import com.synapse.entity.Tag;
@@ -106,5 +107,61 @@ public class PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    @Transactional
+    public PostDto updatePost(Long postId, Long userId, UpdatePostRequest request) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        if (!post.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("Not authorized to edit this post");
+        }
+
+        // Update fields if provided
+        if (request.getTitle() != null) {
+            post.setTitle(request.getTitle());
+        }
+        if (request.getContent() != null) {
+            post.setContent(request.getContent());
+
+            // Regenerate summary for articles
+            if (post.getType() == PostType.ARTICLE) {
+                String content = request.getContent();
+                String summary;
+                if (content.length() <= 200) {
+                    summary = content;
+                } else {
+                    int lastSpace = content.lastIndexOf(' ', 200);
+                    summary = (lastSpace > 0 ? content.substring(0, lastSpace) : content.substring(0, 200)) + "...";
+                }
+                post.setSummary(summary);
+            }
+        }
+        if (request.getLanguage() != null) {
+            post.setLanguage(request.getLanguage());
+        }
+        if (request.getCoverImage() != null) {
+            post.setCoverImage(request.getCoverImage());
+        }
+
+        // Update tags if provided
+        if (request.getTags() != null) {
+            Set<Tag> tags = new HashSet<>();
+            for (String tagName : request.getTags()) {
+                String normalizedName = tagName.trim();
+                if (normalizedName.isEmpty()) {
+                    continue;
+                }
+                Tag tag = tagRepository.findByName(normalizedName)
+                        .orElseGet(() -> tagRepository.save(
+                                Tag.builder().name(normalizedName).build()));
+                tags.add(tag);
+            }
+            post.setTags(tags);
+        }
+
+        Post saved = postRepository.save(post);
+        return PostDto.fromEntity(saved);
     }
 }

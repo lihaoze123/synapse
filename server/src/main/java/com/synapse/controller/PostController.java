@@ -3,6 +3,7 @@ package com.synapse.controller;
 import com.synapse.dto.ApiResponse;
 import com.synapse.dto.CreatePostRequest;
 import com.synapse.dto.PostDto;
+import com.synapse.dto.UpdatePostRequest;
 import com.synapse.entity.PostType;
 import com.synapse.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -65,6 +67,23 @@ public class PostController {
             return ResponseEntity.ok(ApiResponse.success("Post created successfully", post));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostDto>> updatePost(
+            HttpServletRequest request,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdatePostRequest updateRequest) {
+        Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
+        }
+        try {
+            PostDto post = postService.updatePost(id, userId, updateRequest);
+            return ResponseEntity.ok(ApiResponse.success("Post updated successfully", post));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
         }
     }
 
