@@ -1,7 +1,6 @@
 package com.synapse.repository;
 
 import com.synapse.entity.Comment;
-import com.synapse.entity.Post;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

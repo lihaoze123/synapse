@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Code, FileText, Hash, MessageCircle, TrendingUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { usePopularTags } from "@/hooks";
+import { cn } from "@/lib/utils";
 import type { PostType } from "@/types";
 
 const contentTypes: {
@@ -12,7 +12,13 @@ const contentTypes: {
 	color: string;
 	bgColor: string;
 }[] = [
-	{ type: "SNIPPET", label: "代码片段", icon: Code, color: "text-blue-600", bgColor: "group-hover:bg-blue-50 dark:group-hover:bg-blue-950/30" },
+	{
+		type: "SNIPPET",
+		label: "代码片段",
+		icon: Code,
+		color: "text-blue-600",
+		bgColor: "group-hover:bg-blue-50 dark:group-hover:bg-blue-950/30",
+	},
 	{
 		type: "ARTICLE",
 		label: "文章",
@@ -68,7 +74,9 @@ export default function Sidebar() {
 								</Link>
 							))
 						) : (
-							<p className="text-sm text-muted-foreground px-3 py-2">暂无热门话题</p>
+							<p className="text-sm text-muted-foreground px-3 py-2">
+								暂无热门话题
+							</p>
 						)}
 					</div>
 				</Card>

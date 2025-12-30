@@ -1,8 +1,8 @@
 import { Code, FileText, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 import type { PostType } from "@/types";
 
 interface ComposeCardProps {

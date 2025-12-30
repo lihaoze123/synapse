@@ -2,8 +2,8 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
-	oneLight,
 	oneDark,
+	oneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { cn } from "@/lib/utils";
 
@@ -92,9 +92,7 @@ export default function CodeBlock({
 		: normalizedCode;
 
 	// Check if dark mode is active
-	const isDark =
-		typeof document !== "undefined" &&
-		document.documentElement.classList.contains("dark");
+	const isDark = document?.documentElement.classList.contains("dark");
 
 	const customStyle = {
 		margin: 0,

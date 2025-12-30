@@ -47,9 +47,8 @@ export const authService = {
 	},
 
 	async fetchCurrentUser() {
-		const response = await api.get<ApiResponse<AuthResponse["user"]>>(
-			"/auth/me",
-		);
+		const response =
+			await api.get<ApiResponse<AuthResponse["user"]>>("/auth/me");
 		if (response.data.success && response.data.data) {
 			const user = response.data.data;
 			localStorage.setItem("user", JSON.stringify(user));

@@ -20,6 +20,12 @@
         <property name="message" value="Line has trailing whitespace"/>
     </module>
 
+    <!-- Line length (120 chars, reasonable for modern screens) -->
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <property name="ignorePattern" value="^package.*|^import.*|a]+ *$"/>
+    </module>
+
     <module name="TreeWalker">
         <!-- Naming conventions -->
         <module name="ConstantName"/>
@@ -63,21 +69,9 @@
         <module name="OneStatementPerLine"/>
         <module name="MultipleVariableDeclarations"/>
 
-        <!-- Line length (120 chars, reasonable for modern screens) -->
-        <module name="LineLength">
-            <property name="max" value="120"/>
-            <property name="ignorePattern" value="^package.*|^import.*|a]+ *$"/>
-        </module>
-
         <!-- Method length -->
         <module name="MethodLength">
             <property name="max" value="80"/>
-        </module>
-
-        <!-- Suppress warnings for generated code / Lombok -->
-        <module name="SuppressionCommentFilter">
-            <property name="offCommentFormat" value="CHECKSTYLE:OFF"/>
-            <property name="onCommentFormat" value="CHECKSTYLE:ON"/>
         </module>
     </module>
 </module>

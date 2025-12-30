@@ -43,12 +43,16 @@ export default function UserInfo({
 		<div className={cn("flex items-center gap-2.5", className)}>
 			<Avatar className={cn(avatarSize, "ring-2 ring-border/30")}>
 				<AvatarImage src={avatarUrl || undefined} alt={username} />
-				<AvatarFallback className={cn(size === "sm" ? "text-xs" : "text-xs", "font-medium")}>
+				<AvatarFallback
+					className={cn(size === "sm" ? "text-xs" : "text-xs", "font-medium")}
+				>
 					{username.slice(0, 2).toUpperCase()}
 				</AvatarFallback>
 			</Avatar>
 			<div className="flex items-center gap-1.5">
-				<span className={cn("font-semibold tracking-tight", textSize)}>{username}</span>
+				<span className={cn("font-semibold tracking-tight", textSize)}>
+					{username}
+				</span>
 				{timestamp && (
 					<>
 						<span className="text-muted-foreground/60">·</span>

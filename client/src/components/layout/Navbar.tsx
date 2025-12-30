@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Hash, LogIn, LogOut, MessageCircle, Sun, Moon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Hash, LogIn, LogOut, MessageCircle, Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +35,9 @@ export default function Navbar() {
 						<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform duration-200 group-hover:scale-105">
 							<Hash className="h-5 w-5" />
 						</div>
-						<span className="text-lg font-semibold tracking-tight">Synapse</span>
+						<span className="text-lg font-semibold tracking-tight">
+							Synapse
+						</span>
 					</Link>
 
 					<nav className="hidden md:flex items-center gap-1">

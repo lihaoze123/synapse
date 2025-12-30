@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useCallback } from "react";
-import { authService } from "../services/auth";
+import { useCallback, useEffect } from "react";
 import { setAuthErrorHandler } from "../services/api";
+import { authService } from "../services/auth";
 import type { User } from "../types";
 
 export function useAuth() {
