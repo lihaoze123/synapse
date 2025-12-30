@@ -27,6 +27,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByUserIdOrderByCreatedAtDesc(Long userId);
 
+    @EntityGraph(attributePaths = {"user", "tags"})
+    Page<Post> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
     // Paginated queries with EntityGraph to avoid N+1
     @EntityGraph(attributePaths = {"user", "tags"})
     Page<Post> findAllByOrderByCreatedAtDesc(Pageable pageable);
