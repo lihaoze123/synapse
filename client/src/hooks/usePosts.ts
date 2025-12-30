@@ -37,6 +37,7 @@ export function useCreatePost() {
 		mutationFn: (data: CreatePostRequest) => postsService.createPost(data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["posts"] });
+			queryClient.invalidateQueries({ queryKey: ["tags"] });
 		},
 	});
 }
@@ -50,6 +51,7 @@ export function useUpdatePost() {
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({ queryKey: ["posts"] });
 			queryClient.invalidateQueries({ queryKey: ["post", variables.id] });
+			queryClient.invalidateQueries({ queryKey: ["tags"] });
 		},
 	});
 }
@@ -61,6 +63,7 @@ export function useDeletePost() {
 		mutationFn: (id: number) => postsService.deletePost(id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["posts"] });
+			queryClient.invalidateQueries({ queryKey: ["tags"] });
 		},
 	});
 }
