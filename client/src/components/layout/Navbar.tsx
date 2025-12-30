@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Hash, LogIn, LogOut, MessageCircle } from "lucide-react";
+import { Hash, LogIn, LogOut, MessageCircle, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,22 +14,38 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
 	const { user, logout } = useAuth();
+	const [isDark, setIsDark] = useState(false);
+
+	useEffect(() => {
+		const isDarkMode = document.documentElement.classList.contains("dark");
+		setIsDark(isDarkMode);
+	}, []);
+
+	const toggleTheme = () => {
+		const newIsDark = !isDark;
+		setIsDark(newIsDark);
+		document.documentElement.classList.toggle("dark", newIsDark);
+	};
 
 	return (
-		<header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-sm">
-			<div className="flex h-14 items-center justify-between px-4 md:px-6">
-				<div className="flex items-center gap-6">
-					<Link to="/" className="flex items-center gap-2">
-						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+		<header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
+			<div className="flex h-16 items-center justify-between px-4 md:px-6 lg:px-8 mx-auto max-w-6xl">
+				<div className="flex items-center gap-8">
+					<Link to="/" className="flex items-center gap-2.5 group">
+						<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform duration-200 group-hover:scale-105">
 							<Hash className="h-5 w-5" />
 						</div>
-						<span className="text-lg font-semibold">Synapse</span>
+						<span className="text-lg font-semibold tracking-tight">Synapse</span>
 					</Link>
 
 					<nav className="hidden md:flex items-center gap-1">
 						<Link to="/">
 							{({ isActive }) => (
-								<Button variant={isActive ? "secondary" : "ghost"} size="sm">
+								<Button
+									variant={isActive ? "secondary" : "ghost"}
+									size="sm"
+									className="font-medium"
+								>
 									<MessageCircle className="mr-1.5 h-4 w-4" />
 									动态
 								</Button>
@@ -37,21 +54,34 @@ export default function Navbar() {
 					</nav>
 				</div>
 
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-3">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={toggleTheme}
+						className="h-9 w-9"
+					>
+						{isDark ? (
+							<Sun className="h-4 w-4" />
+						) : (
+							<Moon className="h-4 w-4" />
+						)}
+					</Button>
+
 					{user ? (
 						<Menu>
 							<MenuTrigger
 								render={
 									<button
 										type="button"
-										className="flex items-center gap-2 rounded-full p-1 hover:bg-secondary transition-colors"
+										className="flex items-center gap-2 rounded-full p-1.5 hover:bg-secondary transition-colors duration-150"
 									>
-										<Avatar className="h-8 w-8">
+										<Avatar className="h-8 w-8 ring-2 ring-border/50">
 											<AvatarImage
 												src={user.avatarUrl || undefined}
 												alt={user.username}
 											/>
-											<AvatarFallback>
+											<AvatarFallback className="text-xs font-medium">
 												{user.username.slice(0, 2).toUpperCase()}
 											</AvatarFallback>
 										</Avatar>
@@ -59,8 +89,8 @@ export default function Navbar() {
 								}
 							/>
 							<MenuPopup className="min-w-[180px]">
-								<div className="px-3 py-2 text-sm">
-									<p className="font-medium">{user.username}</p>
+								<div className="px-3 py-2.5 text-sm">
+									<p className="font-semibold">{user.username}</p>
 								</div>
 								<MenuSeparator />
 								<MenuItem
@@ -74,7 +104,7 @@ export default function Navbar() {
 						</Menu>
 					) : (
 						<Link to="/login">
-							<Button size="sm">
+							<Button size="sm" className="font-medium shadow-sm">
 								<LogIn className="mr-1.5 h-4 w-4" />
 								登录
 							</Button>

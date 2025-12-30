@@ -53,7 +53,7 @@ export default function Feed({
 
 	if (isLoading) {
 		return (
-			<div className="space-y-4">
+			<div className="space-y-5">
 				{Array.from({ length: 3 }).map((_, i) => (
 					// biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton items don't reorder
 					<PostCardSkeleton key={`skeleton-${i}`} />
@@ -67,7 +67,7 @@ export default function Feed({
 	}
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-5">
 			{posts.map((post) => (
 				<PostCard key={post.id} post={post} />
 			))}
@@ -77,7 +77,7 @@ export default function Feed({
 
 			{/* Loading indicator */}
 			{isFetchingNextPage && (
-				<div className="flex justify-center py-4">
+				<div className="flex justify-center py-6">
 					<div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
 				</div>
 			)}
