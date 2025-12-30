@@ -12,15 +12,15 @@ export default function ArticleContent({
 	coverImage,
 }: ArticleContentProps) {
 	return (
-		<div className="space-y-2">
-			<h3 className="text-lg font-semibold leading-tight line-clamp-2">
+		<div className="space-y-3">
+			<h3 className="text-lg font-semibold leading-snug tracking-tight line-clamp-2">
 				{title}
 			</h3>
 
 			<div className={cn("flex gap-4", coverImage && "items-start")}>
 				<div className="flex-1 min-w-0">
 					{summary && (
-						<p className="text-sm text-muted-foreground line-clamp-3">
+						<p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
 							{summary}
 						</p>
 					)}
@@ -31,7 +31,7 @@ export default function ArticleContent({
 						<img
 							src={coverImage}
 							alt={title}
-							className="h-20 w-28 rounded-lg object-cover"
+							className="h-20 w-28 rounded-lg object-cover ring-1 ring-border/20"
 						/>
 					</div>
 				)}

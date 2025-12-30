@@ -5,62 +5,70 @@
 
 body {
   @apply m-0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  letter-spacing: -0.01em;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+  font-family: 'JetBrains Mono', 'Fira Code', source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
 :root {
-  /* Warm minimalist color palette */
-  --background: 45 30% 97%; /* Cream background */
-  --foreground: 30 10% 20%; /* Dark gray text */
-  --card: 45 25% 95%;
-  --card-foreground: 30 10% 20%;
-  --popover: 45 25% 95%;
-  --popover-foreground: 30 10% 20%;
-  --primary: 30 80% 55%; /* Amber/Orange accent */
-  --primary-foreground: 45 30% 98%;
-  --secondary: 35 20% 90%;
-  --secondary-foreground: 30 10% 25%;
-  --muted: 35 15% 92%;
-  --muted-foreground: 30 10% 45%;
-  --accent: 30 80% 55%;
-  --accent-foreground: 45 30% 98%;
-  --destructive: 0 65% 50%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 35 15% 85%;
-  --input: 35 15% 85%;
-  --ring: 30 80% 55%;
+  /* Modern Minimalist - Neutral Gray + Vibrant Amber */
+  --background: 0 0% 98%; /* Near white, slightly gray */
+  --foreground: 0 0% 9%; /* Near black for high contrast */
+  --card: 0 0% 100%; /* Pure white cards */
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 35 95% 50%; /* Vibrant amber-orange */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 25%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 0 0% 96%;
+  --accent-foreground: 0 0% 9%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 35 95% 50%;
   --radius: 0.75rem;
+
+  /* Animation timing */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
 }
 
 .dark {
-  --background: 30 10% 12%;
-  --foreground: 45 20% 92%;
-  --card: 30 10% 15%;
-  --card-foreground: 45 20% 92%;
-  --popover: 30 10% 15%;
-  --popover-foreground: 45 20% 92%;
-  --primary: 30 80% 55%;
-  --primary-foreground: 30 10% 10%;
-  --secondary: 30 10% 20%;
-  --secondary-foreground: 45 20% 90%;
-  --muted: 30 10% 20%;
-  --muted-foreground: 45 15% 60%;
-  --accent: 30 80% 55%;
-  --accent-foreground: 30 10% 10%;
-  --destructive: 0 60% 45%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 30 10% 25%;
-  --input: 30 10% 25%;
-  --ring: 30 80% 55%;
+  --background: 0 0% 9%; /* Deep charcoal */
+  --foreground: 0 0% 95%; /* Near white */
+  --card: 0 0% 12%; /* Slightly lighter cards */
+  --card-foreground: 0 0% 95%;
+  --popover: 0 0% 12%;
+  --popover-foreground: 0 0% 95%;
+  --primary: 35 95% 55%; /* Slightly brighter for dark */
+  --primary-foreground: 0 0% 9%;
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 0 0% 90%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 55%;
+  --accent: 0 0% 18%;
+  --accent-foreground: 0 0% 95%;
+  --destructive: 0 70% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 35 95% 55%;
 }
 
 @theme inline {

@@ -36,22 +36,22 @@ export default function UserInfo({
 	size = "md",
 	className,
 }: UserInfoProps) {
-	const avatarSize = size === "sm" ? "h-6 w-6" : "h-8 w-8";
+	const avatarSize = size === "sm" ? "h-6 w-6" : "h-9 w-9";
 	const textSize = size === "sm" ? "text-xs" : "text-sm";
 
 	return (
-		<div className={cn("flex items-center gap-2", className)}>
-			<Avatar className={avatarSize}>
+		<div className={cn("flex items-center gap-2.5", className)}>
+			<Avatar className={cn(avatarSize, "ring-2 ring-border/30")}>
 				<AvatarImage src={avatarUrl || undefined} alt={username} />
-				<AvatarFallback className={size === "sm" ? "text-xs" : "text-sm"}>
+				<AvatarFallback className={cn(size === "sm" ? "text-xs" : "text-xs", "font-medium")}>
 					{username.slice(0, 2).toUpperCase()}
 				</AvatarFallback>
 			</Avatar>
 			<div className="flex items-center gap-1.5">
-				<span className={cn("font-medium", textSize)}>{username}</span>
+				<span className={cn("font-semibold tracking-tight", textSize)}>{username}</span>
 				{timestamp && (
 					<>
-						<span className="text-muted-foreground">·</span>
+						<span className="text-muted-foreground/60">·</span>
 						<span className={cn("text-muted-foreground", textSize)}>
 							{formatRelativeTime(timestamp)}
 						</span>

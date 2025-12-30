@@ -5,7 +5,9 @@ interface MomentContentProps {
 export default function MomentContent({ content }: MomentContentProps) {
 	return (
 		<div className="py-1">
-			<p className="text-lg leading-relaxed whitespace-pre-wrap">{content}</p>
+			<p className="text-base leading-relaxed whitespace-pre-wrap text-foreground/90">
+				{content}
+			</p>
 		</div>
 	);
 }
