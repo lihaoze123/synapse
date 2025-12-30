@@ -48,12 +48,21 @@ public class FollowController {
 
     @GetMapping("/followers")
     public ResponseEntity<ApiResponse<Page<FollowDto>>> getFollowers(
-            @RequestParam Long userId,
+            HttpServletRequest request,
+            @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        Long targetUserId = userId;
+        if (targetUserId == null) {
+            targetUserId = (Long) request.getAttribute("userId");
+            if (targetUserId == null) {
+                return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
+            }
+        }
+
         int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, safeSize);
-        Page<FollowDto> followers = followService.getFollowers(userId, pageable);
+        Page<FollowDto> followers = followService.getFollowers(targetUserId, pageable);
         return ResponseEntity.ok(ApiResponse.success(followers));
     }
 

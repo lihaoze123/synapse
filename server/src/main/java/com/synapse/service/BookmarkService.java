@@ -46,17 +46,15 @@ public class BookmarkService {
 
     @Transactional
     public BookmarkDto addBookmark(Long userId, Long postId) {
-        if (!userRepository.existsById(userId)) {
-            throw new IllegalArgumentException("User not found");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
         if (bookmarkRepository.existsByUserIdAndPostId(userId, postId)) {
             throw new IllegalArgumentException("Already bookmarked");
         }
-
-        User user = userRepository.findById(userId).orElseThrow();
 
         Bookmark bookmark = Bookmark.builder()
                 .user(user)

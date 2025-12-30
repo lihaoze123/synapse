@@ -47,9 +47,8 @@ public class FollowService {
             throw new IllegalArgumentException("Cannot follow yourself");
         }
 
-        if (!userRepository.existsById(followerId)) {
-            throw new IllegalArgumentException("Follower user not found");
-        }
+        User follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new IllegalArgumentException("Follower user not found"));
 
         User following = userRepository.findById(followingId)
                 .orElseThrow(() -> new IllegalArgumentException("User to follow not found"));
@@ -57,8 +56,6 @@ public class FollowService {
         if (followRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
             throw new IllegalArgumentException("Already following this user");
         }
-
-        User follower = userRepository.findById(followerId).orElseThrow();
 
         Follow follow = Follow.builder()
                 .follower(follower)
