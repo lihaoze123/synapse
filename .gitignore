@@ -37,5 +37,6 @@ application-local.properties
 
 # For AI
 architecture.md
+plans/
 design.md
 CLAUDE.md
