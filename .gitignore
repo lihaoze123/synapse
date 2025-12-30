@@ -1,0 +1,41 @@
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (keep directory but ignore contents except .gitkeep)
+uploads/*
+!uploads/.gitkeep
+
+# Application
+application-local.properties
+
+# For AI
+architecture.md
+design.md
+CLAUDE.md
