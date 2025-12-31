@@ -1,5 +1,11 @@
 export { useAuth } from "./useAuth";
 export {
+	useCreateComment,
+	useDeleteComment,
+	usePostComments,
+	useUpdateComment,
+} from "./useComments";
+export {
 	useCreatePost,
 	useDeletePost,
 	useFilteredPosts,

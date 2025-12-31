@@ -173,3 +173,90 @@ INSERT INTO post_tags (post_id, tag_id) VALUES (6, 5);  -- Moment - Spring Boot
 INSERT INTO post_tags (post_id, tag_id) VALUES (7, 2);  -- Moment - Python
 INSERT INTO post_tags (post_id, tag_id) VALUES (8, 4);  -- Moment - React
 INSERT INTO post_tags (post_id, tag_id) VALUES (9, 7);  -- Moment - 数据库
+
+-- ============================================
+-- Comments Mock Data (针对 Post ID = 1: QuickSort)
+-- ============================================
+
+-- 一级评论 (parent_id = NULL)
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('这个实现很清晰！partition 函数的逻辑一目了然。', 2, 1, NULL, 1, TIMESTAMP '2024-01-01 10:00:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('建议在 sort 方法开头加上空数组检查。', 3, 1, NULL, 2, TIMESTAMP '2024-01-01 10:05:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('@bob 好建议！已更新。', 1, 1, NULL, 3, TIMESTAMP '2024-01-01 10:10:00', TRUE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('为什么选择最右边的元素作为 pivot？这样对已排序数组性能会退化到 O(n²)。', 4, 1, NULL, 4, TIMESTAMP '2024-01-01 10:15:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('@charlie 可以随机选择 pivot 或者用三数取中法优化。', 2, 1, NULL, 5, TIMESTAMP '2024-01-01 10:20:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('Python 装饰器那个也很赞！', 3, 1, NULL, 6, TIMESTAMP '2024-01-01 11:00:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('这个算法是面试必考题，收藏了。', 2, 1, NULL, 7, TIMESTAMP '2024-01-01 12:30:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('代码缩进用 4 个空格还是 tab？', 3, 1, NULL, 8, TIMESTAMP '2024-01-01 13:00:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('Google Java Style Guide 用 2 个空格，但这个项目用 4 个也没问题。', 4, 1, NULL, 9, TIMESTAMP '2024-01-01 13:05:00', TRUE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('楼上缩进警察哈哈哈', 1, 1, NULL, 10, TIMESTAMP '2024-01-01 13:10:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('有人试过用栈把递归改成迭代吗？', 2, 1, NULL, 11, TIMESTAMP '2024-01-01 14:00:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('写过，但可读性差了很多。', 3, 1, NULL, 12, TIMESTAMP '2024-01-01 14:15:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('这段代码的时间复杂度是 O(n log n) 吧？', 4, 1, NULL, 13, TIMESTAMP '2024-01-01 15:00:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('对的，平均 O(n log n)，最坏 O(n²)', 1, 1, NULL, 14, TIMESTAMP '2024-01-01 15:05:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('学到了！', 2, 1, NULL, 15, TIMESTAMP '2024-01-01 16:00:00', FALSE);
+
+-- 二级回复 (parent_id 指向一级评论的 id，假设一级评论 id 为 1-15)
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('确实，比教科书上写的容易理解多了。', 3, 1, 1, 16, TIMESTAMP '2024-01-01 10:02:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('同意，加上 if (arr == null || arr.length == 0) return;', 1, 1, 2, 17, TIMESTAMP '2024-01-01 10:07:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('或者直接抛 IllegalArgumentException', 4, 1, 2, 18, TIMESTAMP '2024-01-01 10:08:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('随机选择 pivot 需要额外的随机数生成，三数取中更实用。', 1, 1, 4, 19, TIMESTAMP '2024-01-01 10:17:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('是的，很多库都用三数取中。', 3, 1, 4, 20, TIMESTAMP '2024-01-01 10:18:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('三数取中确实是个好方案！', 4, 1, 5, 21, TIMESTAMP '2024-01-01 10:22:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('确实，必考题，上次面试就问了。', 3, 1, 7, 22, TIMESTAMP '2024-01-01 12:35:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('Java 官方推荐用 4 个空格。', 4, 1, 8, 23, TIMESTAMP '2024-01-01 13:02:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('递归转迭代可以避免栈溢出，但代码确实难读。', 1, 1, 11, 24, TIMESTAMP '2024-01-01 14:05:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('空间换时间嘛。', 4, 1, 12, 25, TIMESTAMP '2024-01-01 14:20:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('没错，还要区分平均情况和最坏情况。', 2, 1, 13, 26, TIMESTAMP '2024-01-01 15:02:00', FALSE);
+
+INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
+('最坏情况可以通过随机化避免。', 3, 1, 14, 27, TIMESTAMP '2024-01-01 15:10:00', FALSE);

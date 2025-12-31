@@ -12,6 +12,7 @@ import { useState } from "react";
 import Markdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
+import CommentSection from "@/components/comments/CommentSection";
 import { CodeBlock } from "@/components/common";
 import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
 import PublishModal, {
@@ -308,6 +309,11 @@ function PostDetailPage() {
 						)}
 					</div>
 				</Card>
+
+				<div className="mt-8">
+					<h2 className="mb-6 text-xl font-bold">评论</h2>
+					<CommentSection postId={postId} />
+				</div>
 			</div>
 
 			<PublishModal

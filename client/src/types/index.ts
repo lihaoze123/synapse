@@ -36,3 +36,16 @@ export interface Post {
 	tags: Tag[];
 	createdAt: string;
 }
+
+export interface Comment {
+	id: number;
+	content: string;
+	user: User;
+	postId: number | null;
+	parentId: number | null;
+	floor?: number;
+	replyToFloor?: number;
+	replyToUsername?: string;
+	createdAt: string;
+	isDeleted: boolean | null;
+}
