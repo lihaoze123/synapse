@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,15 +31,15 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 							/>
 						)}
 						{item.href ? (
-							<a
-								href={item.href}
+							<Link
+								to={item.href}
 								className="text-gray-500 hover:text-gray-900 transition-colors"
 							>
 								{item.icon && (
 									<item.icon className="h-4 w-4 mr-1" aria-hidden="true" />
 								)}
 								{item.label}
-							</a>
+							</Link>
 						) : (
 							<span className="text-gray-900 font-medium" aria-current="page">
 								{item.icon && (

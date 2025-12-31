@@ -21,7 +21,7 @@ export function TopBar() {
 	];
 
 	return (
-		<header className="fixed top-0 left-[280px] right-0 h-14 bg-white border-b border-gray-200 dark:bg-gray-950 dark:border-gray-800 z-10">
+		<header className="fixed top-0 left-0 md:left-[280px] right-0 h-14 bg-white border-b border-gray-200 dark:bg-gray-950 dark:border-gray-800 z-10">
 			<div className="h-full px-6 flex items-center justify-between">
 				<Breadcrumb items={breadcrumbItems} />
 
