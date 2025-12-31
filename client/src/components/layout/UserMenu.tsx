@@ -65,27 +65,30 @@ export function UserMenu() {
 					>
 						<SidebarMenuButton
 							size="lg"
+							asChild
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 							tooltip={user.username}
 						>
-							<Avatar className="size-8 rounded-lg">
-								<AvatarImage
-									src={user.avatarUrl || undefined}
-									alt={user.username}
-								/>
-								<AvatarFallback className="rounded-lg text-xs font-medium">
-									{user.username.slice(0, 2).toUpperCase()}
-								</AvatarFallback>
-							</Avatar>
-							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-semibold">
-									{user.username}
-								</span>
-								<span className="truncate text-xs text-muted-foreground">
-									查看个人资料
-								</span>
+							<div className="flex size-full items-center gap-2">
+								<Avatar className="size-8 rounded-lg">
+									<AvatarImage
+										src={user.avatarUrl || undefined}
+										alt={user.username}
+									/>
+									<AvatarFallback className="rounded-lg text-xs font-medium">
+										{user.username.slice(0, 2).toUpperCase()}
+									</AvatarFallback>
+								</Avatar>
+								<div className="grid flex-1 text-left text-sm leading-tight">
+									<span className="truncate font-semibold">
+										{user.username}
+									</span>
+									<span className="truncate text-xs text-muted-foreground">
+										查看个人资料
+									</span>
+								</div>
+								<ChevronsUpDown className="ml-auto size-4" />
 							</div>
-							<ChevronsUpDown className="ml-auto size-4" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<MenuPopup
