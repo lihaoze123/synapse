@@ -6,11 +6,9 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn(
-				"relative flex flex-col rounded-xl border border-border/60 bg-card text-card-foreground",
-				"shadow-[0_1px_2px_rgba(0,0,0,0.04),0_2px_4px_rgba(0,0,0,0.04)]",
-				"transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]",
-				"hover:border-border hover:shadow-[0_4px_8px_rgba(0,0,0,0.06),0_8px_16px_rgba(0,0,0,0.06)]",
-				"dark:border-border/40 dark:hover:border-border/60",
+				"relative flex flex-col rounded border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 text-gray-950 dark:text-gray-50",
+				"transition-colors duration-150",
+				"hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900",
 				className,
 			)}
 			data-slot="card"
