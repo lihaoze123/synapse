@@ -51,16 +51,9 @@ export default function PostCard({ post, className }: PostCardProps) {
 
 	return (
 		<Link to="/posts/$id" params={{ id: String(post.id) }} className="block">
-			<Card
-				className={cn(
-					"p-5 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]",
-					"hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5",
-					"cursor-pointer group",
-					className,
-				)}
-			>
-				<div className="flex items-center justify-between mb-4">
-					<div className="flex items-center gap-3">
+			<Card className={cn("p-4 cursor-pointer", className)}>
+				<div className="flex items-center justify-between mb-3">
+					<div className="flex items-center gap-2">
 						<UserInfo
 							userId={post.user.id}
 							username={post.user.username}
@@ -73,18 +66,18 @@ export default function PostCard({ post, className }: PostCardProps) {
 					</div>
 					<div
 						className={cn(
-							"flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium",
-							"bg-secondary/80 transition-colors",
+							"flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium",
+							"bg-gray-100 dark:bg-gray-800",
 							config.color,
 						)}
 						title={config.label}
 					>
-						<TypeIcon className="h-3.5 w-3.5" />
+						<TypeIcon className="h-3 w-3" />
 						<span className="hidden sm:inline">{config.label}</span>
 					</div>
 				</div>
 
-				<div className="mb-4">
+				<div className="mb-3">
 					{post.type === "SNIPPET" && (
 						<SnippetContent
 							title={post.title}
@@ -105,20 +98,20 @@ export default function PostCard({ post, className }: PostCardProps) {
 				</div>
 
 				{post.tags && post.tags.length > 0 && (
-					<div className="flex flex-wrap gap-2">
+					<div className="flex flex-wrap gap-1.5">
 						{post.tags.map((tag) => (
 							<button
 								key={tag.id}
 								type="button"
 								onClick={(e) => handleTagClick(e, tag.name)}
 								className={cn(
-									"inline-flex items-center gap-1 px-2.5 py-1 rounded-md",
-									"bg-secondary/60 text-muted-foreground text-xs font-medium",
-									"hover:bg-primary hover:text-primary-foreground",
+									"inline-flex items-center gap-0.5 px-2 py-0.5 rounded",
+									"bg-gray-100 dark:bg-gray-800 text-muted-foreground text-xs",
+									"hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-foreground",
 									"transition-colors duration-150",
 								)}
 							>
-								<span className="opacity-60">#</span>
+								<span className="opacity-50">#</span>
 								<span>{tag.name}</span>
 							</button>
 						))}

@@ -93,22 +93,22 @@ export default function CodeBlock({
 	const customStyle = {
 		margin: 0,
 		padding: "0.75rem",
-		fontSize: "0.875rem",
+		fontSize: "13px",
 		lineHeight: "1.5",
 		background: "transparent",
 	};
 
 	return (
 		<div className={cn("group relative", className)}>
-			<div className="overflow-hidden rounded-lg border border-border bg-white dark:bg-zinc-900">
-				<div className="flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-3 py-1.5">
+			<div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-900">
+				<div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-3 py-1.5">
 					<span className="text-xs font-medium text-black/60 dark:text-white/60">
 						{displayLanguage}
 					</span>
 					<button
 						type="button"
 						onClick={handleCopy}
-						className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-black/60 dark:text-white/60 transition-colors hover:bg-black/10 dark:hover:bg-white/10 hover:text-black dark:hover:text-white"
+						className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-black/60 dark:text-white/60 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white"
 					>
 						{copied ? (
 							<>
@@ -142,7 +142,7 @@ export default function CodeBlock({
 				</div>
 
 				{truncated && (
-					<div className="border-t border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-3 py-1.5 text-center">
+					<div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-3 py-1.5 text-center">
 						<span className="text-xs text-black/50 dark:text-white/50">
 							... 还有 {lines.length - maxLines} 行
 						</span>

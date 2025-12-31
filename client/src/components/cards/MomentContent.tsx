@@ -14,7 +14,7 @@ export default function MomentContent({ content, images }: MomentContentProps) {
 
 	return (
 		<div className="py-1 space-y-3">
-			<p className="text-base leading-relaxed whitespace-pre-wrap text-foreground/90">
+			<p className="text-[15px] leading-relaxed whitespace-pre-wrap text-foreground/90 line-clamp-8">
 				{content}
 			</p>
 
@@ -35,7 +35,7 @@ export default function MomentContent({ content, images }: MomentContentProps) {
 							<button
 								key={url}
 								type="button"
-								className="relative overflow-hidden rounded-md bg-muted aspect-square cursor-pointer p-0 border-0"
+								className="relative overflow-hidden rounded bg-muted aspect-square cursor-pointer p-0 border-0"
 								onClick={() => setPreviewIndex(index)}
 							>
 								<img
