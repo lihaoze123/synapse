@@ -105,18 +105,18 @@ export default function Navbar() {
 									<p className="font-semibold">{user.username}</p>
 								</div>
 								<MenuSeparator />
-								<MenuItem onSelect={() => navigate({ to: "/profile" })}>
+								<MenuItem onClick={() => navigate({ to: "/profile" })}>
 									<User className="mr-2 h-4 w-4" />
 									个人资料
 								</MenuItem>
-								<MenuItem onSelect={() => navigate({ to: "/settings" })}>
+								<MenuItem onClick={() => navigate({ to: "/settings" })}>
 									<Settings className="mr-2 h-4 w-4" />
 									设置
 								</MenuItem>
 								<MenuSeparator />
 								<MenuItem
 									className="text-destructive focus:text-destructive"
-									onSelect={logout}
+									onClick={logout}
 								>
 									<LogOut className="mr-2 h-4 w-4" />
 									退出登录
