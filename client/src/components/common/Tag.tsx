@@ -15,12 +15,12 @@ export default function Tag({
 	className,
 }: TagProps) {
 	const baseClasses = cn(
-		"inline-flex items-center rounded-lg font-medium transition-colors",
-		size === "sm" && "px-2 py-0.5 text-xs",
-		size === "md" && "px-2.5 py-1 text-sm",
+		"inline-flex items-center rounded font-medium transition-colors",
+		size === "sm" && "px-1.5 py-0.5 text-xs",
+		size === "md" && "px-2 py-0.5 text-sm",
 		clickable
-			? "bg-secondary text-secondary-foreground hover:bg-secondary/80 cursor-pointer"
-			: "bg-muted text-muted-foreground",
+			? "bg-secondary/50 text-secondary-foreground hover:bg-secondary cursor-pointer"
+			: "bg-muted/50 text-muted-foreground",
 		className,
 	);
 
