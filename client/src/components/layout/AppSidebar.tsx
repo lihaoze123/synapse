@@ -1,7 +1,16 @@
 import { Link } from "@tanstack/react-router";
-import { Hash } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { PostType } from "@/types";
+import {
+	Atom,
+	Braces,
+	Code,
+	FileText,
+	GitBranch,
+	Hash,
+	Leaf,
+	MessageCircle,
+	Search,
+	Terminal,
+} from "lucide-react";
 import {
 	Sidebar,
 	SidebarContent,
@@ -14,8 +23,9 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
+import type { PostType } from "@/types";
 import { UserMenu } from "./UserMenu";
-import { Code, FileText, MessageCircle, Search } from "lucide-react";
 
 const contentTypes: {
 	type: PostType;
@@ -44,21 +54,43 @@ const contentTypes: {
 ];
 
 const placeholderTopics = [
-	{ id: 1, name: "JavaScript", icon: "📜" },
-	{ id: 2, name: "Python", icon: "🐍" },
-	{ id: 3, name: "React", icon: "⚛️" },
-	{ id: 4, name: "Spring Boot", icon: "☕" },
-	{ id: 5, name: "算法", icon: "🧮" },
+	{
+		id: 1,
+		name: "JavaScript",
+		icon: Braces,
+		color: "text-yellow-500 dark:text-yellow-400",
+	},
+	{
+		id: 2,
+		name: "Python",
+		icon: Terminal,
+		color: "text-blue-500 dark:text-blue-400",
+	},
+	{
+		id: 3,
+		name: "React",
+		icon: Atom,
+		color: "text-cyan-500 dark:text-cyan-400",
+	},
+	{
+		id: 4,
+		name: "Spring Boot",
+		icon: Leaf,
+		color: "text-green-600 dark:text-green-400",
+	},
+	{
+		id: 5,
+		name: "算法",
+		icon: GitBranch,
+		color: "text-purple-500 dark:text-purple-400",
+	},
 ];
 
 export function AppSidebar() {
 	return (
 		<Sidebar collapsible="icon">
 			<SidebarHeader>
-				<Link
-					to="/"
-					className="flex items-center gap-2 px-2 py-1.5"
-				>
+				<Link to="/" className="flex items-center gap-2 px-2 py-1.5">
 					<Hash className="size-5 shrink-0 text-amber-600" />
 					<span className="text-base font-semibold group-data-[collapsible=icon]:hidden">
 						Synapse
@@ -89,11 +121,7 @@ export function AppSidebar() {
 								</Link>
 							</SidebarMenuItem>
 							<SidebarMenuItem>
-								<Link
-									to="/search"
-									search={{ keyword: "" }}
-									aria-label="搜索"
-								>
+								<Link to="/search" search={{ keyword: "" }} aria-label="搜索">
 									{({ isActive }) => (
 										<SidebarMenuButton
 											asChild
@@ -117,35 +145,24 @@ export function AppSidebar() {
 					<SidebarGroupLabel>内容类型</SidebarGroupLabel>
 					<SidebarGroupContent>
 						<SidebarMenu>
-							{contentTypes.map(
-								({ type, label, icon: Icon, color }) => (
-									<SidebarMenuItem key={type}>
-										<Link
-											to="/"
-											search={{ type }}
-											aria-label={label}
-										>
-											{({ isActive }) => (
-												<SidebarMenuButton
-													asChild
-													isActive={isActive}
-													tooltip={label}
-												>
-													<div>
-														<Icon
-															className={cn(
-																"h-4 w-4",
-																color
-															)}
-														/>
-														<span>{label}</span>
-													</div>
-												</SidebarMenuButton>
-											)}
-										</Link>
-									</SidebarMenuItem>
-								)
-							)}
+							{contentTypes.map(({ type, label, icon: Icon, color }) => (
+								<SidebarMenuItem key={type}>
+									<Link to="/" search={{ type }} aria-label={label}>
+										{({ isActive }) => (
+											<SidebarMenuButton
+												asChild
+												isActive={isActive}
+												tooltip={label}
+											>
+												<div>
+													<Icon className={cn("h-4 w-4", color)} />
+													<span>{label}</span>
+												</div>
+											</SidebarMenuButton>
+										)}
+									</Link>
+								</SidebarMenuItem>
+							))}
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
@@ -169,18 +186,8 @@ export function AppSidebar() {
 												tooltip={topic.name}
 											>
 												<div>
-													<span
-														className="text-sm"
-														role="img"
-														aria-label={
-															topic.name
-														}
-													>
-														{topic.icon}
-													</span>
-													<span className="truncate">
-														{topic.name}
-													</span>
+													<topic.icon className={cn("h-4 w-4", topic.color)} />
+													<span className="truncate">{topic.name}</span>
 												</div>
 											</SidebarMenuButton>
 										)}
