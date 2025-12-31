@@ -1,5 +1,14 @@
-import { Link } from "@tanstack/react-router";
-import { Hash, LogIn, LogOut, MessageCircle, Moon, Sun } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import {
+	Hash,
+	LogIn,
+	LogOut,
+	MessageCircle,
+	Moon,
+	Settings,
+	Sun,
+	User,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,6 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
 	const { user, logout } = useAuth();
+	const navigate = useNavigate();
 	const [isDark, setIsDark] = useState(false);
 
 	useEffect(() => {
@@ -94,6 +104,15 @@ export default function Navbar() {
 								<div className="px-3 py-2.5 text-sm">
 									<p className="font-semibold">{user.username}</p>
 								</div>
+								<MenuSeparator />
+								<MenuItem onSelect={() => navigate({ to: "/profile" })}>
+									<User className="mr-2 h-4 w-4" />
+									个人资料
+								</MenuItem>
+								<MenuItem onSelect={() => navigate({ to: "/settings" })}>
+									<Settings className="mr-2 h-4 w-4" />
+									设置
+								</MenuItem>
 								<MenuSeparator />
 								<MenuItem
 									className="text-destructive focus:text-destructive"

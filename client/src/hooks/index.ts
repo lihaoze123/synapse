@@ -8,3 +8,4 @@ export {
 	useUpdatePost,
 } from "./usePosts";
 export { useAllTags, usePopularTags } from "./useTags";
+export { useUpdateProfile, useUserPosts } from "./useUsers";
