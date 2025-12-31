@@ -3,7 +3,7 @@ import { Code, FileText, MessageCircle } from "lucide-react";
 import { UserInfo } from "@/components/common";
 import FollowButton from "@/components/common/FollowButton";
 import { Card } from "@/components/ui/card";
-import { useAuth, useIsFollowing } from "@/hooks";
+import { useAuth } from "@/hooks";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
 import ArticleContent from "./ArticleContent";
@@ -38,10 +38,9 @@ export default function PostCard({ post, className }: PostCardProps) {
 	const TypeIcon = config.icon;
 	const navigate = useNavigate();
 	const { user: currentUser } = useAuth();
-	const { isFollowing } = useIsFollowing(post.user.id);
 
 	const isMe = currentUser?.id === post.user.id;
-	const showFollowButton = !isFollowing && !isMe;
+	const showFollowButton = !isMe;
 
 	const handleTagClick = (e: React.MouseEvent, tagName: string) => {
 		e.preventDefault();
