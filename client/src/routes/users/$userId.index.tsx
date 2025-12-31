@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Settings } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Settings } from "lucide-react";
 import { useMemo } from "react";
 import FollowButton from "@/components/common/FollowButton";
 import FollowStats from "@/components/common/FollowStats";
 import { Feed } from "@/components/feed";
+import { Layout } from "@/components/layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +14,14 @@ import { userService } from "@/services/users";
 
 export const Route = createFileRoute("/users/$userId/")({
 	component: UserProfilePage,
+	staticData: {
+		breadcrumb: {
+			label: (match) => {
+				const params = match.params as { userId: string };
+				return `用户 #${params.userId}`;
+			},
+		},
+	},
 });
 
 function UserProfilePage() {
@@ -39,58 +48,43 @@ function UserProfilePage() {
 
 	if (!isValidId) {
 		return (
-			<div className="min-h-screen bg-background">
-				<div className="max-w-2xl mx-auto px-4 py-8">
+			<Layout>
+				<div className="max-w-2xl mx-auto">
 					<Card className="p-8 text-center">
 						<p className="text-muted-foreground">无效的用户 ID</p>
 					</Card>
 				</div>
-			</div>
+			</Layout>
 		);
 	}
 
 	if (isLoadingUser) {
 		return (
-			<div className="min-h-screen bg-background">
-				<div className="max-w-2xl mx-auto px-4 py-8">
+			<Layout>
+				<div className="max-w-2xl mx-auto">
 					<Card className="p-8 text-center">
 						<p className="text-muted-foreground">加载中...</p>
 					</Card>
 				</div>
-			</div>
+			</Layout>
 		);
 	}
 
 	if (!targetUser) {
 		return (
-			<div className="min-h-screen bg-background">
-				<div className="max-w-2xl mx-auto px-4 py-8">
-					<Link
-						to="/"
-						className="mb-6 inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-					>
-						<ArrowLeft className="h-4 w-4" />
-						返回首页
-					</Link>
+			<Layout>
+				<div className="max-w-2xl mx-auto">
 					<Card className="p-8 text-center">
 						<p className="text-muted-foreground">用户不存在</p>
 					</Card>
 				</div>
-			</div>
+			</Layout>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-background">
-			<div className="max-w-2xl mx-auto px-4 py-8">
-				<Link
-					to="/"
-					className="mb-6 inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-				>
-					<ArrowLeft className="h-4 w-4" />
-					返回首页
-				</Link>
-
+		<Layout>
+			<div className="max-w-2xl mx-auto">
 				<div className="space-y-6">
 					<Card className="p-6">
 						<div className="flex flex-col items-center gap-4">
@@ -147,6 +141,6 @@ function UserProfilePage() {
 					</div>
 				</div>
 			</div>
-		</div>
+		</Layout>
 	);
 }

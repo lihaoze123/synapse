@@ -16,6 +16,11 @@ export const Route = createFileRoute("/profile")({
 		}
 	},
 	component: ProfilePage,
+	staticData: {
+		breadcrumb: {
+			label: "我的资料",
+		},
+	},
 });
 
 function ProfilePage() {

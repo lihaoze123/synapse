@@ -1,56 +1,158 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { Link } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, MoreHorizontal } from "lucide-react";
+import type * as React from "react";
+
 import { cn } from "@/lib/utils";
 
-export interface BreadcrumbItem {
+function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
+	return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
+}
+
+function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
+	return (
+		<ol
+			className={cn(
+				"wrap-break-word flex flex-wrap items-center gap-1.5 text-muted-foreground text-sm sm:gap-2.5",
+				className,
+			)}
+			data-slot="breadcrumb-list"
+			{...props}
+		/>
+	);
+}
+
+function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
+	return (
+		<li
+			className={cn("inline-flex items-center gap-1.5", className)}
+			data-slot="breadcrumb-item"
+			{...props}
+		/>
+	);
+}
+
+function BreadcrumbLink({
+	className,
+	render,
+	...props
+}: useRender.ComponentProps<"a">) {
+	const defaultProps = {
+		className: cn("transition-colors hover:text-foreground", className),
+		"data-slot": "breadcrumb-link",
+	};
+
+	return useRender({
+		defaultTagName: "a",
+		props: mergeProps<"a">(defaultProps, props),
+		render,
+	});
+}
+
+function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
+	return (
+		// biome-ignore lint(a11y/useFocusableInteractive): known
+		<span
+			aria-current="page"
+			aria-disabled="true"
+			className={cn("font-normal text-foreground", className)}
+			data-slot="breadcrumb-page"
+			role="link"
+			{...props}
+		/>
+	);
+}
+
+function BreadcrumbSeparator({
+	children,
+	className,
+	...props
+}: React.ComponentProps<"li">) {
+	return (
+		<li
+			aria-hidden="true"
+			className={cn("opacity-80 [&>svg]:size-4", className)}
+			data-slot="breadcrumb-separator"
+			role="presentation"
+			{...props}
+		>
+			{children ?? <ChevronRight />}
+		</li>
+	);
+}
+
+function BreadcrumbEllipsis({
+	className,
+	...props
+}: React.ComponentProps<"span">) {
+	return (
+		<span
+			aria-hidden="true"
+			className={className}
+			data-slot="breadcrumb-ellipsis"
+			role="presentation"
+			{...props}
+		>
+			<MoreHorizontal className="size-4" />
+			<span className="sr-only">More</span>
+		</span>
+	);
+}
+
+export interface BreadcrumbItemType {
 	id: string;
 	label: string;
 	href?: string;
 	icon?: LucideIcon;
 }
 
-interface BreadcrumbProps {
-	items: BreadcrumbItem[];
+interface BreadcrumbWithItemsProps {
+	items: BreadcrumbItemType[];
 	className?: string;
 }
 
-export function Breadcrumb({ items, className }: BreadcrumbProps) {
+export function BreadcrumbWithItems({
+	items,
+	className,
+}: BreadcrumbWithItemsProps) {
 	return (
-		<nav
-			className={cn("flex items-center gap-1.5 text-sm", className)}
-			aria-label="Breadcrumb"
-		>
-			<ol className="flex items-center gap-1.5">
+		<Breadcrumb className={className}>
+			<BreadcrumbList>
 				{items.map((item, index) => (
-					<li key={item.id} className="flex items-center gap-1.5">
-						{index > 0 && (
-							<ChevronRight
-								className="h-4 w-4 text-gray-400"
-								aria-hidden="true"
-							/>
-						)}
-						{item.href ? (
-							<Link
-								to={item.href}
-								className="text-gray-500 hover:text-gray-900 transition-colors"
-							>
-								{item.icon && (
-									<item.icon className="h-4 w-4 mr-1" aria-hidden="true" />
-								)}
-								{item.label}
-							</Link>
-						) : (
-							<span className="text-gray-900 font-medium" aria-current="page">
-								{item.icon && (
-									<item.icon className="h-4 w-4 mr-1" aria-hidden="true" />
-								)}
-								{item.label}
-							</span>
-						)}
-					</li>
+					<div key={item.id} className="flex items-center gap-1.5">
+						{index > 0 && <BreadcrumbSeparator />}
+						<BreadcrumbItem>
+							{item.href ? (
+								<BreadcrumbLink render={<Link to={item.href} />}>
+									{item.icon && (
+										<item.icon className="h-4 w-4 mr-1" aria-hidden="true" />
+									)}
+									{item.label}
+								</BreadcrumbLink>
+							) : (
+								<BreadcrumbPage>
+									{item.icon && (
+										<item.icon className="h-4 w-4 mr-1" aria-hidden="true" />
+									)}
+									{item.label}
+								</BreadcrumbPage>
+							)}
+						</BreadcrumbItem>
+					</div>
 				))}
-			</ol>
-		</nav>
+			</BreadcrumbList>
+		</Breadcrumb>
 	);
 }
+
+export {
+	Breadcrumb,
+	BreadcrumbList,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+	BreadcrumbEllipsis,
+};

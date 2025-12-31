@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-	ArrowLeft,
 	Calendar,
 	Code,
 	Edit,
@@ -16,6 +15,7 @@ import CommentSection from "@/components/comments/CommentSection";
 import { CodeBlock } from "@/components/common";
 import FollowButton from "@/components/common/FollowButton";
 import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
+import { Layout } from "@/components/layout";
 import PublishModal, {
 	type PublishData,
 } from "@/components/publish/PublishModal";
@@ -27,6 +27,14 @@ import type { PostType } from "@/types";
 
 export const Route = createFileRoute("/posts/$id")({
 	component: PostDetailPage,
+	staticData: {
+		breadcrumb: {
+			label: (match) => {
+				const params = match.params as { id: string };
+				return `文章 #${params.id}`;
+			},
+		},
+	},
 });
 
 const typeConfig: Record<
@@ -90,20 +98,13 @@ function PostDetailPage() {
 
 	if (!isValidId) {
 		return (
-			<div className="min-h-screen bg-background">
-				<div className="max-w-4xl mx-auto px-4 py-8">
-					<Link
-						to="/"
-						className="mb-6 inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-					>
-						<ArrowLeft className="h-4 w-4" />
-						返回首页
-					</Link>
+			<Layout>
+				<div className="max-w-4xl mx-auto">
 					<Card className="p-8 text-center">
 						<p className="text-muted-foreground">无效的帖子 ID</p>
 					</Card>
 				</div>
-			</div>
+			</Layout>
 		);
 	}
 
@@ -113,22 +114,15 @@ function PostDetailPage() {
 
 	if (error || !post) {
 		return (
-			<div className="min-h-screen bg-background">
-				<div className="max-w-4xl mx-auto px-4 py-8">
-					<Link
-						to="/"
-						className="mb-6 inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-					>
-						<ArrowLeft className="h-4 w-4" />
-						返回首页
-					</Link>
+			<Layout>
+				<div className="max-w-4xl mx-auto">
 					<Card className="p-8 text-center">
 						<p className="text-muted-foreground">
 							{error?.message || "帖子不存在或已被删除"}
 						</p>
 					</Card>
 				</div>
-			</div>
+			</Layout>
 		);
 	}
 
@@ -136,16 +130,8 @@ function PostDetailPage() {
 	const TypeIcon = config.icon;
 
 	return (
-		<div className="min-h-screen bg-background">
-			<div className="mx-auto max-w-4xl px-4 py-8">
-				<Link
-					to="/"
-					className="mb-6 inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-				>
-					<ArrowLeft className="h-4 w-4" />
-					返回首页
-				</Link>
-
+		<Layout>
+			<div className="max-w-4xl mx-auto">
 				<Card className="overflow-hidden">
 					{post.type === "ARTICLE" && post.coverImage && (
 						<div className="aspect-video w-full overflow-hidden">
@@ -359,15 +345,14 @@ function PostDetailPage() {
 				initialIndex={previewIndex ?? 0}
 				onOpenChange={(open) => setPreviewIndex(open ? 0 : null)}
 			/>
-		</div>
+		</Layout>
 	);
 }
 
 function PostDetailSkeleton() {
 	return (
-		<div className="min-h-screen bg-background">
-			<div className="mx-auto max-w-4xl px-4 py-8">
-				<div className="mb-6 h-5 w-24 animate-pulse rounded bg-secondary/50" />
+		<Layout>
+			<div className="max-w-4xl mx-auto">
 				<Card className="p-6">
 					<div className="mb-4 flex items-center gap-3">
 						<div className="h-10 w-10 animate-pulse rounded-full bg-secondary/50" />
@@ -384,6 +369,6 @@ function PostDetailSkeleton() {
 					</div>
 				</Card>
 			</div>
-		</div>
+		</Layout>
 	);
 }

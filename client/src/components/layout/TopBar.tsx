@@ -1,8 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { LogOut, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { BreadcrumbItem } from "@/components/ui/breadcrumb";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { BreadcrumbWithItems } from "@/components/ui/breadcrumb";
 import {
 	DropdownMenu,
 	DropdownMenuItem,
@@ -11,6 +10,7 @@ import {
 	MenuPopup,
 } from "@/components/ui/menu";
 import { useAuth } from "@/hooks/useAuth";
+import { useBreadcrumb } from "@/hooks/useBreadcrumb";
 import { SearchBar } from "./SearchBar";
 
 // TODO: Implement theme toggle functionality
@@ -71,17 +71,12 @@ function UserDropdown() {
 }
 
 export function TopBar() {
-	// TODO: Integrate with TanStack Router to generate breadcrumb dynamically based on current route
-	// Current route patterns: /, /search, /publish, /posts/:id
-	const breadcrumbItems: BreadcrumbItem[] = [
-		{ id: "feed", label: "动态" },
-		{ id: "all", label: "全部" },
-	];
+	const breadcrumbItems = useBreadcrumb();
 
 	return (
 		<header className="fixed top-0 left-0 md:left-[280px] right-0 h-14 bg-white border-b border-gray-200 dark:bg-gray-950 dark:border-gray-800 z-10">
 			<div className="h-full px-6 flex items-center justify-between">
-				<Breadcrumb items={breadcrumbItems} />
+				<BreadcrumbWithItems items={breadcrumbItems} />
 
 				<SearchBar />
 
