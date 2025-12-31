@@ -47,7 +47,7 @@ const placeholderTopics = [
 
 export default function LeftSidebar() {
 	return (
-		<div className="fixed left-0 top-0 h-screen w-[280px] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 z-20 flex flex-col">
+		<div className="hidden md:flex fixed left-0 top-0 h-screen w-[280px] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 z-20 flex-col">
 			<div className="h-14 flex items-center gap-2 px-4 border-b border-gray-200 dark:border-gray-800">
 				<div className="h-8 w-8 rounded-md bg-amber-500 flex items-center justify-center">
 					<Hash className="h-5 w-5 text-white" />
