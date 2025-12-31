@@ -16,6 +16,11 @@ export const Route = createFileRoute("/settings")({
 		}
 	},
 	component: SettingsPage,
+	staticData: {
+		breadcrumb: {
+			label: "设置",
+		},
+	},
 });
 
 function SettingsPage() {

@@ -23,6 +23,11 @@ export const Route = createFileRoute("/")({
 					: undefined,
 		};
 	},
+	staticData: {
+		breadcrumb: {
+			label: "首页",
+		},
+	},
 });
 
 function HomePage() {

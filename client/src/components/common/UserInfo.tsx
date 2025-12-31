@@ -9,6 +9,7 @@ interface UserInfoProps {
 	timestamp?: string;
 	size?: "sm" | "md";
 	className?: string;
+	asLink?: boolean;
 }
 
 function formatRelativeTime(dateString: string): string {
@@ -38,43 +39,48 @@ export default function UserInfo({
 	timestamp,
 	size = "md",
 	className,
+	asLink = true,
 }: UserInfoProps) {
-	const avatarSize = size === "sm" ? "h-6 w-6" : "h-9 w-9";
-	const textSize = size === "sm" ? "text-xs" : "text-sm";
+	const avatarSize = size === "sm" ? "h-6 w-6" : "h-8 w-8";
 
-	return (
-		<Link
-			to="/users/$userId"
-			params={{ userId: String(userId) }}
-			className={cn("flex items-center gap-2.5 group", className)}
-			onClick={(e) => e.stopPropagation()}
-		>
-			<Avatar className={cn(avatarSize, "ring-2 ring-border/30")}>
+	const content = (
+		<>
+			<Avatar className={avatarSize}>
 				<AvatarImage src={avatarUrl || undefined} alt={username} />
-				<AvatarFallback
-					className={cn(size === "sm" ? "text-xs" : "text-xs", "font-medium")}
-				>
+				<AvatarFallback className="text-xs font-medium">
 					{username.slice(0, 2).toUpperCase()}
 				</AvatarFallback>
 			</Avatar>
-			<div className="flex items-center gap-1.5">
-				<span
-					className={cn(
-						"font-semibold tracking-tight group-hover:underline",
-						textSize,
-					)}
-				>
-					{username}
-				</span>
+			<div className="flex items-center gap-1">
+				<span className="font-medium text-sm">{username}</span>
 				{timestamp && (
 					<>
-						<span className="text-muted-foreground/60">·</span>
-						<span className={cn("text-muted-foreground", textSize)}>
+						<span className="text-muted-foreground/50">·</span>
+						<span className="text-muted-foreground text-xs">
 							{formatRelativeTime(timestamp)}
 						</span>
 					</>
 				)}
 			</div>
+		</>
+	);
+
+	if (!asLink) {
+		return (
+			<div className={cn("flex items-center gap-1.5", className)}>
+				{content}
+			</div>
+		);
+	}
+
+	return (
+		<Link
+			to="/users/$userId"
+			params={{ userId: String(userId) }}
+			className={cn("flex items-center gap-1.5", className)}
+			onClick={(e) => e.stopPropagation()}
+		>
+			{content}
 		</Link>
 	);
 }

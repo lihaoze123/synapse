@@ -21,6 +21,11 @@ export const Route = createFileRoute("/search")({
 				: undefined;
 		return { keyword, type };
 	},
+	staticData: {
+		breadcrumb: {
+			label: "搜索",
+		},
+	},
 });
 
 function SearchPage() {
