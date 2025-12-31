@@ -1,22 +1,17 @@
 import type { ReactNode } from "react";
-import Navbar from "./Navbar";
-import Sidebar from "./Sidebar";
+import LeftSidebar from "./LeftSidebar";
+import { TopBar } from "./TopBar";
 
 interface LayoutProps {
 	children: ReactNode;
-	showSidebar?: boolean;
 }
 
-export default function Layout({ children, showSidebar = true }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
 	return (
-		<div className="min-h-screen bg-background">
-			<Navbar />
-			<div className="mx-auto max-w-6xl px-4 py-8 md:px-6 lg:px-8">
-				<div className="flex gap-8">
-					{showSidebar && <Sidebar />}
-					<main className="flex-1 min-w-0 max-w-[680px]">{children}</main>
-				</div>
-			</div>
+		<div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+			<LeftSidebar />
+			<TopBar />
+			<main className="ml-[280px] mt-14 p-6 lg:p-8">{children}</main>
 		</div>
 	);
 }
