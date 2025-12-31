@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BreadcrumbWithItems } from "@/components/ui/breadcrumb";
 import {
@@ -55,6 +55,17 @@ function UserDropdown() {
 				>
 					<User className="h-4 w-4" />
 					<span>个人资料</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() =>
+						navigate({
+							to: "/users/$userId/following",
+							params: { userId: String(user.id) },
+						})
+					}
+				>
+					<UserPlus className="h-4 w-4" />
+					<span>我的关注</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
 					<Settings className="h-4 w-4" />
