@@ -22,7 +22,6 @@ export default function Feed({
 }: FeedProps) {
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 
-	// Store handler in ref to avoid recreating observer on every render
 	const handleObserverRef = useRef<
 		((entries: IntersectionObserverEntry[]) => void) | undefined
 	>(undefined);
@@ -55,7 +54,6 @@ export default function Feed({
 		return (
 			<div className="space-y-5">
 				{Array.from({ length: 3 }).map((_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton items don't reorder
 					<PostCardSkeleton key={`skeleton-${i}`} />
 				))}
 			</div>
@@ -72,10 +70,8 @@ export default function Feed({
 				<PostCard key={post.id} post={post} />
 			))}
 
-			{/* Load more trigger */}
 			<div ref={loadMoreRef} className="h-4" />
 
-			{/* Loading indicator */}
 			{isFetchingNextPage && (
 				<div className="flex justify-center py-6">
 					<div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />

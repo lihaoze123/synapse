@@ -65,8 +65,6 @@ function HomePage() {
 			});
 			setPublishOpen(false);
 		} catch {
-			// Error is already stored in createPost.error
-			// Modal stays open so user can retry
 		}
 	};
 
@@ -91,7 +89,6 @@ function HomePage() {
 	return (
 		<Layout>
 			<div className="space-y-4">
-				{/* Filter indicator */}
 				{(search.tag || search.type) && (
 					<div className="flex items-center gap-2 text-sm text-muted-foreground">
 						<span>筛选:</span>
@@ -110,17 +107,14 @@ function HomePage() {
 					</div>
 				)}
 
-				{/* Compose card - only show when logged in */}
 				{user && <ComposeCard onCompose={handleCompose} />}
 
-				{/* Error state */}
 				{error && (
 					<div className="p-4 text-center text-red-600 bg-red-50 rounded-lg">
 						加载失败：{error.message}
 					</div>
 				)}
 
-				{/* Feed */}
 				<Feed
 					posts={posts}
 					isLoading={isLoading}
@@ -131,7 +125,6 @@ function HomePage() {
 				/>
 			</div>
 
-			{/* Publish modal */}
 			<PublishModal
 				open={publishOpen}
 				onOpenChange={setPublishOpen}

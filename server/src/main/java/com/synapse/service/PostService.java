@@ -64,7 +64,6 @@ public class PostService {
                 .user(user)
                 .build();
 
-        // Generate summary for articles (truncate at word boundary)
         if (request.getType() == PostType.ARTICLE && request.getContent() != null) {
             String content = request.getContent();
             String summary;
@@ -77,7 +76,6 @@ public class PostService {
             post.setSummary(summary);
         }
 
-        // Process tags with normalization
         if (request.getTags() != null && !request.getTags().isEmpty()) {
             Set<Tag> tags = new HashSet<>();
             for (String tagName : request.getTags()) {
@@ -118,14 +116,12 @@ public class PostService {
             throw new IllegalArgumentException("Not authorized to edit this post");
         }
 
-        // Update fields if provided
         if (request.getTitle() != null) {
             post.setTitle(request.getTitle());
         }
         if (request.getContent() != null) {
             post.setContent(request.getContent());
 
-            // Regenerate summary for articles
             if (post.getType() == PostType.ARTICLE) {
                 String content = request.getContent();
                 String summary;
@@ -145,7 +141,6 @@ public class PostService {
             post.setCoverImage(request.getCoverImage());
         }
 
-        // Update tags if provided
         if (request.getTags() != null) {
             Set<Tag> tags = new HashSet<>();
             for (String tagName : request.getTags()) {

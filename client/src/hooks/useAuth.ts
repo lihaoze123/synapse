@@ -9,7 +9,6 @@ export function useAuth() {
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 
-	// Query to validate token on mount
 	const { data: validatedUser, isLoading: isValidating } = useQuery({
 		queryKey: ["auth", "validate"],
 		queryFn: async () => {
@@ -20,19 +19,17 @@ export function useAuth() {
 			try {
 				return await authService.fetchCurrentUser();
 			} catch {
-				// Token is invalid, clear it
 				authService.logout();
 				return null;
 			}
 		},
-		staleTime: 5 * 60 * 1000, // 5 minutes
+		staleTime: 5 * 60 * 1000,
 		retry: false,
 	});
 
 	const user = (validatedUser || authService.getUser()) as User | null;
 	const isAuthenticated = !!user;
 
-	// Register 401 error handler with navigation
 	useEffect(() => {
 		const handleAuthError = () => {
 			queryClient.clear();

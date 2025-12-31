@@ -49,7 +49,6 @@ const LANGUAGE_LABELS: Record<string, string> = {
 	md: "Markdown",
 };
 
-// Language mapping for react-syntax-highlighter
 const LANGUAGE_MAP: Record<string, string> = {
 	js: "javascript",
 	ts: "typescript",
@@ -79,11 +78,9 @@ export default function CodeBlock({
 	const displayLanguage =
 		LANGUAGE_LABELS[language.toLowerCase()] || language.toUpperCase();
 
-	// Map language aliases to their canonical names
 	const highlightLanguage =
 		LANGUAGE_MAP[language.toLowerCase()] || language.toLowerCase();
 
-	// Normalize line endings and limit lines for preview
 	const normalizedCode = code.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 	const lines = normalizedCode.split("\n");
 	const truncated = lines.length > maxLines;
@@ -91,7 +88,6 @@ export default function CodeBlock({
 		? lines.slice(0, maxLines).join("\n")
 		: normalizedCode;
 
-	// Check if dark mode is active
 	const isDark = document?.documentElement.classList.contains("dark");
 
 	const customStyle = {
@@ -105,7 +101,6 @@ export default function CodeBlock({
 	return (
 		<div className={cn("group relative", className)}>
 			<div className="overflow-hidden rounded-lg border border-border bg-white dark:bg-zinc-900">
-				{/* Header */}
 				<div className="flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-3 py-1.5">
 					<span className="text-xs font-medium text-black/60 dark:text-white/60">
 						{displayLanguage}
@@ -129,7 +124,6 @@ export default function CodeBlock({
 					</button>
 				</div>
 
-				{/* Code */}
 				<div className="overflow-x-auto">
 					<SyntaxHighlighter
 						language={highlightLanguage}
@@ -147,7 +141,6 @@ export default function CodeBlock({
 					</SyntaxHighlighter>
 				</div>
 
-				{/* Truncation indicator */}
 				{truncated && (
 					<div className="border-t border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-3 py-1.5 text-center">
 						<span className="text-xs text-black/50 dark:text-white/50">

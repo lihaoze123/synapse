@@ -20,7 +20,7 @@ public class FileUtil {
             "image/gif",
             "image/webp"
     );
-    private static final long MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final long MAX_SIZE = 10 * 1024 * 1024;
 
     public FileUtil() {
         createUploadDirectory();
@@ -80,7 +80,6 @@ public class FileUtil {
             Path filePath = Paths.get(UPLOAD_DIR, filename);
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
-            // Log error but don't throw - deletion failure is not critical
         }
     }
 }

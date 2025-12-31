@@ -145,3 +145,4 @@ Files saved to project root `uploads/` folder, accessible at `localhost:8080/fil
 
 - This is an MVP demo - avoid production-level complexity (no message queues, caching, MinIO/OSS)
 - Keep the implementation simple and focused on demonstrating the multi-type content model
+- **Never** comment, unless it's useful

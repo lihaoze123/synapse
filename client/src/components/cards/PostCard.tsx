@@ -52,7 +52,6 @@ export default function PostCard({ post, className }: PostCardProps) {
 					className,
 				)}
 			>
-				{/* Header */}
 				<div className="flex items-center justify-between mb-4">
 					<UserInfo
 						username={post.user.username}
@@ -72,7 +71,6 @@ export default function PostCard({ post, className }: PostCardProps) {
 					</div>
 				</div>
 
-				{/* Content - varies by type */}
 				<div className="mb-4">
 					{post.type === "SNIPPET" && (
 						<SnippetContent
@@ -91,7 +89,6 @@ export default function PostCard({ post, className }: PostCardProps) {
 					{post.type === "MOMENT" && <MomentContent content={post.content} />}
 				</div>
 
-				{/* Tags */}
 				{post.tags && post.tags.length > 0 && (
 					<div className="flex flex-wrap gap-2">
 						{post.tags.map((tag) => (

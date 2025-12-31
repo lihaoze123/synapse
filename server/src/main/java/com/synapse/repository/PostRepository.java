@@ -33,7 +33,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @EntityGraph(attributePaths = {"user", "tags"})
     Page<Post> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
-    // Paginated queries with EntityGraph to avoid N+1
     @EntityGraph(attributePaths = {"user", "tags"})
     Page<Post> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
@@ -54,7 +53,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @EntityGraph(attributePaths = {"user", "tags"})
     Optional<Post> findWithDetailsById(Long id);
 
-    // Search queries
     @EntityGraph(attributePaths = {"user", "tags"})
     @Query(
         "SELECT p FROM Post p WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "

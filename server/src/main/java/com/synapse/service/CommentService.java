@@ -122,7 +122,6 @@ public class CommentService {
         Comment comment = commentRepository.findByIdWithUser(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
 
-        // Soft delete
         comment.setIsDeleted(true);
         comment.setContent("[已删除]");
         commentRepository.save(comment);

@@ -49,7 +49,6 @@ function PostDetailPage() {
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const [editError, setEditError] = useState("");
 
-	// Check if current user is the author
 	const isAuthor = currentUser && post && currentUser.id === post.user.id;
 
 	const handleEdit = () => {
@@ -134,7 +133,6 @@ function PostDetailPage() {
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="max-w-4xl mx-auto px-4 py-8">
-				{/* Back navigation */}
 				<Link
 					to="/"
 					className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -144,7 +142,6 @@ function PostDetailPage() {
 				</Link>
 
 				<Card className="overflow-hidden">
-					{/* Cover image for articles */}
 					{post.type === "ARTICLE" && post.coverImage && (
 						<div className="aspect-video w-full overflow-hidden">
 							<img
@@ -156,10 +153,8 @@ function PostDetailPage() {
 					)}
 
 					<div className="p-6">
-						{/* Header with edit/delete buttons */}
 						<div className="flex items-start gap-3 mb-4">
 							<div className="flex-1 flex items-center gap-3">
-								{/* Author avatar */}
 								<div className="shrink-0">
 									{post.user.avatarUrl ? (
 										<img
@@ -192,7 +187,6 @@ function PostDetailPage() {
 								</div>
 							</div>
 
-							{/* Edit/Delete buttons - only for author */}
 							{isAuthor && (
 								<div className="flex items-center gap-2">
 									<button
@@ -215,12 +209,10 @@ function PostDetailPage() {
 							)}
 						</div>
 
-						{/* Title for articles and snippets */}
 						{post.title && (
 							<h1 className="text-2xl font-bold mb-4">{post.title}</h1>
 						)}
 
-						{/* Content */}
 						<div className="mt-4">
 							{post.type === "SNIPPET" && (
 								<div className="rounded-lg overflow-hidden">
@@ -267,7 +259,6 @@ function PostDetailPage() {
 							)}
 						</div>
 
-						{/* Tags */}
 						{post.tags.length > 0 && (
 							<div className="flex flex-wrap gap-2 mt-6 pt-6 border-t border-border">
 								{post.tags.map((tag) => (
@@ -287,7 +278,6 @@ function PostDetailPage() {
 				</Card>
 			</div>
 
-			{/* Edit Modal */}
 			<PublishModal
 				open={isEditModalOpen}
 				onOpenChange={setIsEditModalOpen}
@@ -298,7 +288,6 @@ function PostDetailPage() {
 				error={editError}
 			/>
 
-			{/* Delete Confirmation Dialog */}
 			<ConfirmDialog
 				open={isDeleteDialogOpen}
 				onOpenChange={setIsDeleteDialogOpen}

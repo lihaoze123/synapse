@@ -1,10 +1,10 @@
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api";
+export const STATIC_BASE_URL = "http://localhost:8080";
 
 type AuthErrorHandler = () => void;
 
-// Global callback for handling auth errors (401)
 let onAuthError: AuthErrorHandler | null = null;
 
 export function setAuthErrorHandler(handler: AuthErrorHandler | null) {
@@ -30,11 +30,9 @@ api.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		if (error.response?.status === 401) {
-			// Clear auth data
 			localStorage.removeItem("token");
 			localStorage.removeItem("user");
 
-			// Call registered handler or fallback to window.location
 			if (onAuthError) {
 				onAuthError();
 			} else {

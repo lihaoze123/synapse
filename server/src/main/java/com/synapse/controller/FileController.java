@@ -26,7 +26,6 @@ public class FileController {
             @RequestParam("file") MultipartFile file,
             HttpServletRequest request) {
 
-        // Check authentication
         Object userIdAttr = request.getAttribute("userId");
         if (userIdAttr == null) {
             return ResponseEntity.status(401)

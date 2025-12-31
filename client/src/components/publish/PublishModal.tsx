@@ -17,7 +17,6 @@ interface PublishModalProps {
 	onPublish: (data: PublishData) => void;
 	isPublishing?: boolean;
 	error?: string;
-	// Edit mode props
 	mode?: "create" | "edit";
 	initialData?: Post;
 }
@@ -59,7 +58,6 @@ export default function PublishModal({
 			? "保存"
 			: "发布";
 
-	// Sync activeType with initialType when modal opens
 	useEffect(() => {
 		if (open) {
 			if (isEditMode && initialData) {
@@ -70,32 +68,25 @@ export default function PublishModal({
 		}
 	}, [open, initialType, isEditMode, initialData]);
 
-	// Fetch tags for suggestions only when modal is open
 	const { data: allTags } = useAllTags(open);
 	const tagSuggestions = useMemo(
 		() => allTags?.map((t) => t.name) ?? [],
 		[allTags],
 	);
 
-	// Moment state
 	const [momentContent, setMomentContent] = useState("");
 
-	// Snippet state
 	const [snippetTitle, setSnippetTitle] = useState("");
 	const [snippetCode, setSnippetCode] = useState("");
 	const [snippetLanguage, setSnippetLanguage] = useState("javascript");
 
-	// Article state
 	const [articleTitle, setArticleTitle] = useState("");
 	const [articleContent, setArticleContent] = useState("");
 
-	// Pre-fill form data when editing
 	useEffect(() => {
 		if (open && isEditMode && initialData) {
-			// Set tags
 			setTags(initialData.tags.map((t) => t.name));
 
-			// Set content based on type
 			switch (initialData.type) {
 				case "MOMENT":
 					setMomentContent(initialData.content);
@@ -111,7 +102,6 @@ export default function PublishModal({
 					break;
 			}
 		} else if (open && !isEditMode) {
-			// Reset form for create mode
 			setMomentContent("");
 			setSnippetTitle("");
 			setSnippetCode("");
@@ -197,7 +187,6 @@ export default function PublishModal({
 						</DialogPrimitive.Close>
 					</div>
 
-					{/* Tabs - hide in edit mode since type cannot be changed */}
 					{!isEditMode && (
 						<div className="flex border-b border-border">
 							{TABS.map(({ type, icon: Icon, label }) => (
@@ -219,7 +208,6 @@ export default function PublishModal({
 						</div>
 					)}
 
-					{/* Content */}
 					<div className="max-h-[60vh] overflow-y-auto p-4">
 						{activeType === "MOMENT" && (
 							<MomentEditor
@@ -258,7 +246,6 @@ export default function PublishModal({
 						</div>
 					</div>
 
-					{/* Footer */}
 					<div className="border-t border-border px-4 py-3">
 						{error && (
 							<div className="mb-3 p-2 text-sm text-red-600 bg-red-50 rounded-lg">
