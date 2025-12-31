@@ -1,4 +1,12 @@
-import { Hash, Plus, Search, Zap } from "lucide-react";
+import {
+	Code,
+	FileText,
+	Hash,
+	MessageCircle,
+	Plus,
+	Search,
+	Settings,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PostType } from "@/types";
 import NavItem from "./NavItem";
@@ -6,25 +14,25 @@ import NavItem from "./NavItem";
 const contentTypes: {
 	type: PostType;
 	label: string;
-	icon: typeof Zap;
+	icon: typeof Code;
 	color: string;
 }[] = [
 	{
 		type: "SNIPPET",
 		label: "代码片段",
-		icon: Zap,
+		icon: Code,
 		color: "text-blue-600 dark:text-blue-400",
 	},
 	{
 		type: "ARTICLE",
 		label: "文章",
-		icon: Search,
+		icon: FileText,
 		color: "text-green-600 dark:text-green-400",
 	},
 	{
 		type: "MOMENT",
 		label: "动态",
-		icon: Plus,
+		icon: MessageCircle,
 		color: "text-amber-600 dark:text-amber-400",
 	},
 ];
@@ -48,7 +56,7 @@ export default function LeftSidebar() {
 			</div>
 
 			<nav className="px-2 py-3 space-y-1">
-				<NavItem icon={Zap} label="动态" active to="/" />
+				<NavItem icon={MessageCircle} label="动态" active to="/" />
 				<NavItem icon={Search} label="搜索" to="/search" />
 				<NavItem icon={Plus} label="发布" to="/publish" />
 			</nav>
@@ -103,7 +111,7 @@ export default function LeftSidebar() {
 						"sidebar-item-hover",
 					)}
 				>
-					<span className="h-4 w-4 rounded-full bg-gray-200 dark:bg-gray-700" />
+					<Settings className="h-4 w-4" />
 					<span>设置</span>
 				</a>
 			</div>
