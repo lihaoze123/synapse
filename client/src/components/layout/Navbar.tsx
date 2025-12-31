@@ -10,6 +10,7 @@ import {
 	User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { SearchBar } from "@/components/layout/SearchBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,6 +68,8 @@ export default function Navbar() {
 				</div>
 
 				<div className="flex items-center gap-3">
+					<SearchBar />
+
 					<Button
 						variant="ghost"
 						size="icon"

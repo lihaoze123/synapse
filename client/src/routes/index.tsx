@@ -64,8 +64,7 @@ function HomePage() {
 				tags: data.tags.length > 0 ? data.tags : undefined,
 			});
 			setPublishOpen(false);
-		} catch {
-		}
+		} catch {}
 	};
 
 	const getEmptyMessage = () => {

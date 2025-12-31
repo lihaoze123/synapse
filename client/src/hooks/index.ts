@@ -7,5 +7,6 @@ export {
 	usePosts,
 	useUpdatePost,
 } from "./usePosts";
+export { useSearch } from "./useSearch";
 export { useAllTags, usePopularTags } from "./useTags";
 export { useUpdateProfile, useUserPosts } from "./useUsers";

@@ -81,4 +81,26 @@ export const postsService = {
 			throw new Error(response.data.message || "Failed to delete post");
 		}
 	},
+
+	async searchPosts(
+		params: GetPostsParams & { keyword: string },
+	): Promise<PostsPage> {
+		const { keyword, tag, type, page = 0, size = 10 } = params;
+		const searchParams = new URLSearchParams();
+
+		searchParams.append("keyword", keyword);
+		if (type) searchParams.append("type", type);
+		if (tag) searchParams.append("tag", tag);
+		searchParams.append("page", String(page));
+		searchParams.append("size", String(size));
+
+		const response = await api.get<ApiResponse<PostsPage>>(
+			`/posts/search?${searchParams.toString()}`,
+		);
+
+		if (response.data.success && response.data.data) {
+			return response.data.data;
+		}
+		throw new Error(response.data.message || "Failed to search posts");
+	},
 };

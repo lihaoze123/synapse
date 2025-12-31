@@ -59,8 +59,7 @@ function SettingsPage() {
 				clearTimeout(successTimeoutRef.current);
 			}
 			successTimeoutRef.current = setTimeout(() => setSuccess(false), 2000);
-		} catch {
-		}
+		} catch {}
 	};
 
 	const handleAvatarUpload = (url: string) => {
