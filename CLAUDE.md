@@ -61,40 +61,99 @@ npm run format   # Check formatting
 npm run check    # Lint + format combined
 ```
 
+## Build & Deployment
+
+### Development Mode
+
+Run frontend and backend separately:
+
+```bash
+# Backend (port 8080)
+cd server && ./mvnw spring-boot:run
+
+# Frontend (port 3000, proxies to backend)
+cd client && npm run dev
+```
+
+Frontend dev server uses Vite proxy to forward `/api` requests to `http://localhost:8080`.
+
+### Production Deployment
+
+**1. Build frontend with relative paths**
+```bash
+cd client
+VITE_API_BASE_URL=/api VITE_STATIC_BASE_URL= npm run build
+```
+
+**2. Integrate with backend**
+```bash
+# Copy frontend build to Spring Boot static directory
+cp -r client/dist/* server/src/main/resources/static/
+```
+
+**3. Build backend**
+```bash
+cd server
+./mvnw clean package
+```
+
+**4. Run**
+```bash
+java -jar target/synapse-0.0.1-SNAPSHOT.jar
+```
+
+访问 `http://localhost:8080`，both frontend and API on the same port.
+
+### Important: Vite Environment Variables
+
+- **Vite env vars are build-time fixed**: `VITE_API_BASE_URL` is compiled into the JS bundle during `npm run build`
+- **Cannot be changed at runtime**: Setting `VITE_API_BASE_URL` when running Java has no effect
+- **Use relative paths for deployment**: Build with `/api` to use same-origin requests
+- **Rebuild to change endpoints**: If API endpoint changes, rebuild frontend with new `VITE_API_BASE_URL`
+
 ## Architecture
 
 ### Backend Package Structure
 ```
 com.synapse/
-├── config/        # CORS, StaticResourceConfig
-├── controller/    # AuthController, PostController, TagController
-├── dto/           # PostRequest, LoginRequest
-├── entity/        # User, Post, Tag (JPA Entities)
-├── repository/    # JPA Repository interfaces
-├── service/       # Business logic
-└── utils/         # JWTUtil, FileUtil
+├── config/           # CORS, StaticResourceConfig
+├── controller/       # AuthController, PostController, TagController, CommentController, BookmarkController, FollowController, UserController, FileController
+├── dto/              # Request/Response DTOs (ApiResponse, PostDto, CommentDto, etc.)
+├── entity/           # User, Post, Tag, Comment, Bookmark, Follow (JPA Entities)
+├── repository/       # JPA Repository interfaces
+├── service/          # Business logic
+└── utils/            # JWTUtil, FileUtil
 ```
 
 ### Frontend Structure
 ```
 src/
 ├── components/
-│   ├── common/    # Reusable UI (Button, Input)
-│   ├── layout/    # Navbar, Sidebar
-│   ├── editor/    # MarkdownEditor, CodeEditor
-│   └── cards/     # PostCardFactory, SnippetCard, ArticleCard, MomentCard
-├── hooks/         # useAuth, usePosts
-├── routes/        # TanStack Router definitions
-├── services/      # Axios API client
+│   ├── common/       # Reusable UI (Button, Input, Tag, CodeBlock, FollowButton, FollowStats, UserInfo, UserListItem)
+│   ├── layout/       # Navbar, Sidebar, Layout
+│   ├── editor/       # MarkdownEditor, CodeEditor
+│   ├── cards/        # PostCardFactory, SnippetCard, ArticleCard, MomentCard, PostCard
+│   ├── feed/         # Feed, ComposeCard, EmptyState
+│   ├── publish/      # PublishModal, SnippetEditor, ArticleEditor, MomentEditor, TagInput
+│   ├── upload/       # ImageUploader
+│   ├── profile/      # AvatarUpload
+│   ├── comments/     # CommentSection, CommentItem
+│   └── ui/           # UI components (Card, Button, Input, etc.)
+├── hooks/            # useAuth, usePosts
+├── routes/           # TanStack Router definitions (index, login, search, profile, posts/$id, users/$userId.*)
+├── services/         # Axios API client
 └── utils/
 ```
 
-### Database Schema (4 tables)
+### Database Schema (7 tables)
 
 - **Users**: id, username, password (encrypted), avatar_url
 - **Posts**: id, type (SNIPPET/ARTICLE/MOMENT), title, content, language, summary, cover_image, user_id, created_at
 - **Tags**: id, name, icon
 - **Post_Tags**: post_id, tag_id (junction table)
+- **Comments**: id, post_id, user_id, content, created_at, updated_at
+- **Bookmarks**: id, user_id, post_id, created_at
+- **Follows**: follower_id, following_id, created_at
 
 ### Core API Endpoints
 ```
@@ -110,15 +169,39 @@ PUT  /api/posts/{id}     # Update post (owner only)
 DELETE /api/posts/{id}   # Delete post (owner only)
 GET  /api/posts/search   # Search by keyword with optional type filter
 
-# Tags
-GET  /api/tags           # Popular topics for sidebar
+# Comments
+GET  /api/posts/{postId}/comments  # Get post comments (paginated)
+GET  /api/comments/{id}            # Get single comment
+POST /api/posts/{postId}/comments  # Create comment
+PUT  /api/comments/{id}            # Update comment (owner only)
+DELETE /api/comments/{id}          # Delete comment (owner only)
+
+# Bookmarks
+GET  /api/bookmarks                # Get user bookmarks (paginated)
+GET  /api/bookmarks/posts/{postId} # Check if post is bookmarked
+GET  /api/bookmarks/posts/{postId}/count # Get bookmark count
+POST /api/bookmarks/posts/{postId} # Add bookmark
+DELETE /api/bookmarks/posts/{postId} # Remove bookmark
+
+# Follows
+GET  /api/follows/following        # Get following list (paginated)
+GET  /api/follows/followers        # Get followers list (paginated)
+GET  /api/follows/check/{userId}   # Check if following user
+GET  /api/follows/counts/{userId}  # Get follower/following counts
+POST /api/follows/{userId}         # Follow user
+DELETE /api/follows/{userId}       # Unfollow user
 
 # Users
-GET  /api/users/profile  # Get current user profile
-PUT  /api/users/profile  # Update profile
+GET  /api/users/{id}               # Get user by ID
+GET  /api/users/username/{username} # Get user by username
+GET  /api/users/{id}/posts         # Get user posts (paginated)
+PUT  /api/users/profile            # Update current user profile
+
+# Tags
+GET  /api/tags                     # Popular topics for sidebar
 
 # File Upload
-POST /api/upload         # Image upload → /static/uploads/{uuid}.png
+POST /api/upload                   # Image upload → /static/uploads/{uuid}.png
 ```
 
 ## Key Implementation Details
@@ -129,6 +212,18 @@ Frontend dynamically renders cards based on `post.type`:
 - `ARTICLE`: Cover image + summary + title
 - `MOMENT`: Large text, no title, Twitter-style
 
+### Social Features
+- **Comments**: Nested under posts, owner can edit/delete their comments
+- **Bookmarks**: Toggle bookmark on posts, separate bookmarks page
+- **Follows**: Follow/unfollow users, view followers/following lists with stats
+- **User Profiles**: Public profile pages with user info and posts
+
+### Search
+- Real-time search with debouncing (500ms)
+- Searches post titles and content
+- Optional type filter (Snippet/Article/Moment)
+- URL-synced search state
+
 ### File Upload (MVP approach)
 Configure in `application.properties`:
 ```properties
@@ -136,10 +231,16 @@ spring.web.resources.static-locations=file:./uploads/,classpath:/static/
 ```
 Files saved to project root `uploads/` folder, accessible at `localhost:8080/filename.png`.
 
+### Code Highlighting
+- react-syntax-highlighter for code blocks in posts
+- Language detection from post metadata
+- Custom CodeBlock component with copy button
+
 ### UI Style
 - Minimalist warm color palette (cream background, dark gray text, amber/orange accents)
 - Soft shadows (`shadow-sm` to `shadow-md`), rounded corners (`rounded-xl`)
 - TanStack Router Loader for data pre-loading
+- Responsive design with mobile-first approach
 
 ## Important Constraints
 
