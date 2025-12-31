@@ -1,7 +1,9 @@
+import { Link } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 interface UserInfoProps {
+	userId: number;
 	username: string;
 	avatarUrl?: string | null;
 	timestamp?: string;
@@ -30,6 +32,7 @@ function formatRelativeTime(dateString: string): string {
 }
 
 export default function UserInfo({
+	userId,
 	username,
 	avatarUrl,
 	timestamp,
@@ -40,7 +43,12 @@ export default function UserInfo({
 	const textSize = size === "sm" ? "text-xs" : "text-sm";
 
 	return (
-		<div className={cn("flex items-center gap-2.5", className)}>
+		<Link
+			to="/users/$userId"
+			params={{ userId: String(userId) }}
+			className={cn("flex items-center gap-2.5 group", className)}
+			onClick={(e) => e.stopPropagation()}
+		>
 			<Avatar className={cn(avatarSize, "ring-2 ring-border/30")}>
 				<AvatarImage src={avatarUrl || undefined} alt={username} />
 				<AvatarFallback
@@ -50,7 +58,12 @@ export default function UserInfo({
 				</AvatarFallback>
 			</Avatar>
 			<div className="flex items-center gap-1.5">
-				<span className={cn("font-semibold tracking-tight", textSize)}>
+				<span
+					className={cn(
+						"font-semibold tracking-tight group-hover:underline",
+						textSize,
+					)}
+				>
 					{username}
 				</span>
 				{timestamp && (
@@ -62,6 +75,6 @@ export default function UserInfo({
 					</>
 				)}
 			</div>
-		</div>
+		</Link>
 	);
 }
