@@ -14,7 +14,11 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsersUserIdRouteImport } from './routes/users/$userId'
 import { Route as PostsIdRouteImport } from './routes/posts/$id'
+import { Route as UsersUserIdIndexRouteImport } from './routes/users/$userId.index'
+import { Route as UsersUserIdFollowingRouteImport } from './routes/users/$userId.following'
+import { Route as UsersUserIdFollowersRouteImport } from './routes/users/$userId.followers'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -41,10 +45,30 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersUserIdRoute = UsersUserIdRouteImport.update({
+  id: '/users/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsIdRoute = PostsIdRouteImport.update({
   id: '/posts/$id',
   path: '/posts/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const UsersUserIdIndexRoute = UsersUserIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => UsersUserIdRoute,
+} as any)
+const UsersUserIdFollowingRoute = UsersUserIdFollowingRouteImport.update({
+  id: '/following',
+  path: '/following',
+  getParentRoute: () => UsersUserIdRoute,
+} as any)
+const UsersUserIdFollowersRoute = UsersUserIdFollowersRouteImport.update({
+  id: '/followers',
+  path: '/followers',
+  getParentRoute: () => UsersUserIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -54,6 +78,10 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/posts/$id': typeof PostsIdRoute
+  '/users/$userId': typeof UsersUserIdRouteWithChildren
+  '/users/$userId/followers': typeof UsersUserIdFollowersRoute
+  '/users/$userId/following': typeof UsersUserIdFollowingRoute
+  '/users/$userId/': typeof UsersUserIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +90,9 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/posts/$id': typeof PostsIdRoute
+  '/users/$userId/followers': typeof UsersUserIdFollowersRoute
+  '/users/$userId/following': typeof UsersUserIdFollowingRoute
+  '/users/$userId': typeof UsersUserIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +102,10 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/posts/$id': typeof PostsIdRoute
+  '/users/$userId': typeof UsersUserIdRouteWithChildren
+  '/users/$userId/followers': typeof UsersUserIdFollowersRoute
+  '/users/$userId/following': typeof UsersUserIdFollowingRoute
+  '/users/$userId/': typeof UsersUserIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,8 +116,21 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/posts/$id'
+    | '/users/$userId'
+    | '/users/$userId/followers'
+    | '/users/$userId/following'
+    | '/users/$userId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/profile' | '/search' | '/settings' | '/posts/$id'
+  to:
+    | '/'
+    | '/login'
+    | '/profile'
+    | '/search'
+    | '/settings'
+    | '/posts/$id'
+    | '/users/$userId/followers'
+    | '/users/$userId/following'
+    | '/users/$userId'
   id:
     | '__root__'
     | '/'
@@ -91,6 +139,10 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/posts/$id'
+    | '/users/$userId'
+    | '/users/$userId/followers'
+    | '/users/$userId/following'
+    | '/users/$userId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -100,6 +152,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   PostsIdRoute: typeof PostsIdRoute
+  UsersUserIdRoute: typeof UsersUserIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -139,6 +192,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users/$userId': {
+      id: '/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/users/$userId'
+      preLoaderRoute: typeof UsersUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/$id': {
       id: '/posts/$id'
       path: '/posts/$id'
@@ -146,8 +206,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users/$userId/': {
+      id: '/users/$userId/'
+      path: '/'
+      fullPath: '/users/$userId/'
+      preLoaderRoute: typeof UsersUserIdIndexRouteImport
+      parentRoute: typeof UsersUserIdRoute
+    }
+    '/users/$userId/following': {
+      id: '/users/$userId/following'
+      path: '/following'
+      fullPath: '/users/$userId/following'
+      preLoaderRoute: typeof UsersUserIdFollowingRouteImport
+      parentRoute: typeof UsersUserIdRoute
+    }
+    '/users/$userId/followers': {
+      id: '/users/$userId/followers'
+      path: '/followers'
+      fullPath: '/users/$userId/followers'
+      preLoaderRoute: typeof UsersUserIdFollowersRouteImport
+      parentRoute: typeof UsersUserIdRoute
+    }
   }
 }
+
+interface UsersUserIdRouteChildren {
+  UsersUserIdFollowersRoute: typeof UsersUserIdFollowersRoute
+  UsersUserIdFollowingRoute: typeof UsersUserIdFollowingRoute
+  UsersUserIdIndexRoute: typeof UsersUserIdIndexRoute
+}
+
+const UsersUserIdRouteChildren: UsersUserIdRouteChildren = {
+  UsersUserIdFollowersRoute: UsersUserIdFollowersRoute,
+  UsersUserIdFollowingRoute: UsersUserIdFollowingRoute,
+  UsersUserIdIndexRoute: UsersUserIdIndexRoute,
+}
+
+const UsersUserIdRouteWithChildren = UsersUserIdRoute._addFileChildren(
+  UsersUserIdRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -156,6 +253,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   PostsIdRoute: PostsIdRoute,
+  UsersUserIdRoute: UsersUserIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

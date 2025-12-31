@@ -1,7 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Code, FileText, MessageCircle } from "lucide-react";
 import { UserInfo } from "@/components/common";
+import FollowButton from "@/components/common/FollowButton";
 import { Card } from "@/components/ui/card";
+import { useAuth, useIsFollowing } from "@/hooks";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
 import ArticleContent from "./ArticleContent";
@@ -35,6 +37,11 @@ export default function PostCard({ post, className }: PostCardProps) {
 	const config = TYPE_CONFIG[post.type];
 	const TypeIcon = config.icon;
 	const navigate = useNavigate();
+	const { user: currentUser } = useAuth();
+	const { isFollowing } = useIsFollowing(post.user.id);
+
+	const isMe = currentUser?.id === post.user.id;
+	const showFollowButton = !isFollowing && !isMe;
 
 	const handleTagClick = (e: React.MouseEvent, tagName: string) => {
 		e.preventDefault();
@@ -53,11 +60,17 @@ export default function PostCard({ post, className }: PostCardProps) {
 				)}
 			>
 				<div className="flex items-center justify-between mb-4">
-					<UserInfo
-						username={post.user.username}
-						avatarUrl={post.user.avatarUrl}
-						timestamp={post.createdAt}
-					/>
+					<div className="flex items-center gap-3">
+						<UserInfo
+							userId={post.user.id}
+							username={post.user.username}
+							avatarUrl={post.user.avatarUrl}
+							timestamp={post.createdAt}
+						/>
+						{showFollowButton && (
+							<FollowButton userId={post.user.id} size="sm" />
+						)}
+					</div>
 					<div
 						className={cn(
 							"flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium",

@@ -1,6 +1,7 @@
 package com.synapse.controller;
 
 import com.synapse.dto.ApiResponse;
+import com.synapse.dto.FollowCounts;
 import com.synapse.dto.FollowDto;
 import com.synapse.service.FollowService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -120,6 +121,4 @@ public class FollowController {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
-
-    public record FollowCounts(long followingCount, long followerCount) {}
 }

@@ -6,6 +6,14 @@ export {
 	useUpdateComment,
 } from "./useComments";
 export {
+	useFollowCounts,
+	useFollowers,
+	useFollowing,
+	useFollowUser,
+	useIsFollowing,
+	useUnfollowUser,
+} from "./useFollows";
+export {
 	useCreatePost,
 	useDeletePost,
 	useFilteredPosts,

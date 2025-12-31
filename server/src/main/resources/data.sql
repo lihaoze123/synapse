@@ -260,3 +260,32 @@ INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, i
 
 INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, is_deleted) VALUES
 ('最坏情况可以通过随机化避免。', 3, 1, 14, 27, TIMESTAMP '2024-01-01 15:10:00', FALSE);
+
+-- ============================================
+-- Follows Mock Data
+-- ============================================
+
+-- Follow relationships between users
+-- alice (id=2) follows admin (id=1)
+INSERT INTO follows (follower_id, following_id, created_at) VALUES
+(2, 1, TIMESTAMP '2024-01-02 09:00:00');
+
+-- bob (id=3) follows admin (id=1) and alice (id=2)
+INSERT INTO follows (follower_id, following_id, created_at) VALUES
+(3, 1, TIMESTAMP '2024-01-03 10:00:00'),
+(3, 2, TIMESTAMP '2024-01-03 10:05:00');
+
+-- charlie (id=4) follows admin (id=1), alice (id=2), and bob (id=3)
+INSERT INTO follows (follower_id, following_id, created_at) VALUES
+(4, 1, TIMESTAMP '2024-01-04 11:00:00'),
+(4, 2, TIMESTAMP '2024-01-04 11:05:00'),
+(4, 3, TIMESTAMP '2024-01-04 11:10:00');
+
+-- admin (id=1) follows bob (id=3) and charlie (id=4)
+INSERT INTO follows (follower_id, following_id, created_at) VALUES
+(1, 3, TIMESTAMP '2024-01-05 14:00:00'),
+(1, 4, TIMESTAMP '2024-01-05 14:05:00');
+
+-- alice (id=2) also follows charlie (id=4)
+INSERT INTO follows (follower_id, following_id, created_at) VALUES
+(2, 4, TIMESTAMP '2024-01-06 16:00:00');

@@ -49,3 +49,23 @@ export interface Comment {
 	createdAt: string;
 	isDeleted: boolean | null;
 }
+
+export interface FollowDto {
+	id: number;
+	follower: User;
+	following: User;
+	createdAt: string;
+}
+
+export interface FollowCounts {
+	followingCount: number;
+	followerCount: number;
+}
+
+export interface FollowsPage {
+	content: FollowDto[];
+	totalElements: number;
+	totalPages: number;
+	number: number;
+	last: boolean;
+}

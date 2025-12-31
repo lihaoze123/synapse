@@ -1,6 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { Settings } from "lucide-react";
 import { useMemo } from "react";
+import FollowStats from "@/components/common/FollowStats";
 import { Feed } from "@/components/feed";
 import { Layout } from "@/components/layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -54,6 +55,8 @@ function ProfilePage() {
 								: "暂无内容"}
 						</p>
 					</div>
+
+					<FollowStats userId={user.id} />
 
 					<Button
 						variant="outline"

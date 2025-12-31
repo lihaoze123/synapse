@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -79,15 +80,21 @@ export default function CommentItem({
 	return (
 		<div className="flex gap-3">
 			<div className="flex flex-col items-center gap-1 shrink-0">
-				<Avatar className="h-8 w-8 ring-2 ring-border/30">
-					<AvatarImage
-						src={comment.user.avatarUrl || undefined}
-						alt={comment.user.username}
-					/>
-					<AvatarFallback className="text-xs font-medium">
-						{comment.user.username.slice(0, 2).toUpperCase()}
-					</AvatarFallback>
-				</Avatar>
+				<Link
+					to="/users/$userId"
+					params={{ userId: String(comment.user.id) }}
+					className="shrink-0"
+				>
+					<Avatar className="h-8 w-8 ring-2 ring-border/30 hover:ring-primary/50 transition-all">
+						<AvatarImage
+							src={comment.user.avatarUrl || undefined}
+							alt={comment.user.username}
+						/>
+						<AvatarFallback className="text-xs font-medium">
+							{comment.user.username.slice(0, 2).toUpperCase()}
+						</AvatarFallback>
+					</Avatar>
+				</Link>
 				{floor > 0 && (
 					<span className="text-xs text-muted-foreground/60 w-8 text-center">
 						#{floor}
@@ -97,7 +104,13 @@ export default function CommentItem({
 
 			<div className="flex-1 min-w-0 pb-4 border-b border-border/50 last:border-0 last:pb-0">
 				<div className="flex items-center gap-2 mb-1">
-					<span className="font-semibold text-sm">{comment.user.username}</span>
+					<Link
+						to="/users/$userId"
+						params={{ userId: String(comment.user.id) }}
+						className="font-semibold text-sm hover:underline"
+					>
+						{comment.user.username}
+					</Link>
 					<span className="text-muted-foreground/60 text-xs">·</span>
 					<span className="text-muted-foreground text-xs">
 						{formatRelativeTime(comment.createdAt)}
