@@ -31,6 +31,8 @@ Thumbs.db
 # Uploads (keep directory but ignore contents except .gitkeep)
 uploads/*
 !uploads/.gitkeep
+server/uploads/*
+!server/uploads/.gitkeep
 
 # Application
 application-local.properties
