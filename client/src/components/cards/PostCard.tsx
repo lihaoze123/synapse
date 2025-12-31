@@ -59,6 +59,7 @@ export default function PostCard({ post, className }: PostCardProps) {
 							username={post.user.username}
 							avatarUrl={post.user.avatarUrl}
 							timestamp={post.createdAt}
+							asLink={false}
 						/>
 						{showFollowButton && (
 							<FollowButton userId={post.user.id} size="sm" />

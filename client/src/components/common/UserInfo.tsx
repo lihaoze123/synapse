@@ -9,6 +9,7 @@ interface UserInfoProps {
 	timestamp?: string;
 	size?: "sm" | "md";
 	className?: string;
+	asLink?: boolean;
 }
 
 function formatRelativeTime(dateString: string): string {
@@ -38,16 +39,12 @@ export default function UserInfo({
 	timestamp,
 	size = "md",
 	className,
+	asLink = true,
 }: UserInfoProps) {
 	const avatarSize = size === "sm" ? "h-6 w-6" : "h-8 w-8";
 
-	return (
-		<Link
-			to="/users/$userId"
-			params={{ userId: String(userId) }}
-			className={cn("flex items-center gap-1.5", className)}
-			onClick={(e) => e.stopPropagation()}
-		>
+	const content = (
+		<>
 			<Avatar className={avatarSize}>
 				<AvatarImage src={avatarUrl || undefined} alt={username} />
 				<AvatarFallback className="text-xs font-medium">
@@ -65,6 +62,25 @@ export default function UserInfo({
 					</>
 				)}
 			</div>
+		</>
+	);
+
+	if (!asLink) {
+		return (
+			<div className={cn("flex items-center gap-1.5", className)}>
+				{content}
+			</div>
+		);
+	}
+
+	return (
+		<Link
+			to="/users/$userId"
+			params={{ userId: String(userId) }}
+			className={cn("flex items-center gap-1.5", className)}
+			onClick={(e) => e.stopPropagation()}
+		>
+			{content}
 		</Link>
 	);
 }
