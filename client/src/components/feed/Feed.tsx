@@ -54,7 +54,8 @@ export default function Feed({
 		return (
 			<div className="space-y-5">
 				{Array.from({ length: 3 }).map((_, i) => (
-					<PostCardSkeleton key={`skeleton-${i}`} />
+					// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list never reorders
+					<PostCardSkeleton key={i} />
 				))}
 			</div>
 		);
