@@ -4,7 +4,6 @@ import {
 	FileText,
 	Hash,
 	MessageCircle,
-	Plus,
 	Search,
 	Settings,
 } from "lucide-react";
@@ -71,7 +70,12 @@ export default function LeftSidebar() {
 						</div>
 					)}
 				</Link>
-				<Link to="/search" className="block" aria-label="搜索">
+				<Link
+					to="/search"
+					search={{ keyword: "" }}
+					className="block"
+					aria-label="搜索"
+				>
 					{({ isActive }) => (
 						<div
 							className={cn(
@@ -83,21 +87,6 @@ export default function LeftSidebar() {
 						>
 							<Search className="h-4 w-4" aria-hidden="true" />
 							<span>搜索</span>
-						</div>
-					)}
-				</Link>
-				<Link to="/publish" className="block" aria-label="发布">
-					{({ isActive }) => (
-						<div
-							className={cn(
-								"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
-								"sidebar-item-hover",
-								isActive && "sidebar-item-active",
-							)}
-							aria-current={isActive ? "page" : undefined}
-						>
-							<Plus className="h-4 w-4" aria-hidden="true" />
-							<span>发布</span>
 						</div>
 					)}
 				</Link>

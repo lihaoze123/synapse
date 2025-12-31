@@ -88,30 +88,27 @@ export function SearchBar() {
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="flex items-center gap-1.5">
-			<div className="relative flex items-center group">
-				<Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+		<form onSubmit={handleSubmit} className="flex items-center gap-1">
+			<div className="relative flex items-center">
+				<Search className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
 				<Input
 					type="search"
 					value={keyword}
 					onChange={(e) => setKeyword(e.target.value)}
-					placeholder="搜索后按回车..."
+					placeholder="搜索..."
 					aria-label="搜索内容"
-					className="w-44 md:w-56 h-9 pl-9 pr-8 rounded-xl border-border/60 bg-secondary/50 focus-within:bg-background"
+					size="sm"
+					className="w-40 md:w-48 pl-8 pr-7"
 				/>
-				{keyword ? (
+				{keyword && (
 					<button
 						type="button"
 						onClick={handleClear}
 						aria-label="清除搜索"
-						className="absolute right-2.5 p-0.5 text-muted-foreground hover:text-foreground rounded transition-colors"
+						className="absolute right-2 p-0.5 text-muted-foreground hover:text-foreground rounded transition-colors"
 					>
-						<X className="h-3.5 w-3.5" />
+						<X className="h-3 w-3" />
 					</button>
-				) : (
-					<span className="absolute right-2.5 text-[10px] text-muted-foreground/60 hidden group-focus-within:inline">
-						↵
-					</span>
 				)}
 			</div>
 
@@ -119,9 +116,9 @@ export function SearchBar() {
 				type="submit"
 				disabled={!keyword.trim()}
 				aria-label="搜索"
-				className="hidden sm:flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+				className="hidden sm:flex items-center justify-center h-8 w-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none transition-colors"
 			>
-				<Search className="h-4 w-4" />
+				<Search className="h-3.5 w-3.5" />
 			</button>
 
 			<div className="relative hidden sm:block">
@@ -132,11 +129,11 @@ export function SearchBar() {
 					aria-expanded={typeOpen}
 					aria-haspopup="listbox"
 					aria-label="选择内容类型"
-					className="flex items-center gap-1 px-2.5 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/80 rounded-lg transition-colors"
+					className="flex items-center gap-1 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
 				>
 					<span>{POST_TYPE_LABELS[type]}</span>
 					<ChevronDown
-						className={`h-3.5 w-3.5 transition-transform ${typeOpen ? "rotate-180" : ""}`}
+						className={`h-3 w-3 transition-transform ${typeOpen ? "rotate-180" : ""}`}
 					/>
 				</button>
 
@@ -146,7 +143,7 @@ export function SearchBar() {
 						role="listbox"
 						aria-label="内容类型"
 						onKeyDown={handleKeyDown}
-						className="absolute top-full right-0 mt-1.5 z-50 min-w-[120px] bg-popover border border-border/60 rounded-xl shadow-lg p-1 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
+						className="absolute top-full right-0 mt-1 z-50 min-w-[100px] bg-popover border border-border rounded-md shadow-md p-1"
 					>
 						{POST_TYPE_OPTIONS.map((typeOption) => (
 							<button
@@ -158,10 +155,10 @@ export function SearchBar() {
 									setType(typeOption);
 									setTypeOpen(false);
 								}}
-								className={`w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors ${
+								className={`w-full text-left px-2 py-1 text-sm rounded transition-colors ${
 									type === typeOption
-										? "bg-primary/10 text-primary font-medium"
-										: "text-foreground hover:bg-secondary"
+										? "bg-accent text-accent-foreground"
+										: "text-foreground hover:bg-accent"
 								}`}
 							>
 								{POST_TYPE_LABELS[typeOption]}
