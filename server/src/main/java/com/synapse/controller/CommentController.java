@@ -27,89 +27,83 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class CommentController {
 
-    private static final int MAX_PAGE_SIZE = 50;
+	private static final int MAX_PAGE_SIZE = 100;
+	private static final int DEFAULT_PAGE_SIZE = 20;
 
-    private final CommentService commentService;
+	private final CommentService commentService;
 
-    @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<ApiResponse<Page<CommentDto>>> getPostComments(
-            @PathVariable Long postId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
-        Pageable pageable = PageRequest.of(page, safeSize);
-        Page<CommentDto> comments = commentService.getPostComments(postId, pageable);
-        return ResponseEntity.ok(ApiResponse.success(comments));
-    }
+	@GetMapping("/posts/{postId}/comments")
+	public ResponseEntity<ApiResponse<Page<CommentDto>>> getPostComments(
+			@PathVariable Long postId,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "20") int size) {
+		int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+		Pageable pageable = PageRequest.of(page, safeSize);
+		try {
+			Page<CommentDto> comments = commentService.getPostComments(postId, pageable);
+			return ResponseEntity.ok(ApiResponse.success(comments));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+		}
+	}
 
-    @GetMapping("/comments/{commentId}/replies")
-    public ResponseEntity<ApiResponse<Page<CommentDto>>> getCommentReplies(
-            @PathVariable Long commentId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
-        Pageable pageable = PageRequest.of(page, safeSize);
-        Page<CommentDto> replies = commentService.getCommentReplies(commentId, pageable);
-        return ResponseEntity.ok(ApiResponse.success(replies));
-    }
+	@GetMapping("/comments/{id}")
+	public ResponseEntity<ApiResponse<CommentDto>> getComment(@PathVariable Long id) {
+		try {
+			CommentDto comment = commentService.getComment(id);
+			return ResponseEntity.ok(ApiResponse.success(comment));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
+		}
+	}
 
-    @GetMapping("/comments/{id}")
-    public ResponseEntity<ApiResponse<CommentDto>> getComment(@PathVariable Long id) {
-        try {
-            CommentDto comment = commentService.getComment(id);
-            return ResponseEntity.ok(ApiResponse.success(comment));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
-        }
-    }
+	@PostMapping("/posts/{postId}/comments")
+	public ResponseEntity<ApiResponse<CommentDto>> createComment(
+			HttpServletRequest request,
+			@PathVariable Long postId,
+			@Valid @RequestBody CreateCommentRequest createRequest) {
+		Long userId = (Long) request.getAttribute("userId");
+		if (userId == null) {
+			return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
+		}
+		try {
+			CommentDto comment = commentService.createComment(userId, postId, createRequest);
+			return ResponseEntity.ok(ApiResponse.success("Comment created successfully", comment));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+		}
+	}
 
-    @PostMapping("/posts/{postId}/comments")
-    public ResponseEntity<ApiResponse<CommentDto>> createComment(
-            HttpServletRequest request,
-            @PathVariable Long postId,
-            @Valid @RequestBody CreateCommentRequest createRequest) {
-        Long userId = (Long) request.getAttribute("userId");
-        if (userId == null) {
-            return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
-        }
-        try {
-            CommentDto comment = commentService.createComment(userId, postId, createRequest);
-            return ResponseEntity.ok(ApiResponse.success("Comment created successfully", comment));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
-        }
-    }
+	@PutMapping("/comments/{id}")
+	public ResponseEntity<ApiResponse<CommentDto>> updateComment(
+			HttpServletRequest request,
+			@PathVariable Long id,
+			@Valid @RequestBody UpdateCommentRequest updateRequest) {
+		Long userId = (Long) request.getAttribute("userId");
+		if (userId == null) {
+			return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
+		}
+		try {
+			CommentDto comment = commentService.updateComment(id, userId, updateRequest);
+			return ResponseEntity.ok(ApiResponse.success("Comment updated successfully", comment));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
+		}
+	}
 
-    @PutMapping("/comments/{id}")
-    public ResponseEntity<ApiResponse<CommentDto>> updateComment(
-            HttpServletRequest request,
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateCommentRequest updateRequest) {
-        Long userId = (Long) request.getAttribute("userId");
-        if (userId == null) {
-            return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
-        }
-        try {
-            CommentDto comment = commentService.updateComment(id, userId, updateRequest);
-            return ResponseEntity.ok(ApiResponse.success("Comment updated successfully", comment));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
-        }
-    }
-
-    @DeleteMapping("/comments/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteComment(
-            HttpServletRequest request,
-            @PathVariable Long id) {
-        Long userId = (Long) request.getAttribute("userId");
-        if (userId == null) {
-            return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
-        }
-        try {
-            commentService.deleteComment(id, userId);
-            return ResponseEntity.ok(ApiResponse.success("Comment deleted successfully", null));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
-        }
-    }
+	@DeleteMapping("/comments/{id}")
+	public ResponseEntity<ApiResponse<Void>> deleteComment(
+			HttpServletRequest request,
+			@PathVariable Long id) {
+		Long userId = (Long) request.getAttribute("userId");
+		if (userId == null) {
+			return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
+		}
+		try {
+			commentService.deleteComment(id, userId);
+			return ResponseEntity.ok(ApiResponse.success("Comment deleted successfully", null));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
+		}
+	}
 }
