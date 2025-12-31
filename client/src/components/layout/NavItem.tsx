@@ -22,8 +22,10 @@ export default function NavItem({
 				"sidebar-item-hover",
 				active && "sidebar-item-active",
 			)}
+			aria-label={label}
+			aria-current={active ? "page" : undefined}
 		>
-			<Icon className="h-4 w-4" />
+			<Icon className="h-4 w-4" aria-hidden="true" />
 			<span>{label}</span>
 		</a>
 	);

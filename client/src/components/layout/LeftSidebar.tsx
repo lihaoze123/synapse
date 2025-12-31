@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
 	Code,
 	FileText,
@@ -9,7 +10,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PostType } from "@/types";
-import NavItem from "./NavItem";
 
 const contentTypes: {
 	type: PostType;
@@ -56,9 +56,51 @@ export default function LeftSidebar() {
 			</div>
 
 			<nav className="px-2 py-3 space-y-1">
-				<NavItem icon={MessageCircle} label="动态" active to="/" />
-				<NavItem icon={Search} label="搜索" to="/search" />
-				<NavItem icon={Plus} label="发布" to="/publish" />
+				<Link to="/" className="block" aria-label="动态">
+					{({ isActive }) => (
+						<div
+							className={cn(
+								"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
+								"sidebar-item-hover",
+								isActive && "sidebar-item-active",
+							)}
+							aria-current={isActive ? "page" : undefined}
+						>
+							<MessageCircle className="h-4 w-4" aria-hidden="true" />
+							<span>动态</span>
+						</div>
+					)}
+				</Link>
+				<Link to="/search" className="block" aria-label="搜索">
+					{({ isActive }) => (
+						<div
+							className={cn(
+								"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
+								"sidebar-item-hover",
+								isActive && "sidebar-item-active",
+							)}
+							aria-current={isActive ? "page" : undefined}
+						>
+							<Search className="h-4 w-4" aria-hidden="true" />
+							<span>搜索</span>
+						</div>
+					)}
+				</Link>
+				<Link to="/publish" className="block" aria-label="发布">
+					{({ isActive }) => (
+						<div
+							className={cn(
+								"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
+								"sidebar-item-hover",
+								isActive && "sidebar-item-active",
+							)}
+							aria-current={isActive ? "page" : undefined}
+						>
+							<Plus className="h-4 w-4" aria-hidden="true" />
+							<span>发布</span>
+						</div>
+					)}
+				</Link>
 			</nav>
 
 			<section className="px-2 py-3 border-t border-gray-200 dark:border-gray-800">
@@ -67,17 +109,27 @@ export default function LeftSidebar() {
 				</h3>
 				<div className="space-y-1">
 					{contentTypes.map(({ type, label, icon: Icon, color }) => (
-						<a
+						<Link
 							key={type}
-							href={`/?type=${type}`}
-							className={cn(
-								"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
-								"sidebar-item-hover",
-							)}
+							to="/"
+							search={{ type }}
+							className="block"
+							aria-label={label}
 						>
-							<Icon className={cn("h-4 w-4", color)} />
-							<span>{label}</span>
-						</a>
+							{({ isActive }) => (
+								<div
+									className={cn(
+										"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
+										"sidebar-item-hover",
+										isActive && "sidebar-item-active",
+									)}
+									aria-current={isActive ? "page" : undefined}
+								>
+									<Icon className={cn("h-4 w-4", color)} aria-hidden="true" />
+									<span>{label}</span>
+								</div>
+							)}
+						</Link>
 					))}
 				</div>
 			</section>
@@ -88,32 +140,49 @@ export default function LeftSidebar() {
 				</h3>
 				<div className="space-y-1">
 					{placeholderTopics.map((topic) => (
-						<a
+						<Link
 							key={topic.id}
-							href={`/?tag=${topic.name}`}
-							className={cn(
-								"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
-								"sidebar-item-hover",
-							)}
+							to="/"
+							search={{ tag: topic.name }}
+							className="block"
+							aria-label={topic.name}
 						>
-							<span className="text-sm">{topic.icon}</span>
-							<span>{topic.name}</span>
-						</a>
+							{({ isActive }) => (
+								<div
+									className={cn(
+										"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
+										"sidebar-item-hover",
+										isActive && "sidebar-item-active",
+									)}
+									aria-current={isActive ? "page" : undefined}
+								>
+									<span className="text-sm" role="img" aria-label={topic.name}>
+										{topic.icon}
+									</span>
+									<span className="truncate">{topic.name}</span>
+								</div>
+							)}
+						</Link>
 					))}
 				</div>
 			</section>
 
 			<div className="px-2 py-3 border-t border-gray-200 dark:border-gray-800">
-				<a
-					href="/settings"
-					className={cn(
-						"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
-						"sidebar-item-hover",
+				<Link to="/settings" className="block" aria-label="设置">
+					{({ isActive }) => (
+						<div
+							className={cn(
+								"flex items-center gap-2 px-3 h-9 rounded text-sm font-medium",
+								"sidebar-item-hover",
+								isActive && "sidebar-item-active",
+							)}
+							aria-current={isActive ? "page" : undefined}
+						>
+							<Settings className="h-4 w-4" aria-hidden="true" />
+							<span>设置</span>
+						</div>
 					)}
-				>
-					<Settings className="h-4 w-4" />
-					<span>设置</span>
-				</a>
+				</Link>
 			</div>
 		</div>
 	);
