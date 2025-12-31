@@ -1,5 +1,5 @@
 import type { ApiResponse, Post, User } from "../types";
-import api, { STATIC_BASE_URL } from "./api";
+import api from "./api";
 
 export interface UpdateProfileRequest {
 	username?: string;
@@ -78,10 +78,8 @@ export const userService = {
 
 		if (response.data.success && response.data.data) {
 			const data = response.data.data;
-			return {
-				...data,
-				url: `${STATIC_BASE_URL}${data.url}`,
-			};
+			// 存储相对路径，显示时再添加 STATIC_BASE_URL
+			return data;
 		}
 		throw new Error(response.data.message || "Failed to upload file");
 	},

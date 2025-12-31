@@ -61,6 +61,8 @@ function HomePage() {
 				title: data.title || undefined,
 				content: data.content,
 				language: data.language || undefined,
+				coverImage: data.coverImage || undefined,
+				images: data.images && data.images.length > 0 ? data.images : undefined,
 				tags: data.tags.length > 0 ? data.tags : undefined,
 			});
 			setPublishOpen(false);

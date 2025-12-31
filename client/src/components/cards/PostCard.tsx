@@ -86,7 +86,9 @@ export default function PostCard({ post, className }: PostCardProps) {
 							coverImage={post.coverImage}
 						/>
 					)}
-					{post.type === "MOMENT" && <MomentContent content={post.content} />}
+					{post.type === "MOMENT" && (
+						<MomentContent content={post.content} images={post.images} />
+					)}
 				</div>
 
 				{post.tags && post.tags.length > 0 && (

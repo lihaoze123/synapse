@@ -7,6 +7,7 @@ export interface CreatePostRequest {
 	content: string;
 	language?: string;
 	coverImage?: string;
+	images?: string[];
 	tags?: string[];
 }
 

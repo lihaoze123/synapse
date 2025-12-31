@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { resolveStaticUrl } from "@/services/api";
 
 interface ArticleContentProps {
 	title: string;
@@ -29,7 +30,7 @@ export default function ArticleContent({
 				{coverImage && (
 					<div className="shrink-0">
 						<img
-							src={coverImage}
+							src={resolveStaticUrl(coverImage)}
 							alt={title}
 							className="h-20 w-28 rounded-lg object-cover ring-1 ring-border/20"
 						/>

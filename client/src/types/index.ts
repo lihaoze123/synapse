@@ -31,6 +31,7 @@ export interface Post {
 	language: string | null;
 	summary: string | null;
 	coverImage: string | null;
+	images: string[] | null;
 	user: User;
 	tags: Tag[];
 	createdAt: string;

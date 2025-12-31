@@ -26,6 +26,8 @@ export interface PublishData {
 	title?: string;
 	content: string;
 	language?: string;
+	coverImage?: string;
+	images?: string[];
 	tags: string[];
 }
 
@@ -75,6 +77,7 @@ export default function PublishModal({
 	);
 
 	const [momentContent, setMomentContent] = useState("");
+	const [momentImages, setMomentImages] = useState<string[]>([]);
 
 	const [snippetTitle, setSnippetTitle] = useState("");
 	const [snippetCode, setSnippetCode] = useState("");
@@ -82,6 +85,9 @@ export default function PublishModal({
 
 	const [articleTitle, setArticleTitle] = useState("");
 	const [articleContent, setArticleContent] = useState("");
+	const [articleCoverImage, setArticleCoverImage] = useState<
+		string | undefined
+	>(undefined);
 
 	useEffect(() => {
 		if (open && isEditMode && initialData) {
@@ -90,6 +96,7 @@ export default function PublishModal({
 			switch (initialData.type) {
 				case "MOMENT":
 					setMomentContent(initialData.content);
+					setMomentImages(initialData.images || []);
 					break;
 				case "SNIPPET":
 					setSnippetTitle(initialData.title || "");
@@ -99,26 +106,31 @@ export default function PublishModal({
 				case "ARTICLE":
 					setArticleTitle(initialData.title || "");
 					setArticleContent(initialData.content);
+					setArticleCoverImage(initialData.coverImage || undefined);
 					break;
 			}
 		} else if (open && !isEditMode) {
 			setMomentContent("");
+			setMomentImages([]);
 			setSnippetTitle("");
 			setSnippetCode("");
 			setSnippetLanguage("javascript");
 			setArticleTitle("");
 			setArticleContent("");
+			setArticleCoverImage(undefined);
 			setTags([]);
 		}
 	}, [open, isEditMode, initialData]);
 
 	const resetForm = () => {
 		setMomentContent("");
+		setMomentImages([]);
 		setSnippetTitle("");
 		setSnippetCode("");
 		setSnippetLanguage("javascript");
 		setArticleTitle("");
 		setArticleContent("");
+		setArticleCoverImage(undefined);
 		setTags([]);
 	};
 
@@ -132,7 +144,12 @@ export default function PublishModal({
 
 		switch (activeType) {
 			case "MOMENT":
-				data = { type: "MOMENT", content: momentContent, tags };
+				data = {
+					type: "MOMENT",
+					content: momentContent,
+					images: momentImages.length > 0 ? momentImages : undefined,
+					tags,
+				};
 				break;
 			case "SNIPPET":
 				data = {
@@ -148,6 +165,7 @@ export default function PublishModal({
 					type: "ARTICLE",
 					title: articleTitle,
 					content: articleContent,
+					coverImage: articleCoverImage,
 					tags,
 				};
 				break;
@@ -213,6 +231,8 @@ export default function PublishModal({
 							<MomentEditor
 								content={momentContent}
 								onChange={setMomentContent}
+								images={momentImages}
+								onImagesChange={setMomentImages}
 							/>
 						)}
 
@@ -233,6 +253,8 @@ export default function PublishModal({
 								onTitleChange={setArticleTitle}
 								content={articleContent}
 								onContentChange={setArticleContent}
+								coverImage={articleCoverImage}
+								onCoverImageChange={setArticleCoverImage}
 							/>
 						)}
 

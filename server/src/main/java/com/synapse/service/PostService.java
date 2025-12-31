@@ -1,5 +1,7 @@
 package com.synapse.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.dto.CreatePostRequest;
 import com.synapse.dto.PostDto;
 import com.synapse.dto.UpdatePostRequest;
@@ -11,6 +13,7 @@ import com.synapse.repository.PostRepository;
 import com.synapse.repository.TagRepository;
 import com.synapse.repository.UserRepository;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +28,18 @@ public class PostService {
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
+
+    private String convertImagesToJson(List<String> images) {
+        if (images == null || images.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(images);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+    }
 
     @Transactional(readOnly = true)
     public Page<PostDto> getPosts(String tag, PostType type, Pageable pageable) {
@@ -61,6 +76,7 @@ public class PostService {
                 .content(request.getContent())
                 .language(request.getLanguage())
                 .coverImage(request.getCoverImage())
+                .images(convertImagesToJson(request.getImages()))
                 .user(user)
                 .build();
 
@@ -139,6 +155,9 @@ public class PostService {
         }
         if (request.getCoverImage() != null) {
             post.setCoverImage(request.getCoverImage());
+        }
+        if (request.getImages() != null) {
+            post.setImages(convertImagesToJson(request.getImages()));
         }
 
         if (request.getTags() != null) {

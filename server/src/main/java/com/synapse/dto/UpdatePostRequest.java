@@ -20,6 +20,9 @@ public class UpdatePostRequest {
 
     private String coverImage;
 
+    @Size(max = 9, message = "Maximum 9 images allowed")
+    private List<String> images;
+
     @Size(max = 5, message = "Maximum 5 tags allowed")
     private List<String> tags;
 }

@@ -13,12 +13,14 @@ import Markdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "@/components/common";
+import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
 import PublishModal, {
 	type PublishData,
 } from "@/components/publish/PublishModal";
 import { Card } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useAuth, useDeletePost, usePost, useUpdatePost } from "@/hooks";
+import { resolveStaticUrl } from "@/services/api";
 import type { PostType } from "@/types";
 
 export const Route = createFileRoute("/posts/$id")({
@@ -48,6 +50,7 @@ function PostDetailPage() {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const [editError, setEditError] = useState("");
+	const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
 	const isAuthor = currentUser && post && currentUser.id === post.user.id;
 
@@ -89,7 +92,7 @@ function PostDetailPage() {
 				<div className="max-w-4xl mx-auto px-4 py-8">
 					<Link
 						to="/"
-						className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
+						className="mb-6 inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
 					>
 						<ArrowLeft className="h-4 w-4" />
 						返回首页
@@ -112,7 +115,7 @@ function PostDetailPage() {
 				<div className="max-w-4xl mx-auto px-4 py-8">
 					<Link
 						to="/"
-						className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
+						className="mb-6 inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
 					>
 						<ArrowLeft className="h-4 w-4" />
 						返回首页
@@ -132,10 +135,10 @@ function PostDetailPage() {
 
 	return (
 		<div className="min-h-screen bg-background">
-			<div className="max-w-4xl mx-auto px-4 py-8">
+			<div className="mx-auto max-w-4xl px-4 py-8">
 				<Link
 					to="/"
-					className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
+					className="mb-6 inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
 				>
 					<ArrowLeft className="h-4 w-4" />
 					返回首页
@@ -145,7 +148,7 @@ function PostDetailPage() {
 					{post.type === "ARTICLE" && post.coverImage && (
 						<div className="aspect-video w-full overflow-hidden">
 							<img
-								src={post.coverImage}
+								src={resolveStaticUrl(post.coverImage)}
 								alt={post.title || "文章封面"}
 								className="h-full w-full object-cover"
 							/>
@@ -153,8 +156,8 @@ function PostDetailPage() {
 					)}
 
 					<div className="p-6">
-						<div className="flex items-start gap-3 mb-4">
-							<div className="flex-1 flex items-center gap-3">
+						<div className="mb-4 flex items-start gap-3">
+							<div className="flex flex-1 items-center gap-3">
 								<div className="shrink-0">
 									{post.user.avatarUrl ? (
 										<img
@@ -163,13 +166,13 @@ function PostDetailPage() {
 											className="h-10 w-10 rounded-full object-cover"
 										/>
 									) : (
-										<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-medium">
 											{post.user.username.charAt(0).toUpperCase()}
 										</div>
 									)}
 								</div>
 
-								<div className="flex-1 min-w-0">
+								<div className="min-w-0 flex-1">
 									<div className="font-medium">{post.user.username}</div>
 									<div className="flex items-center gap-2 text-sm text-muted-foreground">
 										<TypeIcon className={`h-3.5 w-3.5 ${config.color}`} />
@@ -192,7 +195,7 @@ function PostDetailPage() {
 									<button
 										type="button"
 										onClick={handleEdit}
-										className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+										className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 									>
 										<Edit className="h-4 w-4" />
 										编辑
@@ -200,7 +203,7 @@ function PostDetailPage() {
 									<button
 										type="button"
 										onClick={() => setIsDeleteDialogOpen(true)}
-										className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+										className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
 									>
 										<Trash2 className="h-4 w-4" />
 										删除
@@ -210,12 +213,12 @@ function PostDetailPage() {
 						</div>
 
 						{post.title && (
-							<h1 className="text-2xl font-bold mb-4">{post.title}</h1>
+							<h1 className="mb-4 text-2xl font-bold">{post.title}</h1>
 						)}
 
 						<div className="mt-4">
 							{post.type === "SNIPPET" && (
-								<div className="rounded-lg overflow-hidden">
+								<div className="overflow-hidden rounded-lg">
 									<CodeBlock
 										code={post.content}
 										language={post.language || "text"}
@@ -225,7 +228,7 @@ function PostDetailPage() {
 							)}
 
 							{post.type === "ARTICLE" && (
-								<div className="prose prose-neutral dark:prose-invert max-w-none">
+								<div className="prose prose-neutral max-w-none dark:prose-invert">
 									<Markdown
 										remarkPlugins={[remarkGfm]}
 										rehypePlugins={[rehypeSanitize]}
@@ -255,18 +258,47 @@ function PostDetailPage() {
 							)}
 
 							{post.type === "MOMENT" && (
-								<p className="text-lg whitespace-pre-wrap">{post.content}</p>
+								<div className="space-y-4">
+									<p className="text-lg whitespace-pre-wrap">{post.content}</p>
+									{post.images && post.images.length > 0 && (
+										<div
+											className={`grid gap-1.5 max-w-[300px] ${
+												post.images.length === 1
+													? "grid-cols-1"
+													: post.images.length === 2
+														? "grid-cols-2"
+														: "grid-cols-3"
+											}`}
+										>
+											{post.images.map((url, index) => (
+												<button
+													key={url}
+													type="button"
+													className="relative overflow-hidden rounded-md bg-muted aspect-square cursor-pointer p-0 border-0"
+													onClick={() => setPreviewIndex(index)}
+												>
+													<img
+														src={resolveStaticUrl(url)}
+														alt={`图片 ${index + 1}`}
+														className="absolute inset-0 h-full w-full object-cover"
+														loading="lazy"
+													/>
+												</button>
+											))}
+										</div>
+									)}
+								</div>
 							)}
 						</div>
 
 						{post.tags.length > 0 && (
-							<div className="flex flex-wrap gap-2 mt-6 pt-6 border-t border-border">
+							<div className="mt-6 flex flex-wrap gap-2 border-t border-border pt-6">
 								{post.tags.map((tag) => (
 									<Link
 										key={tag.id}
 										to="/"
 										search={{ tag: tag.name }}
-										className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-secondary text-sm hover:bg-secondary/80 transition-colors"
+										className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-sm transition-colors hover:bg-secondary/80"
 									>
 										<span>{tag.icon || "#"}</span>
 										<span>{tag.name}</span>
@@ -298,6 +330,13 @@ function PostDetailPage() {
 				onConfirm={handleDeleteConfirm}
 				isConfirming={deletePost.isPending}
 			/>
+
+			<ImagePreviewModal
+				images={post.images || []}
+				open={previewIndex !== null}
+				initialIndex={previewIndex ?? 0}
+				onOpenChange={(open) => setPreviewIndex(open ? 0 : null)}
+			/>
 		</div>
 	);
 }
@@ -305,21 +344,21 @@ function PostDetailPage() {
 function PostDetailSkeleton() {
 	return (
 		<div className="min-h-screen bg-background">
-			<div className="max-w-4xl mx-auto px-4 py-8">
-				<div className="h-5 w-24 bg-secondary/50 rounded animate-pulse mb-6" />
+			<div className="mx-auto max-w-4xl px-4 py-8">
+				<div className="mb-6 h-5 w-24 animate-pulse rounded bg-secondary/50" />
 				<Card className="p-6">
-					<div className="flex items-center gap-3 mb-4">
-						<div className="h-10 w-10 rounded-full bg-secondary/50 animate-pulse" />
+					<div className="mb-4 flex items-center gap-3">
+						<div className="h-10 w-10 animate-pulse rounded-full bg-secondary/50" />
 						<div className="space-y-2">
-							<div className="h-4 w-24 bg-secondary/50 rounded animate-pulse" />
-							<div className="h-3 w-32 bg-secondary/50 rounded animate-pulse" />
+							<div className="h-4 w-24 animate-pulse rounded bg-secondary/50" />
+							<div className="h-3 w-32 animate-pulse rounded bg-secondary/50" />
 						</div>
 					</div>
-					<div className="h-8 w-3/4 bg-secondary/50 rounded animate-pulse mb-4" />
+					<div className="mb-4 h-8 w-3/4 animate-pulse rounded bg-secondary/50" />
 					<div className="space-y-3">
-						<div className="h-4 w-full bg-secondary/50 rounded animate-pulse" />
-						<div className="h-4 w-full bg-secondary/50 rounded animate-pulse" />
-						<div className="h-4 w-2/3 bg-secondary/50 rounded animate-pulse" />
+						<div className="h-4 w-full animate-pulse rounded bg-secondary/50" />
+						<div className="h-4 w-full animate-pulse rounded bg-secondary/50" />
+						<div className="h-4 w-2/3 animate-pulse rounded bg-secondary/50" />
 					</div>
 				</Card>
 			</div>

@@ -34,7 +34,8 @@ public class FileController {
 
         try {
             String filename = fileUtil.saveFile(file);
-            String url = "/" + filename;
+            // 返回相对路径，前端再统一补全前缀，避免重复前缀导致 404
+            String url = "/uploads/" + filename;
 
             return ResponseEntity.ok(ApiResponse.success(Map.of(
                     "filename", filename,

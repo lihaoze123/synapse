@@ -50,6 +50,9 @@ public class Post {
     @Column(name = "cover_image")
     private String coverImage;
 
+    @Column(columnDefinition = "JSON")
+    private String images;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

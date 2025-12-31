@@ -28,6 +28,11 @@ export default defineConfig(({ mode }) => {
   server: {
     proxy: {
       '/api': env.VITE_PROXY_TARGET || 'http://localhost:8080',
+      // 代理图片请求到后端
+      '^/uploads/.*\\.(jpg|jpeg|png|gif|webp)$': {
+        target: env.VITE_PROXY_TARGET || 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
 }

@@ -1,8 +1,11 @@
+import { ImageUploader } from "@/components/upload/ImageUploader";
 import { cn } from "@/lib/utils";
 
 interface MomentEditorProps {
 	content: string;
 	onChange: (content: string) => void;
+	images?: string[];
+	onImagesChange?: (images: string[]) => void;
 	maxLength?: number;
 	className?: string;
 }
@@ -10,11 +13,13 @@ interface MomentEditorProps {
 export default function MomentEditor({
 	content,
 	onChange,
+	images = [],
+	onImagesChange,
 	maxLength = 500,
 	className,
 }: MomentEditorProps) {
 	return (
-		<div className={cn("space-y-2", className)}>
+		<div className={cn("space-y-3", className)}>
 			<textarea
 				value={content}
 				onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
@@ -33,6 +38,19 @@ export default function MomentEditor({
 				>
 					{content.length}/{maxLength}
 				</span>
+			</div>
+
+			{/* Image attachments */}
+			<div className="space-y-1.5">
+				<span className="text-sm font-medium text-muted-foreground">
+					添加图片（最多9张）
+				</span>
+				<ImageUploader
+					mode="multiple"
+					maxFiles={9}
+					value={images}
+					onChange={onImagesChange}
+				/>
 			</div>
 		</div>
 	);

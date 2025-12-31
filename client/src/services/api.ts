@@ -1,7 +1,17 @@
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-export const STATIC_BASE_URL = import.meta.env.VITE_STATIC_BASE_URL || "";
+
+const STATIC_BASE_URL =
+	import.meta.env.VITE_STATIC_BASE_URL?.replace(/\/$/, "") || "";
+
+export function resolveStaticUrl(url: string): string {
+	if (!url) return url;
+	if (url.startsWith("http://") || url.startsWith("https://")) {
+		return url;
+	}
+	return STATIC_BASE_URL ? `${STATIC_BASE_URL}${url}` : url;
+}
 
 type AuthErrorHandler = () => void;
 
