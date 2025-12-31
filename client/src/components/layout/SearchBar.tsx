@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -11,23 +11,33 @@ const POST_TYPE_LABELS: Record<PostType | "all", string> = {
 	MOMENT: "动态",
 };
 
-interface SearchBarProps {
-	defaultKeyword?: string;
-	defaultType?: PostType | "all";
-}
-
-export function SearchBar({
-	defaultKeyword = "",
-	defaultType = "all",
-}: SearchBarProps) {
+export function SearchBar() {
 	const navigate = useNavigate();
-	const [keyword, setKeyword] = useState(defaultKeyword);
-	const [type, setType] = useState<PostType | "all">(defaultType);
+	const location = useLocation();
+	const [keyword, setKeyword] = useState("");
+	const [type, setType] = useState<PostType | "all">("all");
 	const [typeOpen, setTypeOpen] = useState(false);
 
+	const isSearchPage = location.pathname === "/search";
+	const searchParams = isSearchPage
+		? (location.search as { keyword?: string; type?: PostType })
+		: {};
+
 	useEffect(() => {
-		setKeyword(defaultKeyword);
-	}, [defaultKeyword]);
+		if (searchParams.keyword) {
+			setKeyword(searchParams.keyword);
+		} else if (!isSearchPage) {
+			setKeyword("");
+		}
+	}, [searchParams.keyword, isSearchPage]);
+
+	useEffect(() => {
+		if (searchParams.type) {
+			setType(searchParams.type);
+		} else {
+			setType("all");
+		}
+	}, [searchParams.type]);
 
 	const performSearch = useCallback(
 		(searchKeyword: string, searchType: PostType | "all") => {
@@ -35,9 +45,10 @@ export function SearchBar({
 
 			navigate({
 				to: "/search",
-				search: searchType === "all"
-					? { keyword: searchKeyword.trim() }
-					: { keyword: searchKeyword.trim(), type: searchType as PostType },
+				search:
+					searchType === "all"
+						? { keyword: searchKeyword.trim() }
+						: { keyword: searchKeyword.trim(), type: searchType as PostType },
 			});
 		},
 		[navigate],
