@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Code, FileText, MessageCircle } from "lucide-react";
 import { UserInfo } from "@/components/common";
+import { BookmarkButton } from "@/components/common/BookmarkButton";
 import FollowButton from "@/components/common/FollowButton";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks";
@@ -51,7 +52,7 @@ export default function PostCard({ post, className }: PostCardProps) {
 	return (
 		<Link to="/posts/$id" params={{ id: String(post.id) }} className="block">
 			<Card className={cn("p-4 cursor-pointer", className)}>
-				<div className="flex items-center justify-between mb-3">
+				<div className="flex items-start justify-between mb-3 gap-2">
 					<div className="flex items-center gap-2">
 						<UserInfo
 							userId={post.user.id}
@@ -64,16 +65,19 @@ export default function PostCard({ post, className }: PostCardProps) {
 							<FollowButton userId={post.user.id} size="sm" />
 						)}
 					</div>
-					<div
-						className={cn(
-							"flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium",
-							"bg-gray-100 dark:bg-gray-800",
-							config.color,
-						)}
-						title={config.label}
-					>
-						<TypeIcon className="h-3 w-3" />
-						<span className="hidden sm:inline">{config.label}</span>
+					<div className="flex items-center gap-2">
+						<BookmarkButton postId={post.id} size="sm" />
+						<div
+							className={cn(
+								"flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium",
+								"bg-gray-100 dark:bg-gray-800",
+								config.color,
+							)}
+							title={config.label}
+						>
+							<TypeIcon className="h-3 w-3" />
+							<span className="hidden sm:inline">{config.label}</span>
+						</div>
 					</div>
 				</div>
 

@@ -1,6 +1,6 @@
 import { Check, Copy } from "lucide-react";
-import { useState } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { useEffect, useState } from "react";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
 	oneDark,
 	oneLight,
@@ -60,6 +60,41 @@ const LANGUAGE_MAP: Record<string, string> = {
 	md: "markdown",
 };
 
+type LanguageModule = { default: unknown };
+
+const languageLoaders: Record<string, () => Promise<LanguageModule>> = {
+	bash: () => import("react-syntax-highlighter/dist/esm/languages/prism/bash"),
+	c: () => import("react-syntax-highlighter/dist/esm/languages/prism/c"),
+	cpp: () => import("react-syntax-highlighter/dist/esm/languages/prism/cpp"),
+	csharp: () =>
+		import("react-syntax-highlighter/dist/esm/languages/prism/csharp"),
+	css: () => import("react-syntax-highlighter/dist/esm/languages/prism/css"),
+	go: () => import("react-syntax-highlighter/dist/esm/languages/prism/go"),
+	html: () =>
+		import("react-syntax-highlighter/dist/esm/languages/prism/markup"),
+	java: () => import("react-syntax-highlighter/dist/esm/languages/prism/java"),
+	javascript: () =>
+		import("react-syntax-highlighter/dist/esm/languages/prism/javascript"),
+	json: () => import("react-syntax-highlighter/dist/esm/languages/prism/json"),
+	kotlin: () =>
+		import("react-syntax-highlighter/dist/esm/languages/prism/kotlin"),
+	markdown: () =>
+		import("react-syntax-highlighter/dist/esm/languages/prism/markdown"),
+	php: () => import("react-syntax-highlighter/dist/esm/languages/prism/php"),
+	python: () =>
+		import("react-syntax-highlighter/dist/esm/languages/prism/python"),
+	ruby: () => import("react-syntax-highlighter/dist/esm/languages/prism/ruby"),
+	rust: () => import("react-syntax-highlighter/dist/esm/languages/prism/rust"),
+	sql: () => import("react-syntax-highlighter/dist/esm/languages/prism/sql"),
+	swift: () =>
+		import("react-syntax-highlighter/dist/esm/languages/prism/swift"),
+	typescript: () =>
+		import("react-syntax-highlighter/dist/esm/languages/prism/typescript"),
+	yaml: () => import("react-syntax-highlighter/dist/esm/languages/prism/yaml"),
+};
+
+const registered = new Set<string>();
+
 export default function CodeBlock({
 	code,
 	language = "text",
@@ -68,6 +103,7 @@ export default function CodeBlock({
 	className,
 }: CodeBlockProps) {
 	const [copied, setCopied] = useState(false);
+	const [languageReady, setLanguageReady] = useState(false);
 
 	const handleCopy = async () => {
 		await navigator.clipboard.writeText(code);
@@ -80,6 +116,33 @@ export default function CodeBlock({
 
 	const highlightLanguage =
 		LANGUAGE_MAP[language.toLowerCase()] || language.toLowerCase();
+	const loader = languageLoaders[highlightLanguage];
+
+	useEffect(() => {
+		let mounted = true;
+		if (!loader || registered.has(highlightLanguage)) {
+			setLanguageReady(true);
+			return;
+		}
+
+		loader()
+			.then((module) => {
+				if (!mounted) return;
+				SyntaxHighlighter.registerLanguage(
+					highlightLanguage,
+					module.default as never,
+				);
+				registered.add(highlightLanguage);
+				setLanguageReady(true);
+			})
+			.catch(() => {
+				if (mounted) setLanguageReady(true);
+			});
+
+		return () => {
+			mounted = false;
+		};
+	}, [highlightLanguage, loader]);
 
 	const normalizedCode = code.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 	const lines = normalizedCode.split("\n");
@@ -125,20 +188,26 @@ export default function CodeBlock({
 				</div>
 
 				<div className="overflow-x-auto">
-					<SyntaxHighlighter
-						language={highlightLanguage}
-						style={isDark ? oneDark : oneLight}
-						showLineNumbers={showLineNumbers}
-						customStyle={customStyle}
-						codeTagProps={{
-							style: {
-								fontFamily:
-									'"JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, monospace',
-							},
-						}}
-					>
-						{String(displayCode).trim()}
-					</SyntaxHighlighter>
+					{languageReady ? (
+						<SyntaxHighlighter
+							language={highlightLanguage}
+							style={isDark ? oneDark : oneLight}
+							showLineNumbers={showLineNumbers}
+							customStyle={customStyle}
+							codeTagProps={{
+								style: {
+									fontFamily:
+										'"JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, monospace',
+								},
+							}}
+						>
+							{String(displayCode).trim()}
+						</SyntaxHighlighter>
+					) : (
+						<pre className="px-3 py-2 text-sm text-foreground/80">
+							{String(displayCode).trim()}
+						</pre>
+					)}
 				</div>
 
 				{truncated && (

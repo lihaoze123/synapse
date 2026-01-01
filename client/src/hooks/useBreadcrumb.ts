@@ -14,7 +14,9 @@ export function useBreadcrumb(): BreadcrumbItemType[] {
 	const breadcrumbItems: BreadcrumbItemType[] = [];
 
 	for (const match of matches) {
-		const staticData = match.staticData as { breadcrumb?: BreadcrumbConfig } | undefined;
+		const staticData = match.staticData as
+			| { breadcrumb?: BreadcrumbConfig }
+			| undefined;
 
 		if (staticData?.breadcrumb) {
 			const breadcrumb = staticData.breadcrumb;

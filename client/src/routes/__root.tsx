@@ -1,9 +1,9 @@
-import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import Devtools from "@/integrations/devtools";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 interface MyRouterContext {
@@ -15,18 +15,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 		<SidebarProvider>
 			<Outlet />
 			<Toaster />
-			<TanStackDevtools
-				config={{
-					position: "bottom-right",
-				}}
-				plugins={[
-					{
-						name: "Tanstack Router",
-						render: <TanStackRouterDevtoolsPanel />,
-					},
-					TanStackQueryDevtools,
-				]}
-			/>
+			<Suspense>
+				<Devtools plugins={[TanStackQueryDevtools]} />
+			</Suspense>
 		</SidebarProvider>
 	),
 });
