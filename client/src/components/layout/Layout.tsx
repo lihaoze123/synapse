@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { SidebarInset } from "@/components/ui/sidebar";
-import { TopBar } from "./TopBar";
 import { AppSidebar } from "./AppSidebar";
+import { TopBar } from "./TopBar";
 
 interface LayoutProps {
 	children: ReactNode;
@@ -22,11 +22,7 @@ export default function Layout({ children }: LayoutProps) {
 				<TopBar />
 
 				{/* biome-ignore lint/correctness/useUniqueElementIds: stable ID needed for skip link accessibility */}
-				<main
-					id="main-content"
-					tabIndex={-1}
-					className="p-4 sm:p-6 lg:p-8"
-				>
+				<main id="main-content" tabIndex={-1} className="p-4 sm:p-6 lg:p-8">
 					{children}
 				</main>
 			</SidebarInset>

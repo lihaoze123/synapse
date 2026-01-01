@@ -29,8 +29,8 @@ export const Route = createFileRoute("/posts/$id")({
 	component: PostDetailPage,
 	staticData: {
 		breadcrumb: {
-			label: (match) => {
-				const params = match.params as { id: string };
+			label: (match: { params: { id: string } }) => {
+				const params = match.params;
 				return `文章 #${params.id}`;
 			},
 		},

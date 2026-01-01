@@ -16,8 +16,8 @@ export const Route = createFileRoute("/users/$userId/")({
 	component: UserProfilePage,
 	staticData: {
 		breadcrumb: {
-			label: (match) => {
-				const params = match.params as { userId: string };
+			label: (match: { params: { userId: string } }) => {
+				const params = match.params;
 				return `用户 #${params.userId}`;
 			},
 		},
