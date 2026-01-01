@@ -44,21 +44,21 @@ This is a course project (课程设计). Implementation is in progress - basic C
 
 **Frontend (React + Vite):** `client/`
 ```bash
-npm install
+bun install
 
 # Development
-npm run dev      # Dev server at http://localhost:3000
+bun run dev      # Dev server at http://localhost:3000
 
 # Build
-npm run build    # Production build
+bun run build    # Production build
 
 # Test (Vitest)
-npm run test
+bun run test
 
 # Lint & Format (Biome)
-npm run lint     # Check for lint errors
-npm run format   # Check formatting
-npm run check    # Lint + format combined
+bun run lint     # Check for lint errors
+bun run format   # Check formatting
+bun run check    # Lint + format combined
 ```
 
 ## Build & Deployment
@@ -72,7 +72,7 @@ Run frontend and backend separately:
 cd server && ./mvnw spring-boot:run
 
 # Frontend (port 3000, proxies to backend)
-cd client && npm run dev
+cd client && bun run dev
 ```
 
 Frontend dev server uses Vite proxy to forward `/api` requests to `http://localhost:8080`.
@@ -82,7 +82,7 @@ Frontend dev server uses Vite proxy to forward `/api` requests to `http://localh
 **1. Build frontend with relative paths**
 ```bash
 cd client
-VITE_API_BASE_URL=/api VITE_STATIC_BASE_URL= npm run build
+VITE_API_BASE_URL=/api VITE_STATIC_BASE_URL= bun run build
 ```
 
 **2. Integrate with backend**
