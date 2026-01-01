@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder.Default;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,8 @@ public class PostDto {
     private UserDto user;
     private List<TagDto> tags;
     private LocalDateTime createdAt;
+    private int likeCount;
+    private UserStateDto userState;
 
     public static PostDto fromEntity(Post post) {
         List<String> imageList = Collections.emptyList();
@@ -64,6 +67,8 @@ public class PostDto {
                         .map(TagDto::fromEntity)
                         .toList())
                 .createdAt(post.getCreatedAt())
+                .likeCount(post.getLikeCount())
+                .userState(new UserStateDto(false)) // default not liked; controller/service may enrich
                 .build();
     }
 }

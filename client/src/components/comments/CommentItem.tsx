@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { LikeButton } from "@/components/common/LikeButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks";
@@ -167,7 +168,14 @@ export default function CommentItem({
 				)}
 
 				{!isEditing && !isDeleted && (
-					<div className="flex gap-3 mt-2">
+					<div className="flex gap-3 mt-2 items-center">
+						<LikeButton
+							targetId={comment.id}
+							type="comment"
+							initialLiked={comment.userState?.liked ?? false}
+							initialCount={comment.likeCount ?? 0}
+							size="sm"
+						/>
 						<button
 							type="button"
 							className="text-xs text-muted-foreground hover:text-foreground transition-colors"

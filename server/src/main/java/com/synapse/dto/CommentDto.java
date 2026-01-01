@@ -3,6 +3,7 @@ package com.synapse.dto;
 import com.synapse.entity.Comment;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
+import lombok.Builder.Default;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,8 @@ public class CommentDto {
 	private String replyToUsername;
 	private LocalDateTime createdAt;
 	private Boolean isDeleted;
+	private int likeCount;
+	private UserStateDto userState;
 
 	public static CommentDto fromEntity(Comment comment) {
 		CommentDto dto = CommentDto.builder()
@@ -34,6 +37,8 @@ public class CommentDto {
 				.floor(comment.getFloor())
 				.createdAt(comment.getCreatedAt())
 				.isDeleted(comment.getIsDeleted())
+				.likeCount(comment.getLikeCount())
+				.userState(new UserStateDto(false))
 				.build();
 
 		if (comment.getParent() != null) {
