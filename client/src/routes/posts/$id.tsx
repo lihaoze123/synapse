@@ -17,6 +17,7 @@ import { CodeBlock } from "@/components/common";
 import { BookmarkButton } from "@/components/common/BookmarkButton";
 import FollowButton from "@/components/common/FollowButton";
 import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
+import { LikeButton } from "@/components/common/LikeButton";
 import { Layout } from "@/components/layout";
 import PublishModal, {
 	type PublishData,
@@ -221,6 +222,13 @@ function PostDetailPage() {
 							</div>
 
 							<div className="hidden md:flex items-center gap-2 flex-shrink-0 sm:w-auto justify-end">
+								<LikeButton
+									targetId={post.id}
+									type="post"
+									initialLiked={post.userState?.liked ?? false}
+									initialCount={post.likeCount ?? 0}
+									size="md"
+								/>
 								<BookmarkButton postId={post.id} size="md" />
 								{isAuthor && (
 									<>
@@ -380,6 +388,8 @@ function PostDetailPage() {
 				<Suspense fallback={null}>
 					<MobileActionBar
 						postId={postId}
+						initialLiked={post.userState?.liked ?? false}
+						initialLikeCount={post.likeCount ?? 0}
 						isAuthor={!!isAuthor}
 						onEdit={handleEdit}
 						onDelete={() => setIsDeleteDialogOpen(true)}

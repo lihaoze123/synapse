@@ -5,6 +5,7 @@ import com.synapse.dto.CommentDto;
 import com.synapse.dto.CreateCommentRequest;
 import com.synapse.dto.UpdateCommentRequest;
 import com.synapse.service.CommentService;
+import com.synapse.service.CommentLikeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +32,25 @@ public class CommentController {
 	private static final int DEFAULT_PAGE_SIZE = 20;
 
 	private final CommentService commentService;
+	private final CommentLikeService commentLikeService;
 
 	@GetMapping("/posts/{postId}/comments")
 	public ResponseEntity<ApiResponse<Page<CommentDto>>> getPostComments(
 			@PathVariable Long postId,
 			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "20") int size) {
+			@RequestParam(defaultValue = "20") int size,
+			HttpServletRequest request) {
 		int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
 		Pageable pageable = PageRequest.of(page, safeSize);
 		try {
-			Page<CommentDto> comments = commentService.getPostComments(postId, pageable);
+			Long userId = (Long) request.getAttribute("userId");
+			Page<CommentDto> comments = commentService.getPostComments(postId, pageable)
+					.map(dto -> {
+						if (userId != null && dto.getUserState() != null) {
+							dto.getUserState().setLiked(commentLikeService.hasLikedComment(userId, dto.getId()));
+						}
+						return dto;
+					});
 			return ResponseEntity.ok(ApiResponse.success(comments));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
@@ -48,9 +58,13 @@ public class CommentController {
 	}
 
 	@GetMapping("/comments/{id}")
-	public ResponseEntity<ApiResponse<CommentDto>> getComment(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<CommentDto>> getComment(HttpServletRequest request, @PathVariable Long id) {
 		try {
 			CommentDto comment = commentService.getComment(id);
+			Long userId = (Long) request.getAttribute("userId");
+			if (userId != null && comment.getUserState() != null) {
+				comment.getUserState().setLiked(commentLikeService.hasLikedComment(userId, comment.getId()));
+			}
 			return ResponseEntity.ok(ApiResponse.success(comment));
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));

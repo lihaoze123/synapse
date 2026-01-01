@@ -6,6 +6,7 @@ import com.synapse.dto.PostDto;
 import com.synapse.dto.UpdatePostRequest;
 import com.synapse.entity.PostType;
 import com.synapse.service.PostService;
+import com.synapse.service.LikeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +32,25 @@ public class PostController {
     private static final int MAX_PAGE_SIZE = 50;
 
     private final PostService postService;
+    private final LikeService likeService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<PostDto>>> getPosts(
             @RequestParam(required = false) String tag,
             @RequestParam(required = false) PostType type,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
         int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, safeSize);
-        Page<PostDto> posts = postService.getPosts(tag, type, pageable);
+        Long userId = (Long) request.getAttribute("userId");
+        Page<PostDto> posts = postService.getPosts(tag, type, pageable)
+                .map(dto -> {
+                    if (userId != null && dto.getUserState() != null) {
+                        dto.getUserState().setLiked(likeService.hasLikedPost(userId, dto.getId()));
+                    }
+                    return dto;
+                });
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
@@ -51,7 +61,8 @@ public class PostController {
             @RequestParam(required = false) java.util.List<String> tags,
             @RequestParam(required = false) PostType type,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
         int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, safeSize);
         java.util.LinkedHashSet<String> merged = new java.util.LinkedHashSet<>();
@@ -59,14 +70,25 @@ public class PostController {
         if (tag != null && !tag.trim().isEmpty()) merged.add(tag.trim());
         java.util.List<String> finalTags = merged.isEmpty() ? null : new java.util.ArrayList<>(merged);
 
-        Page<PostDto> posts = postService.searchPosts(keyword, finalTags, type, pageable);
+        Long userId = (Long) request.getAttribute("userId");
+        Page<PostDto> posts = postService.searchPosts(keyword, finalTags, type, pageable)
+                .map(dto -> {
+                    if (userId != null && dto.getUserState() != null) {
+                        dto.getUserState().setLiked(likeService.hasLikedPost(userId, dto.getId()));
+                    }
+                    return dto;
+                });
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PostDto>> getPost(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<PostDto>> getPost(HttpServletRequest request, @PathVariable Long id) {
         try {
             PostDto post = postService.getPost(id);
+            Long userId = (Long) request.getAttribute("userId");
+            if (userId != null && post.getUserState() != null) {
+                post.getUserState().setLiked(likeService.hasLikedPost(userId, post.getId()));
+            }
             return ResponseEntity.ok(ApiResponse.success(post));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));

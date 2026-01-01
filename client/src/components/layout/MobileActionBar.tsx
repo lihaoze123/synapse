@@ -1,12 +1,7 @@
-import {
-	ArrowUp,
-	Bookmark,
-	MessageCircle,
-	MoreVertical,
-	Share2,
-} from "lucide-react";
+import { ArrowUp, Bookmark, MoreVertical, Share2 } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { LikeButton } from "@/components/common/LikeButton";
 import { Menu, MenuItem, MenuPopup, MenuTrigger } from "@/components/ui/menu";
 import { useAuth } from "@/hooks";
 import {
@@ -21,6 +16,8 @@ interface MobileActionBarProps {
 	isAuthor?: boolean;
 	onEdit?: () => void;
 	onDelete?: () => void;
+	initialLiked?: boolean;
+	initialLikeCount?: number;
 }
 
 // A lightweight bottom action bar for mobile: Bookmark, Comment, Share.
@@ -30,6 +27,8 @@ export function MobileActionBar({
 	isAuthor = false,
 	onEdit,
 	onDelete,
+	initialLiked = false,
+	initialLikeCount = 0,
 }: MobileActionBarProps) {
 	const { user } = useAuth();
 	const isLoggedIn = Boolean(user);
@@ -49,13 +48,6 @@ export function MobileActionBar({
 			return;
 		}
 		toggle.mutate(isBookmarked);
-	};
-
-	const onComment = () => {
-		const el = document.getElementById("comments");
-		if (el) {
-			el.scrollIntoView({ behavior: "smooth", block: "start" });
-		}
 	};
 
 	const onShare = async () => {
@@ -85,6 +77,14 @@ export function MobileActionBar({
 			}}
 		>
 			<div className="flex flex-col items-center gap-3">
+				<LikeButton
+					targetId={postId}
+					type="post"
+					initialLiked={initialLiked}
+					initialCount={initialLikeCount}
+					size="md"
+					appearance="fab"
+				/>
 				<button
 					type="button"
 					onClick={onBookmark}
@@ -106,14 +106,6 @@ export function MobileActionBar({
 							{displayCount}
 						</span>
 					)}
-				</button>
-				<button
-					type="button"
-					onClick={onComment}
-					aria-label="评论"
-					className="h-11 w-11 rounded-full border flex items-center justify-center shadow-sm border-gray-300 bg-white text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-				>
-					<MessageCircle className="h-5 w-5" />
 				</button>
 				<button
 					type="button"

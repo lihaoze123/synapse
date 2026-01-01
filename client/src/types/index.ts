@@ -43,6 +43,10 @@ export interface Post {
 	user: User;
 	tags: Tag[];
 	createdAt: string;
+	likeCount: number;
+	userState?: {
+		liked: boolean;
+	};
 }
 
 export interface Comment {
@@ -56,6 +60,10 @@ export interface Comment {
 	replyToUsername?: string;
 	createdAt: string;
 	isDeleted: boolean | null;
+	likeCount: number;
+	userState?: {
+		liked: boolean;
+	};
 }
 
 export interface Bookmark {

@@ -3,6 +3,7 @@ import { Code, FileText, MessageCircle } from "lucide-react";
 import { UserInfo } from "@/components/common";
 import { BookmarkButton } from "@/components/common/BookmarkButton";
 import FollowButton from "@/components/common/FollowButton";
+import { LikeButton } from "@/components/common/LikeButton";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,13 @@ export default function PostCard({ post, className }: PostCardProps) {
 						)}
 					</div>
 					<div className="flex items-center gap-2 mt-2 sm:mt-0">
+						<LikeButton
+							targetId={post.id}
+							type="post"
+							initialLiked={post.userState?.liked ?? false}
+							initialCount={post.likeCount ?? 0}
+							size="sm"
+						/>
 						<BookmarkButton postId={post.id} size="sm" />
 						<div
 							className={cn(

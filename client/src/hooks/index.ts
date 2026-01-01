@@ -19,6 +19,7 @@ export {
 	useIsFollowing,
 	useUnfollowUser,
 } from "./useFollows";
+export { useLikeComment, useLikePost } from "./useLikes";
 export {
 	useCreatePost,
 	useDeletePost,
