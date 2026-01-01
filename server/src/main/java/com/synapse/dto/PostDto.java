@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.entity.Post;
 import com.synapse.entity.PostType;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -31,7 +31,7 @@ public class PostDto {
     private List<String> images;
     private UserDto user;
     private List<TagDto> tags;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     private int likeCount;
     private UserStateDto userState;
 
