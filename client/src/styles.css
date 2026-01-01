@@ -160,6 +160,8 @@ code {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex: 1 1 auto;
+  min-width: 0;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -167,7 +169,7 @@ code {
   position: relative;
   display: flex;
   align-items: center;
-  width: 200px;
+  width: 100%;
   height: 36px;
   padding: 0 10px;
   background: linear-gradient(to bottom, #FAFAFA, #F5F5F5);
@@ -180,13 +182,22 @@ code {
 }
 
 .search-bar-container[data-focused="true"] .search-bar-inner {
-  width: 280px;
   border-color: hsl(35, 90%, 48%);
   box-shadow:
     0 0 0 3px hsla(35, 90%, 48%, 0.12),
     0 2px 8px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   background: linear-gradient(to bottom, #FFFFFF, #FAFAFA);
+}
+
+/* On >=640px, compact width with expansion on focus to improve ergonomics */
+@media (min-width: 640px) {
+  .search-bar-inner {
+    width: 240px;
+  }
+  .search-bar-container[data-focused="true"] .search-bar-inner {
+    width: 320px;
+  }
 }
 
 .search-bar-icon {
@@ -348,3 +359,7 @@ code {
   background: #252525;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
+
+/* Safe-area helpers for iOS devices with notches */
+.sa-pb { padding-bottom: env(safe-area-inset-bottom); }
+.sa-pt { padding-top: env(safe-area-inset-top); }

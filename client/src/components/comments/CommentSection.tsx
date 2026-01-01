@@ -131,6 +131,8 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 				</div>
 			)}
 
+			{/* Mobile bottom action bar handles comment entry; no floating composer needed */}
+
 			{/* Comments List */}
 			<div className="space-y-4">
 				{isError ? (

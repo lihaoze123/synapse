@@ -171,7 +171,7 @@ export default function CodeBlock({
 					<button
 						type="button"
 						onClick={handleCopy}
-						className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-black/60 dark:text-white/60 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white"
+						className="flex items-center gap-1 rounded px-2 py-1 text-[11px] sm:text-xs text-black/60 dark:text-white/60 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white min-h-[32px]"
 					>
 						{copied ? (
 							<>
