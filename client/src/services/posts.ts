@@ -23,6 +23,7 @@ export interface PostsPage {
 
 export interface GetPostsParams {
 	tag?: string;
+	tags?: string[];
 	type?: PostType;
 	page?: number;
 	size?: number;
@@ -83,15 +84,18 @@ export const postsService = {
 		}
 	},
 
-	async searchPosts(
-		params: GetPostsParams & { keyword: string },
-	): Promise<PostsPage> {
-		const { keyword, tag, type, page = 0, size = 10 } = params;
+	async searchPosts(params: GetPostsParams & { keyword: string }): Promise<PostsPage> {
+		const { keyword, tag, tags, type, page = 0, size = 10 } = params;
 		const searchParams = new URLSearchParams();
 
 		searchParams.append("keyword", keyword);
 		if (type) searchParams.append("type", type);
 		if (tag) searchParams.append("tag", tag);
+		if (tags && tags.length > 0) {
+			for (const t of tags) {
+				if (t) searchParams.append("tags", t);
+			}
+		}
 		searchParams.append("page", String(page));
 		searchParams.append("size", String(size));
 

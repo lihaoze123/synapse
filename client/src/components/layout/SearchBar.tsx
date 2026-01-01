@@ -1,7 +1,14 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Search, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PostType } from "@/types";
+import { useAllTags } from "@/hooks/useTags";
+import {
+	Menu,
+	MenuCheckboxItem,
+	MenuPopup,
+	MenuTrigger,
+} from "@/components/ui/menu";
 
 const POST_TYPE_OPTIONS = ["all", "SNIPPET", "ARTICLE", "MOMENT"] as const;
 type FilterType = (typeof POST_TYPE_OPTIONS)[number];
@@ -21,35 +28,51 @@ export function SearchBar() {
 	const location = useLocation();
 	const [keyword, setKeyword] = useState("");
 	const [type, setType] = useState<FilterType>("all");
+	const [tags, setTags] = useState<string[]>([]);
 	const [isFocused, setIsFocused] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const containerRef = useRef<HTMLFormElement>(null);
+	const { data: allTags } = useAllTags(true);
 
 	const isSearchPage = location.pathname === "/search";
 	const urlParams = isSearchPage
-		? (location.search as { keyword?: string; type?: PostType })
+		? (location.search as {
+				keyword?: string;
+				type?: PostType;
+				tags?: string[] | string;
+		  })
 		: null;
 
 	useEffect(() => {
 		if (urlParams) {
 			setKeyword(urlParams.keyword ?? "");
 			setType(urlParams.type ?? "all");
+			let parsed: string[] = [];
+			if (Array.isArray(urlParams.tags)) {
+				parsed = urlParams.tags.filter(
+					(t): t is string => typeof t === "string" && t.trim().length > 0,
+				);
+			} else if (typeof urlParams.tags === "string" && urlParams.tags.trim()) {
+				parsed = urlParams.tags.split(",").map((t) => t.trim()).filter(Boolean);
+			}
+			setTags(parsed);
 		} else {
 			setKeyword("");
 			setType("all");
+			setTags([]);
 		}
 	}, [urlParams]);
 
 	const handleSearch = useCallback(() => {
-		if (!keyword.trim()) return;
 		navigate({
 			to: "/search",
 			search: {
 				keyword: keyword.trim(),
 				...(type !== "all" && { type }),
+				...(tags.length > 0 && { tags }),
 			},
 		});
-	}, [keyword, type, navigate]);
+	}, [keyword, type, tags, navigate]);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -59,6 +82,7 @@ export function SearchBar() {
 	const handleClear = () => {
 		setKeyword("");
 		setType("all");
+		setTags([]);
 		inputRef.current?.focus();
 		if (isSearchPage) {
 			navigate({ to: "/" });
@@ -84,6 +108,33 @@ export function SearchBar() {
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
 	}, [isFocused]);
+
+	useEffect(() => {
+		if (!isSearchPage) return;
+		const hasCriteria =
+			keyword.trim().length > 0 || type !== "all" || tags.length > 0;
+		if (!hasCriteria) return;
+		const id = setTimeout(() => {
+			navigate({
+				to: "/search",
+				replace: true,
+				search: {
+					keyword: keyword.trim(),
+					...(type !== "all" && { type }),
+					...(tags.length > 0 && { tags }),
+				},
+			});
+		}, 400);
+		return () => clearTimeout(id);
+	}, [isSearchPage, keyword, type, tags, navigate]);
+
+	const sortedTags = useMemo(() => {
+		return (allTags ?? []).slice().sort((a, b) => a.name.localeCompare(b.name));
+	}, [allTags]);
+
+	const toggleTag = (name: string) => {
+		setTags((prev) => (prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]));
+	};
 
 	return (
 		<form
@@ -121,6 +172,7 @@ export function SearchBar() {
 						<X strokeWidth={2.5} />
 					</button>
 				)}
+
 			</div>
 
 			<div className="search-bar-filters">
@@ -136,6 +188,47 @@ export function SearchBar() {
 						{POST_TYPE_CONFIG[typeOption].shortLabel}
 					</button>
 				))}
+				<Menu>
+					<MenuTrigger
+						className="search-bar-filter-chip"
+						aria-label="选择标签"
+						aria-haspopup="menu"
+						type="button"
+					>
+						{tags.length ? `标签(${tags.length})` : "标签"}
+					</MenuTrigger>
+					<MenuPopup align="start" sideOffset={6}>
+						<div className="max-h-64 overflow-y-auto">
+							{sortedTags.map((t) => (
+								<MenuCheckboxItem
+									key={t.id}
+									checked={tags.includes(t.name)}
+									onCheckedChange={() => toggleTag(t.name)}
+									onSelect={(e) => {
+										// Keep menu open while multi-selecting
+										e.preventDefault();
+									}}
+								>
+									{t.name}
+								</MenuCheckboxItem>
+							))}
+						</div>
+					</MenuPopup>
+				</Menu>
+				{tags.length > 0 && (
+					<button
+						type="button"
+						className="search-bar-filter-chip"
+						aria-label="清除全部标签"
+						onClick={() => setTags([])}
+						title="清除全部标签"
+					>
+						清除标签
+						<span aria-hidden="true" style={{ marginLeft: 6, display: "inline-flex" }}>
+							<X width={12} height={12} />
+						</span>
+					</button>
+				)}
 			</div>
 		</form>
 	);

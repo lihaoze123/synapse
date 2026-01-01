@@ -8,6 +8,7 @@ import type { PostType } from "@/types";
 interface SearchParams {
 	keyword: string;
 	type?: PostType;
+	tags?: string[];
 }
 
 export const Route = createFileRoute("/search")({
@@ -19,7 +20,13 @@ export const Route = createFileRoute("/search")({
 			["SNIPPET", "ARTICLE", "MOMENT"].includes(search.type)
 				? (search.type as PostType)
 				: undefined;
-		return { keyword, type };
+		let tags: string[] | undefined;
+		if (Array.isArray(search.tags)) {
+			tags = search.tags.filter((t): t is string => typeof t === "string" && t.trim().length > 0);
+		} else if (typeof search.tags === "string" && search.tags.trim().length > 0) {
+			tags = search.tags.split(",").map((t) => t.trim()).filter(Boolean);
+		}
+		return { keyword, type, tags };
 	},
 	staticData: {
 		breadcrumb: {
@@ -41,6 +48,7 @@ function SearchPage() {
 	} = useSearchPosts({
 		keyword: search.keyword,
 		type: search.type,
+		tags: search.tags,
 	});
 
 	const posts = useMemo(() => {
@@ -55,9 +63,13 @@ function SearchPage() {
 		};
 
 		if (search.type) {
-			return `未找到包含 "${search.keyword}" 的 ${typeLabels[search.type]}`;
+			return `未找到包含 "${search.keyword}" 的 ${typeLabels[search.type]}${
+				search.tags?.length ? `（标签: ${search.tags.join(", ")}）` : ""
+			}`;
 		}
-		return `未找到包含 "${search.keyword}" 的内容`;
+		return `未找到包含 "${search.keyword}" 的内容${
+			search.tags?.length ? `（标签: ${search.tags.join(", ")}）` : ""
+		}`;
 	};
 
 	return (
@@ -74,6 +86,17 @@ function SearchPage() {
 								{search.type === "SNIPPET" && "代码片段"}
 								{search.type === "ARTICLE" && "文章"}
 								{search.type === "MOMENT" && "动态"}
+							</span>
+						)}
+						{search.tags && search.tags.length > 0 &&
+							search.tags.slice(0, 3).map((t) => (
+								<span key={t} className="px-2 py-0.5 bg-secondary rounded-full">
+									标签: {t}
+								</span>
+							))}
+						{search.tags && search.tags.length > 3 && (
+							<span className="px-2 py-0.5 bg-secondary rounded-full">
+								+{search.tags.length - 3}
 							</span>
 						)}
 					</div>
