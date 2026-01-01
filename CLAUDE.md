@@ -117,9 +117,9 @@ java -jar target/synapse-0.0.1-SNAPSHOT.jar
 ```
 com.synapse/
 ├── config/           # CORS, StaticResourceConfig
-├── controller/       # AuthController, PostController, TagController, CommentController, BookmarkController, FollowController, UserController, FileController
+├── controller/       # AuthController, PostController, TagController, CommentController, CommentLikeController, BookmarkController, FollowController, LikeController, UserController, FileController
 ├── dto/              # Request/Response DTOs (ApiResponse, PostDto, CommentDto, etc.)
-├── entity/           # User, Post, Tag, Comment, Bookmark, Follow (JPA Entities)
+├── entity/           # User, Post, Tag, Comment, CommentLike, Bookmark, Follow, Like (JPA Entities)
 ├── repository/       # JPA Repository interfaces
 ├── service/          # Business logic
 └── utils/            # JWTUtil, FileUtil
@@ -145,15 +145,17 @@ src/
 └── utils/
 ```
 
-### Database Schema (7 tables)
+### Database Schema (9 tables)
 
 - **Users**: id, username, password (encrypted), avatar_url
 - **Posts**: id, type (SNIPPET/ARTICLE/MOMENT), title, content, language, summary, cover_image, user_id, created_at
 - **Tags**: id, name, icon
 - **Post_Tags**: post_id, tag_id (junction table)
 - **Comments**: id, post_id, user_id, content, created_at, updated_at
+- **CommentLikes**: id, user_id, comment_id, created_at
 - **Bookmarks**: id, user_id, post_id, created_at
 - **Follows**: follower_id, following_id, created_at
+- **Likes**: id, user_id, post_id, created_at
 
 ### Core API Endpoints
 ```
@@ -175,6 +177,10 @@ GET  /api/comments/{id}            # Get single comment
 POST /api/posts/{postId}/comments  # Create comment
 PUT  /api/comments/{id}            # Update comment (owner only)
 DELETE /api/comments/{id}          # Delete comment (owner only)
+
+# Likes
+POST /api/likes/posts/{postId}     # Toggle like on post (like/unlike)
+POST /api/comment-likes/{commentId} # Toggle like on comment (like/unlike)
 
 # Bookmarks
 GET  /api/bookmarks                # Get user bookmarks (paginated)
@@ -213,7 +219,8 @@ Frontend dynamically renders cards based on `post.type`:
 - `MOMENT`: Large text, no title, Twitter-style
 
 ### Social Features
-- **Comments**: Nested under posts, owner can edit/delete their comments
+- **Comments**: Nested under posts, owner can edit/delete their comments, like/unlike comments
+- **Likes**: Toggle like on posts and comments, real-time like count
 - **Bookmarks**: Toggle bookmark on posts, separate bookmarks page
 - **Follows**: Follow/unfollow users, view followers/following lists with stats
 - **User Profiles**: Public profile pages with user info and posts

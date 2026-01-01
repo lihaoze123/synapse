@@ -179,19 +179,19 @@ switch (post.type) {
 ### 环境要求
 
 > - **Node.js 18+**
-> - **npm** 或 **pnpm**
+> - **bun** (推荐) 或 npm
 
 ### 安装依赖
 
 ```bash
 cd client
-npm install
+bun install
 ```
 
 ### 开发模式
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 访问 http://localhost:3000
@@ -199,13 +199,13 @@ npm run dev
 ### 构建生产版本
 
 ```bash
-npm run build
+bun run build
 ```
 
 ### 预览生产构建
 
 ```bash
-npm run preview
+bun run preview
 ```
 
 ---
@@ -214,13 +214,13 @@ npm run preview
 
 | 命令 | 说明 |
 |:-----|:-----|
-| `npm run dev` | 🚀 启动开发服务器（端口 3000） |
-| `npm run build` | 📦 构建生产版本 |
-| `npm run preview` | 👁️ 预览生产构建 |
-| `npm run test` | 🧪 运行测试 |
-| `npm run lint` | 🔍 代码规范检查 |
-| `npm run format` | ✨ 代码格式化检查 |
-| `npm run check` | ✔️ 规范 + 格式检查 |
+| `bun run dev` | 🚀 启动开发服务器（端口 3000） |
+| `bun run build` | 📦 构建生产版本 |
+| `bun run preview` | 👁️ 预览生产构建 |
+| `bun run test` | 🧪 运行测试 |
+| `bun run lint` | 🔍 代码规范检查 |
+| `bun run format` | ✨ 代码格式化检查 |
+| `bun run check` | ✔️ 规范 + 格式检查 |
 
 ---
 
@@ -345,13 +345,13 @@ className={cn("base-class", isActive && "active-class")}
 
 ```bash
 # 检查代码规范
-npm run lint
+bun run lint
 
 # 格式化代码
-npm run format -- --write .
+bun run format -- --write .
 
 # 一次性检查并修复
-npm run check -- --write .
+bun run check -- --write .
 ```
 
 ---

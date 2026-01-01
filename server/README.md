@@ -24,6 +24,10 @@ Synapse 后端基于 **Spring Boot** 构建，提供完整的 RESTful API 支持
 - 🔐 **JWT 认证** - 无状态 Token 认证机制
 - 📝 **多态内容** - 支持 SNIPPET / ARTICLE / MOMENT 三种帖子类型
 - 🏷️ **标签系统** - 灵活的话题分类和聚合
+- 👍 **点赞功能** - 帖子和评论点赞
+- 💬 **评论系统** - 帖子评论，支持编辑/删除
+- 🔖 **书签收藏** - 收藏帖子功能
+- 👥 **关注系统** - 用户关注/粉丝
 - 📤 **文件上传** - 本地存储，UUID 命名
 - 🔍 **全文搜索** - 支持关键词搜索和类型筛选
 - 📄 **分页查询** - 高效的数据分页加载
@@ -58,8 +62,14 @@ com.synapse/
 ├── 📂 controller/             # 🎮 控制器层
 │   ├── AuthController.java   # 🔐 认证接口
 │   ├── PostController.java   # 📝 帖子接口
+│   ├── CommentController.java    # 💬 评论接口
+│   ├── LikeController.java    # 👍 帖子点赞接口
+│   ├── CommentLikeController.java    # 👍 评论点赞接口
+│   ├── BookmarkController.java    # 🔖 书签接口
+│   ├── FollowController.java    # 👥 关注接口
 │   ├── TagController.java    # 🏷️ 标签接口
-│   └── UserController.java   # 👤 用户接口
+│   ├── UserController.java   # 👤 用户接口
+│   └── FileController.java   # 📤 文件上传接口
 │
 ├── 📂 dto/                    # 📦 数据传输对象
 │   ├── request/              # ← 请求 DTO
@@ -68,6 +78,11 @@ com.synapse/
 ├── 📂 entity/                 # 🗄️ JPA 实体
 │   ├── User.java             # 👤 用户实体
 │   ├── Post.java             # 📄 帖子实体
+│   ├── Comment.java          # 💬 评论实体
+│   ├── CommentLike.java      # 👍 评论点赞实体
+│   ├── Like.java             # 👍 帖子点赞实体
+│   ├── Bookmark.java         # 🔖 书签实体
+│   ├── Follow.java           # 👥 关注实体
 │   ├── Tag.java              # 🏷️ 标签实体
 │   └── PostType.java         # 📋 帖子类型枚举
 │
@@ -159,6 +174,75 @@ com.synapse/
 
 </details>
 
+<details>
+<summary><b>💬 comments - 评论表</b></summary>
+
+| 字段 | 类型 | 约束 | 说明 |
+|:-----|:-----|:-----|:-----|
+| id | BIGINT | PK | 主键（自增） |
+| post_id | BIGINT | FK | 帖子 ID |
+| user_id | BIGINT | FK | 评论者 ID |
+| content | TEXT | NOT NULL | 评论内容 |
+| created_at | DATETIME | | 创建时间 |
+| updated_at | DATETIME | | 更新时间 |
+
+</details>
+
+<details>
+<summary><b>👍 likes - 帖子点赞表</b></summary>
+
+| 字段 | 类型 | 约束 | 说明 |
+|:-----|:-----|:-----|:-----|
+| id | BIGINT | PK | 主键（自增） |
+| user_id | BIGINT | FK | 用户 ID |
+| post_id | BIGINT | FK | 帖子 ID |
+| created_at | DATETIME | | 创建时间 |
+
+**唯一约束**: (user_id, post_id)
+
+</details>
+
+<details>
+<summary><b>👍 comment_likes - 评论点赞表</b></summary>
+
+| 字段 | 类型 | 约束 | 说明 |
+|:-----|:-----|:-----|:-----|
+| id | BIGINT | PK | 主键（自增） |
+| user_id | BIGINT | FK | 用户 ID |
+| comment_id | BIGINT | FK | 评论 ID |
+| created_at | DATETIME | | 创建时间 |
+
+**唯一约束**: (user_id, comment_id)
+
+</details>
+
+<details>
+<summary><b>🔖 bookmarks - 书签表</b></summary>
+
+| 字段 | 类型 | 约束 | 说明 |
+|:-----|:-----|:-----|:-----|
+| id | BIGINT | PK | 主键（自增） |
+| user_id | BIGINT | FK | 用户 ID |
+| post_id | BIGINT | FK | 帖子 ID |
+| created_at | DATETIME | | 创建时间 |
+
+**唯一约束**: (user_id, post_id)
+
+</details>
+
+<details>
+<summary><b>👥 follows - 关注表</b></summary>
+
+| 字段 | 类型 | 约束 | 说明 |
+|:-----|:-----|:-----|:-----|
+| follower_id | BIGINT | FK | 关注者 ID |
+| following_id | BIGINT | FK | 被关注者 ID |
+| created_at | DATETIME | | 创建时间 |
+
+**唯一约束**: (follower_id, following_id)
+
+</details>
+
 ---
 
 ## 🔌 API 接口
@@ -191,6 +275,76 @@ com.synapse/
 GET /api/posts?tag=Java&type=SNIPPET&page=0&size=20
 GET /api/posts/search?keyword=Spring&type=ARTICLE
 ```
+
+</details>
+
+<details>
+<summary><b>💬 评论接口 /api/comments</b></summary>
+
+| 方法 | 路径 | 说明 | 认证 |
+|:-----|:-----|:-----|:-----|
+| GET | `/api/posts/{postId}/comments` | 获取帖子评论列表（分页） | ❌ |
+| GET | `/api/comments/{id}` | 获取单条评论详情 | ❌ |
+| POST | `/api/posts/{postId}/comments` | 发表评论 | ✅ |
+| PUT | `/api/comments/{id}` | 更新评论（仅作者） | ✅ |
+| DELETE | `/api/comments/{id}` | 删除评论（仅作者） | ✅ |
+
+</details>
+
+<details>
+<summary><b>👍 点赞接口 /api/likes</b></summary>
+
+| 方法 | 路径 | 说明 | 认证 |
+|:-----|:-----|:-----|:-----|
+| POST | `/api/likes/posts/{postId}` | 点赞/取消点赞帖子 | ✅ |
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "message": "liked",
+  "data": {
+    "liked": true,
+    "count": 42
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>👍 评论点赞接口 /api/comment-likes</b></summary>
+
+| 方法 | 路径 | 说明 | 认证 |
+|:-----|:-----|:-----|:-----|
+| POST | `/api/comment-likes/{commentId}` | 点赞/取消点赞评论 | ✅ |
+
+</details>
+
+<details>
+<summary><b>🔖 书签接口 /api/bookmarks</b></summary>
+
+| 方法 | 路径 | 说明 | 认证 |
+|:-----|:-----|:-----|:-----|
+| GET | `/api/bookmarks` | 获取书签列表（分页） | ✅ |
+| GET | `/api/bookmarks/posts/{postId}` | 检查帖子是否已收藏 | ✅ |
+| GET | `/api/bookmarks/posts/{postId}/count` | 获取帖子收藏数 | ❌ |
+| POST | `/api/bookmarks/posts/{postId}` | 添加书签 | ✅ |
+| DELETE | `/api/bookmarks/posts/{postId}` | 移除书签 | ✅ |
+
+</details>
+
+<details>
+<summary><b>👥 关注接口 /api/follows</b></summary>
+
+| 方法 | 路径 | 说明 | 认证 |
+|:-----|:-----|:-----|:-----|
+| GET | `/api/follows/following` | 获取关注列表（分页） | ✅ |
+| GET | `/api/follows/followers` | 获取粉丝列表（分页） | ✅ |
+| GET | `/api/follows/check/{userId}` | 检查是否关注某用户 | ✅ |
+| GET | `/api/follows/counts/{userId}` | 获取用户关注数/粉丝数 | ❌ |
+| POST | `/api/follows/{userId}` | 关注用户 | ✅ |
+| DELETE | `/api/follows/{userId}` | 取消关注 | ✅ |
 
 </details>
 
