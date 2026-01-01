@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/menu";
 import {
 	SidebarMenu,
-	SidebarMenuItem,
 	SidebarMenuButton,
+	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -36,9 +36,7 @@ export function UserMenu() {
 								<LogIn className="size-4" />
 							</div>
 							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-medium">
-									登录 / 注册
-								</span>
+								<span className="truncate font-medium">登录 / 注册</span>
 								<span className="truncate text-xs text-muted-foreground">
 									开始你的旅程
 								</span>
@@ -119,9 +117,7 @@ export function UserMenu() {
 							<UserPlus className="size-4" />
 							<span>我的关注</span>
 						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => navigate({ to: "/settings" })}
-						>
+						<DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
 							<Settings className="size-4" />
 							<span>设置</span>
 						</DropdownMenuItem>

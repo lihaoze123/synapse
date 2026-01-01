@@ -1,17 +1,23 @@
 import { useMatches } from "@tanstack/react-router";
 import type { BreadcrumbItemType } from "@/components/ui/breadcrumb";
 
+type Match = ReturnType<typeof useMatches>[number];
+
+type BreadcrumbConfig = {
+	label: string | ((match: Match) => string);
+	href?: string;
+};
+
 export function useBreadcrumb(): BreadcrumbItemType[] {
 	const matches = useMatches();
 
 	const breadcrumbItems: BreadcrumbItemType[] = [];
 
 	for (const match of matches) {
-		if (match.staticData?.breadcrumb) {
-			const breadcrumb = match.staticData.breadcrumb as {
-				label: string | ((match: typeof match) => string);
-				href?: string;
-			};
+		const staticData = match.staticData as { breadcrumb?: BreadcrumbConfig } | undefined;
+
+		if (staticData?.breadcrumb) {
+			const breadcrumb = staticData.breadcrumb;
 
 			const label =
 				typeof breadcrumb.label === "function"
