@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      CI: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+          cache-dependency-path: client/bun.lock
+
+      - name: Install frontend dependencies
+        working-directory: client
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend
+        working-directory: client
+        env:
+          VITE_API_BASE_URL: /api
+          VITE_STATIC_BASE_URL: ""
+        run: bun run build
+
+      - name: Copy frontend build into backend static resources
+        run: |
+          rm -rf server/src/main/resources/static
+          mkdir -p server/src/main/resources/static
+          cp -r client/dist/* server/src/main/resources/static/
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          cache-dependency-path: server/pom.xml
+
+      - name: Set Maven version
+        working-directory: server
+        run: ./mvnw -B versions:set -DnewVersion=${{ steps.version.outputs.VERSION }}
+
+      - name: Package Spring Boot application
+        working-directory: server
+        run: ./mvnw -B -ntp clean package
+
+      - name: Upload jar to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: server/target/synapse-${{ steps.version.outputs.VERSION }}.jar
+          fail_on_unmatched_files: true
