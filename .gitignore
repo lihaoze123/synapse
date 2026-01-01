@@ -37,6 +37,9 @@ server/uploads/*
 # Application
 application-local.properties
 
+# Docker
+.env
+
 # For AI
 architecture.md
 plans/
