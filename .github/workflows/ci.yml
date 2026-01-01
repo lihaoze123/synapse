@@ -66,7 +66,7 @@ jobs:
 
       - name: Test
         working-directory: client
-        run: npm run test -- --runInBand
+        run: npm run test
 
       - name: Build
         working-directory: client
