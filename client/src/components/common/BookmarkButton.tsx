@@ -48,7 +48,8 @@ export function BookmarkButton({
 		toggle.mutate(isBookmarked);
 	};
 
-	const buttonSize = size === "sm" ? "xs" : "sm";
+	// Normalize to Button sizes so that 'md' aligns with default h-9 buttons
+	const buttonSize = size === "sm" ? "xs" : "default";
 
 	return (
 		<Button
@@ -59,7 +60,6 @@ export function BookmarkButton({
 			aria-pressed={isBookmarked}
 			aria-busy={isWorking}
 			className={cn(
-				"min-w-[76px] justify-center",
 				isBookmarked && "border-amber-200 bg-amber-50 text-amber-700",
 				className,
 			)}

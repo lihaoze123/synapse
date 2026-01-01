@@ -7,7 +7,8 @@ import {
 	MessageCircle,
 	Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
+// Desktop actions remain as before; mobile hides top action buttons
 import Markdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
@@ -23,8 +24,17 @@ import PublishModal, {
 import { Card } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useAuth, useDeletePost, usePost, useUpdatePost } from "@/hooks";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { resolveStaticUrl } from "@/services/api";
 import type { PostType } from "@/types";
+
+// No dropdown menu for desktop; restore original inline buttons
+
+const MobileActionBar = lazy(() =>
+	import("@/components/layout/MobileActionBar").then((m) => ({
+		default: m.MobileActionBar,
+	})),
+);
 
 export const Route = createFileRoute("/posts/$id")({
 	component: PostDetailPage,
@@ -54,6 +64,7 @@ function PostDetailPage() {
 	const { data: post, isLoading, error } = usePost(isValidId ? postId : 0);
 	const { user: currentUser } = useAuth();
 	const navigate = useNavigate();
+	const isMobile = useIsMobile();
 
 	const updatePost = useUpdatePost();
 	const deletePost = useDeletePost();
@@ -129,6 +140,17 @@ function PostDetailPage() {
 
 	const config = typeConfig[post.type];
 	const TypeIcon = config.icon;
+	const createdDate = new Date(post.createdAt);
+	const dateLong = createdDate.toLocaleDateString("zh-CN", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+	const dateShort = createdDate.toLocaleDateString("zh-CN", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	});
 
 	return (
 		<Layout>
@@ -145,8 +167,8 @@ function PostDetailPage() {
 					)}
 
 					<div className="p-6">
-						<div className="mb-4 flex items-start justify-between gap-3">
-							<div className="flex flex-1 items-center gap-3">
+						<div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
+							<div className="flex flex-1 items-center gap-3 min-w-0">
 								<Link
 									to="/users/$userId"
 									params={{ userId: String(post.user.id) }}
@@ -166,7 +188,7 @@ function PostDetailPage() {
 								</Link>
 
 								<div className="min-w-0 flex-1">
-									<div className="flex items-center gap-3">
+									<div className="flex items-center gap-2 sm:gap-3">
 										<Link
 											to="/users/$userId"
 											params={{ userId: String(post.user.id) }}
@@ -178,26 +200,28 @@ function PostDetailPage() {
 											<FollowButton userId={post.user.id} size="sm" />
 										)}
 									</div>
-									<div className="flex items-center gap-2 text-sm text-muted-foreground">
-										<TypeIcon className={`h-3.5 w-3.5 ${config.color}`} />
-										<span>{config.label}</span>
-										<span>·</span>
-										<Calendar className="h-3.5 w-3.5" />
-										<time dateTime={post.createdAt}>
-											{new Date(post.createdAt).toLocaleDateString("zh-CN", {
-												year: "numeric",
-												month: "long",
-												day: "numeric",
-											})}
-										</time>
+									<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground">
+										<div className="flex items-center gap-1 whitespace-nowrap">
+											<TypeIcon className={`h-3.5 w-3.5 ${config.color}`} />
+											<span className="hidden sm:inline">{config.label}</span>
+										</div>
+										<span className="hidden sm:inline">·</span>
+										<div className="flex items-center gap-1 whitespace-nowrap">
+											<Calendar className="h-3.5 w-3.5" />
+											<time
+												className="whitespace-nowrap"
+												dateTime={post.createdAt}
+											>
+												<span className="sm:hidden">{dateShort}</span>
+												<span className="hidden sm:inline">{dateLong}</span>
+											</time>
+										</div>
 									</div>
 								</div>
 							</div>
 
-							<div className="flex items-center gap-2">
-								{!isAuthor && <FollowButton userId={post.user.id} size="sm" />}
+							<div className="hidden md:flex items-center gap-2 flex-shrink-0 sm:w-auto justify-end">
 								<BookmarkButton postId={post.id} size="md" />
-
 								{isAuthor && (
 									<>
 										<button
@@ -318,7 +342,8 @@ function PostDetailPage() {
 					</div>
 				</Card>
 
-				<div className="mt-8">
+				{/* biome-ignore lint/correctness/useUniqueElementIds: single instance on page; anchor target for MobileActionBar */}
+				<div className="mt-8" id="comments">
 					<h2 className="mb-6 text-xl font-bold">评论</h2>
 					<CommentSection postId={postId} />
 				</div>
@@ -351,6 +376,16 @@ function PostDetailPage() {
 				initialIndex={previewIndex ?? 0}
 				onOpenChange={(open) => setPreviewIndex(open ? 0 : null)}
 			/>
+			{isMobile && (
+				<Suspense fallback={null}>
+					<MobileActionBar
+						postId={postId}
+						isAuthor={!!isAuthor}
+						onEdit={handleEdit}
+						onDelete={() => setIsDeleteDialogOpen(true)}
+					/>
+				</Suspense>
+			)}
 		</Layout>
 	);
 }

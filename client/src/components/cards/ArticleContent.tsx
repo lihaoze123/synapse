@@ -32,7 +32,8 @@ export default function ArticleContent({
 						<img
 							src={resolveStaticUrl(coverImage)}
 							alt={title}
-							className="h-16 w-24 rounded object-cover border border-border"
+							loading="lazy"
+							className="h-16 w-24 rounded object-cover border border-border sm:h-20 sm:w-28"
 						/>
 					</div>
 				)}

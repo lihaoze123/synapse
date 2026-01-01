@@ -52,8 +52,8 @@ export default function PostCard({ post, className }: PostCardProps) {
 	return (
 		<Link to="/posts/$id" params={{ id: String(post.id) }} className="block">
 			<Card className={cn("p-4 cursor-pointer", className)}>
-				<div className="flex items-start justify-between mb-3 gap-2">
-					<div className="flex items-center gap-2">
+				<div className="flex items-start justify-between mb-3 gap-2 flex-wrap">
+					<div className="flex items-center gap-2 min-w-0">
 						<UserInfo
 							userId={post.user.id}
 							username={post.user.username}
@@ -65,7 +65,7 @@ export default function PostCard({ post, className }: PostCardProps) {
 							<FollowButton userId={post.user.id} size="sm" />
 						)}
 					</div>
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-2 mt-2 sm:mt-0">
 						<BookmarkButton postId={post.id} size="sm" />
 						<div
 							className={cn(
