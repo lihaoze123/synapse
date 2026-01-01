@@ -416,29 +416,58 @@ cd server
 
 ### 生产环境配置
 
-**1. 创建 MySQL 数据库**
+#### 1. 创建 MySQL 数据库
 
 ```sql
 CREATE DATABASE synapse CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-**2. 修改配置文件**
+#### 2. 配置环境变量（推荐）
 
-编辑 `src/main/resources/application.properties`：
-
-```properties
-# 注释 H2，启用 MySQL
-spring.datasource.url=jdbc:mysql://localhost:3306/synapse
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-```
-
-**3. 构建并运行**
+编辑 `src/main/resources/application-prod.properties` 或通过环境变量传入：
 
 ```bash
-./mvnw clean package
-java -jar target/synapse-0.0.1-SNAPSHOT.jar
+# MySQL 数据库配置
+export DB_URL="jdbc:mysql://localhost:3306/synapse?useSSL=true&serverTimezone=UTC"
+export DB_USERNAME="your_username"
+export DB_PASSWORD="your_password"
+
+# JWT 密钥（必须修改）
+export JWT_SECRET="your-256-bit-secret-key-change-in-production"
+
+# CORS 允许的前端地址
+export CORS_ALLOWED_ORIGINS="https://your-domain.com"
 ```
+
+#### 3. 运行方式
+
+**方式一：Maven 运行（开发测试）**
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+```
+
+**方式二：JAR 运行（生产环境）**
+```bash
+./mvnw clean package
+java -jar target/synapse-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
+
+**方式三：直接传入参数**
+```bash
+java -jar target/synapse-0.0.1-SNAPSHOT.jar \
+  --spring.profiles.active=prod \
+  --spring.datasource.url=jdbc:mysql://host:3306/synapse \
+  --spring.datasource.username=user \
+  --spring.datasource.password=pass \
+  --jwt.secret=your-secret-key
+```
+
+#### Profile 说明
+
+| Profile | 数据库 | SQL 日志 | DDL 模式 | H2 控制台 | 数据初始化 |
+|:-------|:-------|:--------|:--------|:--------|:---------|
+| `dev` (默认) | H2 内存 | ✅ 开启 | update | ✅ 启用 | ✅ 加载测试数据 |
+| `prod` | MySQL | ❌ 关闭 | validate | ❌ 禁用 | ❌ 不加载 |
 
 ---
 

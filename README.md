@@ -96,27 +96,43 @@ cd client && bun run dev
 
 ### 生产部署
 
-**1. 构建前端（使用相对路径）**
+**1. 创建 MySQL 数据库**
+```sql
+CREATE DATABASE synapse CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+**2. 设置环境变量**
+```bash
+# MySQL 配置
+export DB_URL="jdbc:mysql://localhost:3306/synapse?useSSL=true&serverTimezone=UTC"
+export DB_USERNAME="your_username"
+export DB_PASSWORD="your_password"
+
+# JWT 密钥
+export JWT_SECRET="your-256-bit-secret-key"
+```
+
+**3. 构建前端（使用相对路径）**
 ```bash
 cd client
 VITE_API_BASE_URL=/api VITE_STATIC_BASE_URL= npm run build
 ```
 
-**2. 集成到后端**
+**4. 集成到后端**
 ```bash
 # 复制前端构建产物到 Spring Boot static 目录
 cp -r client/dist/* server/src/main/resources/static/
 ```
 
-**3. 构建后端**
+**5. 构建后端**
 ```bash
 cd server
 ./mvnw clean package
 ```
 
-**4. 运行**
+**6. 运行**
 ```bash
-java -jar target/synapse-0.0.1-SNAPSHOT.jar
+java -jar target/synapse-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
 
 访问 `http://localhost:8080`，前端和 API 都在同一端口下。
