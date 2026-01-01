@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
 	Atom,
+	Bookmark,
 	Braces,
 	Code,
 	FileText,
@@ -23,6 +24,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks";
 import { cn } from "@/lib/utils";
 import type { PostType } from "@/types";
 import { UserMenu } from "./UserMenu";
@@ -87,6 +89,8 @@ const placeholderTopics = [
 ];
 
 export function AppSidebar() {
+	const { user } = useAuth();
+
 	return (
 		<Sidebar collapsible="icon">
 			<SidebarHeader>
@@ -136,6 +140,24 @@ export function AppSidebar() {
 									)}
 								</Link>
 							</SidebarMenuItem>
+							{user && (
+								<SidebarMenuItem>
+									<Link to="/bookmarks" aria-label="收藏">
+										{({ isActive }) => (
+											<SidebarMenuButton
+												asChild
+												isActive={isActive}
+												tooltip="收藏"
+											>
+												<div>
+													<Bookmark />
+													<span>收藏</span>
+												</div>
+											</SidebarMenuButton>
+										)}
+									</Link>
+								</SidebarMenuItem>
+							)}
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>

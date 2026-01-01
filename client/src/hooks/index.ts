@@ -1,5 +1,11 @@
 export { useAuth } from "./useAuth";
 export {
+	useBookmarkCount,
+	useBookmarkStatus,
+	useBookmarks,
+	useBookmarkToggle,
+} from "./useBookmarks";
+export {
 	useCreateComment,
 	useDeleteComment,
 	usePostComments,

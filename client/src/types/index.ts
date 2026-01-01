@@ -15,6 +15,14 @@ export interface ApiResponse<T> {
 	data: T;
 }
 
+export interface Page<T> {
+	content: T[];
+	totalElements: number;
+	totalPages: number;
+	number: number;
+	last: boolean;
+}
+
 export type PostType = "SNIPPET" | "ARTICLE" | "MOMENT";
 
 export interface Tag {
@@ -48,6 +56,12 @@ export interface Comment {
 	replyToUsername?: string;
 	createdAt: string;
 	isDeleted: boolean | null;
+}
+
+export interface Bookmark {
+	id: number;
+	post: Post;
+	createdAt: string;
 }
 
 export interface FollowDto {

@@ -13,6 +13,7 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import CommentSection from "@/components/comments/CommentSection";
 import { CodeBlock } from "@/components/common";
+import { BookmarkButton } from "@/components/common/BookmarkButton";
 import FollowButton from "@/components/common/FollowButton";
 import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
 import { Layout } from "@/components/layout";
@@ -144,7 +145,7 @@ function PostDetailPage() {
 					)}
 
 					<div className="p-6">
-						<div className="mb-4 flex items-start gap-3">
+						<div className="mb-4 flex items-start justify-between gap-3">
 							<div className="flex flex-1 items-center gap-3">
 								<Link
 									to="/users/$userId"
@@ -193,26 +194,31 @@ function PostDetailPage() {
 								</div>
 							</div>
 
-							{isAuthor && (
-								<div className="flex items-center gap-2">
-									<button
-										type="button"
-										onClick={handleEdit}
-										className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-									>
-										<Edit className="h-4 w-4" />
-										编辑
-									</button>
-									<button
-										type="button"
-										onClick={() => setIsDeleteDialogOpen(true)}
-										className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-									>
-										<Trash2 className="h-4 w-4" />
-										删除
-									</button>
-								</div>
-							)}
+							<div className="flex items-center gap-2">
+								{!isAuthor && <FollowButton userId={post.user.id} size="sm" />}
+								<BookmarkButton postId={post.id} size="md" />
+
+								{isAuthor && (
+									<>
+										<button
+											type="button"
+											onClick={handleEdit}
+											className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+										>
+											<Edit className="h-4 w-4" />
+											编辑
+										</button>
+										<button
+											type="button"
+											onClick={() => setIsDeleteDialogOpen(true)}
+											className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+										>
+											<Trash2 className="h-4 w-4" />
+											删除
+										</button>
+									</>
+								)}
+							</div>
 						</div>
 
 						{post.title && (
