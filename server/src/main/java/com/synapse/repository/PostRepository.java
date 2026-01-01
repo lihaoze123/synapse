@@ -71,4 +71,83 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         @Param("type") PostType type,
         Pageable pageable
     );
+
+    @EntityGraph(attributePaths = {"user", "tags"})
+    @Query(
+        "SELECT DISTINCT p FROM Post p JOIN p.tags t "
+            + "WHERE t.name = :tagName AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+            + "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
+            + "ORDER BY p.createdAt DESC"
+    )
+    Page<Post> searchByKeywordAndTag(
+        @Param("keyword") String keyword,
+        @Param("tagName") String tagName,
+        Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"user", "tags"})
+    @Query(
+        "SELECT DISTINCT p FROM Post p JOIN p.tags t "
+            + "WHERE t.name = :tagName AND p.type = :type AND "
+            + "(LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+            + "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
+            + "ORDER BY p.createdAt DESC"
+    )
+    Page<Post> searchByKeywordTagAndType(
+        @Param("keyword") String keyword,
+        @Param("tagName") String tagName,
+        @Param("type") PostType type,
+        Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"user", "tags"})
+    @Query(
+        "SELECT DISTINCT p FROM Post p JOIN p.tags t "
+            + "WHERE t.name IN :tagNames AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+            + "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
+            + "ORDER BY p.createdAt DESC"
+    )
+    Page<Post> searchByKeywordAndAnyTags(
+        @Param("keyword") String keyword,
+        @Param("tagNames") java.util.List<String> tagNames,
+        Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"user", "tags"})
+    @Query(
+        "SELECT DISTINCT p FROM Post p JOIN p.tags t "
+            + "WHERE t.name IN :tagNames AND p.type = :type AND "
+            + "(LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+            + "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) "
+            + "ORDER BY p.createdAt DESC"
+    )
+    Page<Post> searchByKeywordAnyTagsAndType(
+        @Param("keyword") String keyword,
+        @Param("tagNames") java.util.List<String> tagNames,
+        @Param("type") PostType type,
+        Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"user", "tags"})
+    @Query(
+        "SELECT DISTINCT p FROM Post p JOIN p.tags t "
+            + "WHERE t.name IN :tagNames "
+            + "ORDER BY p.createdAt DESC"
+    )
+    Page<Post> findByAnyTags(
+        @Param("tagNames") java.util.List<String> tagNames,
+        Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"user", "tags"})
+    @Query(
+        "SELECT DISTINCT p FROM Post p JOIN p.tags t "
+            + "WHERE t.name IN :tagNames AND p.type = :type "
+            + "ORDER BY p.createdAt DESC"
+    )
+    Page<Post> findByAnyTagsAndType(
+        @Param("tagNames") java.util.List<String> tagNames,
+        @Param("type") PostType type,
+        Pageable pageable
+    );
 }

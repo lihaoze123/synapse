@@ -47,12 +47,19 @@ public class PostController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Page<PostDto>>> searchPosts(
             @RequestParam String keyword,
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) java.util.List<String> tags,
             @RequestParam(required = false) PostType type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, safeSize);
-        Page<PostDto> posts = postService.searchPosts(keyword, type, pageable);
+        java.util.LinkedHashSet<String> merged = new java.util.LinkedHashSet<>();
+        if (tags != null) merged.addAll(tags);
+        if (tag != null && !tag.trim().isEmpty()) merged.add(tag.trim());
+        java.util.List<String> finalTags = merged.isEmpty() ? null : new java.util.ArrayList<>(merged);
+
+        Page<PostDto> posts = postService.searchPosts(keyword, finalTags, type, pageable);
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 

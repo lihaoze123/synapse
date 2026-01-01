@@ -180,16 +180,46 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostDto> searchPosts(String keyword, PostType type, Pageable pageable) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return Page.empty(pageable);
+    public Page<PostDto> searchPosts(String keyword, java.util.List<String> tags, PostType type, Pageable pageable) {
+        Page<Post> posts;
+        String kw = keyword == null ? "" : keyword.trim();
+
+        java.util.List<String> normTags = null;
+        if (tags != null && !tags.isEmpty()) {
+            java.util.LinkedHashSet<String> set = new java.util.LinkedHashSet<>();
+            for (String t : tags) {
+                if (t != null) {
+                    String nt = t.trim();
+                    if (!nt.isEmpty()) set.add(nt);
+                }
+            }
+            if (!set.isEmpty()) {
+                normTags = new java.util.ArrayList<>(set);
+            }
         }
 
-        Page<Post> posts;
-        if (type != null) {
-            posts = postRepository.searchByKeywordAndType(keyword.trim(), type, pageable);
+        boolean hasKeyword = !kw.isEmpty();
+
+        if (hasKeyword) {
+            if (normTags != null && type != null) {
+                posts = postRepository.searchByKeywordAnyTagsAndType(kw, normTags, type, pageable);
+            } else if (normTags != null) {
+                posts = postRepository.searchByKeywordAndAnyTags(kw, normTags, pageable);
+            } else if (type != null) {
+                posts = postRepository.searchByKeywordAndType(kw, type, pageable);
+            } else {
+                posts = postRepository.searchByKeyword(kw, pageable);
+            }
         } else {
-            posts = postRepository.searchByKeyword(keyword.trim(), pageable);
+            if (normTags != null && type != null) {
+                posts = postRepository.findByAnyTagsAndType(normTags, type, pageable);
+            } else if (normTags != null) {
+                posts = postRepository.findByAnyTags(normTags, pageable);
+            } else if (type != null) {
+                posts = postRepository.findByTypeOrderByCreatedAtDesc(type, pageable);
+            } else {
+                posts = postRepository.findAllByOrderByCreatedAtDesc(pageable);
+            }
         }
 
         return posts.map(PostDto::fromEntity);
