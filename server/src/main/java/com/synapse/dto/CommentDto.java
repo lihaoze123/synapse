@@ -1,7 +1,7 @@
 package com.synapse.dto;
 
 import com.synapse.entity.Comment;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder.Default;
 import lombok.Builder;
@@ -22,7 +22,7 @@ public class CommentDto {
 	private Integer floor;
 	private Integer replyToFloor;
 	private String replyToUsername;
-	private LocalDateTime createdAt;
+	private Instant createdAt;
 	private Boolean isDeleted;
 	private int likeCount;
 	private UserStateDto userState;

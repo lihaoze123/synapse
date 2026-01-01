@@ -1,7 +1,7 @@
 package com.synapse.dto;
 
 import com.synapse.entity.Follow;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +16,7 @@ public class FollowDto {
     private Long id;
     private UserDto follower;
     private UserDto following;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public static FollowDto fromEntity(Follow follow) {
         return FollowDto.builder()

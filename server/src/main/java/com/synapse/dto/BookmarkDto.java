@@ -1,7 +1,7 @@
 package com.synapse.dto;
 
 import com.synapse.entity.Bookmark;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +15,7 @@ public class BookmarkDto {
 
     private Long id;
     private PostDto post;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public static BookmarkDto fromEntity(Bookmark bookmark) {
         return BookmarkDto.builder()
