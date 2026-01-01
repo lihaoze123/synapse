@@ -22,9 +22,17 @@ export const Route = createFileRoute("/search")({
 				: undefined;
 		let tags: string[] | undefined;
 		if (Array.isArray(search.tags)) {
-			tags = search.tags.filter((t): t is string => typeof t === "string" && t.trim().length > 0);
-		} else if (typeof search.tags === "string" && search.tags.trim().length > 0) {
-			tags = search.tags.split(",").map((t) => t.trim()).filter(Boolean);
+			tags = search.tags.filter(
+				(t): t is string => typeof t === "string" && t.trim().length > 0,
+			);
+		} else if (
+			typeof search.tags === "string" &&
+			search.tags.trim().length > 0
+		) {
+			tags = search.tags
+				.split(",")
+				.map((t) => t.trim())
+				.filter(Boolean);
 		}
 		return { keyword, type, tags };
 	},
@@ -88,7 +96,8 @@ function SearchPage() {
 								{search.type === "MOMENT" && "动态"}
 							</span>
 						)}
-						{search.tags && search.tags.length > 0 &&
+						{search.tags &&
+							search.tags.length > 0 &&
 							search.tags.slice(0, 3).map((t) => (
 								<span key={t} className="px-2 py-0.5 bg-secondary rounded-full">
 									标签: {t}

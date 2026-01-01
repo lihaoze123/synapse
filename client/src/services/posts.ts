@@ -84,7 +84,9 @@ export const postsService = {
 		}
 	},
 
-	async searchPosts(params: GetPostsParams & { keyword: string }): Promise<PostsPage> {
+	async searchPosts(
+		params: GetPostsParams & { keyword: string },
+	): Promise<PostsPage> {
 		const { keyword, tag, tags, type, page = 0, size = 10 } = params;
 		const searchParams = new URLSearchParams();
 

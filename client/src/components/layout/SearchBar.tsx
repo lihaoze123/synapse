@@ -1,14 +1,14 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { PostType } from "@/types";
-import { useAllTags } from "@/hooks/useTags";
 import {
 	Menu,
 	MenuCheckboxItem,
 	MenuPopup,
 	MenuTrigger,
 } from "@/components/ui/menu";
+import { useAllTags } from "@/hooks/useTags";
+import type { PostType } from "@/types";
 
 const POST_TYPE_OPTIONS = ["all", "SNIPPET", "ARTICLE", "MOMENT"] as const;
 type FilterType = (typeof POST_TYPE_OPTIONS)[number];
@@ -40,7 +40,7 @@ export function SearchBar() {
 				keyword?: string;
 				type?: PostType;
 				tags?: string[] | string;
-		  })
+			})
 		: null;
 
 	useEffect(() => {
@@ -53,7 +53,10 @@ export function SearchBar() {
 					(t): t is string => typeof t === "string" && t.trim().length > 0,
 				);
 			} else if (typeof urlParams.tags === "string" && urlParams.tags.trim()) {
-				parsed = urlParams.tags.split(",").map((t) => t.trim()).filter(Boolean);
+				parsed = urlParams.tags
+					.split(",")
+					.map((t) => t.trim())
+					.filter(Boolean);
 			}
 			setTags(parsed);
 		} else {
@@ -133,7 +136,9 @@ export function SearchBar() {
 	}, [allTags]);
 
 	const toggleTag = (name: string) => {
-		setTags((prev) => (prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]));
+		setTags((prev) =>
+			prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name],
+		);
 	};
 
 	return (
@@ -172,7 +177,6 @@ export function SearchBar() {
 						<X strokeWidth={2.5} />
 					</button>
 				)}
-
 			</div>
 
 			<div className="search-bar-filters">
@@ -224,7 +228,10 @@ export function SearchBar() {
 						title="清除全部标签"
 					>
 						清除标签
-						<span aria-hidden="true" style={{ marginLeft: 6, display: "inline-flex" }}>
+						<span
+							aria-hidden="true"
+							style={{ marginLeft: 6, display: "inline-flex" }}
+						>
 							<X width={12} height={12} />
 						</span>
 					</button>
