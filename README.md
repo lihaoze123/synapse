@@ -38,24 +38,32 @@ Synapse 是一个 Java 课程设计项目，实现了一个多类型内容聚合
 
 ## 快速开始
 
-### 后端
+### Docker（推荐）
 
+一键启动应用和数据库：
+
+```bash
+docker compose --profile demo up --build
+```
+
+访问 http://localhost:8080
+
+### 本地开发
+
+**后端**
 ```bash
 cd server
 ./mvnw spring-boot:run
 ```
 
-访问 [server/README.md](server/README.md) 查看详细文档
-
-### 前端
-
+**前端**
 ```bash
 cd client
 bun install
 bun run dev
 ```
 
-访问 [client/README.md](client/README.md) 查看详细文档
+访问 [server/README.md](server/README.md) 和 [client/README.md](client/README.md) 查看详细文档
 
 ## 功能特性
 
@@ -82,7 +90,116 @@ bun run dev
 
 ## 构建与部署
 
-### 开发模式
+### Docker 部署（推荐）
+
+**演示环境**（包含 MySQL）
+
+```bash
+# 一键启动
+docker compose --profile demo up --build
+
+# 后台运行
+docker compose --profile demo up -d --build
+
+# 停止并删除数据
+docker compose --profile demo down -v
+```
+
+**生产环境**（使用外部数据库）
+
+```bash
+# 复制环境变量模板
+cp .env.example .env
+
+# 编辑 .env 文件，配置数据库和密钥
+vim .env
+
+# 启动
+docker compose up -d --build
+```
+
+### 数据备份
+
+**备份数据库**
+
+```bash
+# 导出数据库到 SQL 文件
+docker exec synapse-mysql mysqldump -uroot -psynapse123 synapse > backup-$(date +%Y%m%d).sql
+
+# 恢复数据库
+docker exec -i synapse-mysql mysql -uroot -psynapse123 synapse < backup-20250101.sql
+```
+
+**备份上传文件**
+
+```bash
+# 查看 uploads 数据卷位置
+docker volume inspect java-teamwork_uploads_data
+
+# 备份到 tar 文件
+docker run --rm -v java-teamwork_uploads_data:/data -v $(pwd):/backup alpine tar czf /backup/uploads-backup-$(date +%Y%m%d).tar.gz -C /data .
+
+# 恢复
+docker run --rm -v java-teamwork_uploads_data:/data -v $(pwd):/backup alpine tar xzf /backup/uploads-backup-20250101.tar.gz -C /data
+```
+
+**完整备份脚本**
+
+```bash
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="./backups/$DATE"
+mkdir -p "$BACKUP_DIR"
+
+# 备份数据库
+docker exec synapse-mysql mysqldump -uroot -psynapse123 synapse > "$BACKUP_DIR/database.sql"
+
+# 备份上传文件
+docker run --rm -v java-teamwork_uploads_data:/data -v "$BACKUP_DIR":/backup alpine tar czf /backup/uploads.tar.gz -C /data .
+
+echo "Backup completed: $BACKUP_DIR"
+```
+
+### 生产数据库选项
+
+**推荐方案**
+
+| 方案 | 适用场景 | 说明 |
+|-----|---------|------|
+| 云托管数据库 | 生产环境 | AWS RDS、Google Cloud SQL、阿里云 RDS，自动备份、高可用 |
+| 单独 MySQL 实例 | 小型生产 | 独立服务器或 VPS 上的 MySQL |
+| PostgreSQL | 需要更复杂查询 | 性能优于 MySQL，需添加 PostgreSQL 驱动 |
+
+**使用外部数据库步骤**
+
+```bash
+# 1. 创建数据库
+# MySQL
+CREATE DATABASE synapse CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# PostgreSQL
+CREATE DATABASE synapse ENCODING 'UTF8';
+
+# 2. 复制并编辑 .env 文件
+cp .env.example .env
+vim .env  # 修改 DB_URL, DB_USERNAME, DB_PASSWORD
+
+# 3. 启动（不启动 demo profile 的 MySQL）
+docker compose up -d --build
+```
+
+**添加 PostgreSQL 支持**（可选）
+
+在 `server/pom.xml` 中添加依赖：
+
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+</dependency>
+```
+
+### 本地开发（不使用 Docker）
 
 前端和后端分别运行（热重载）：
 
@@ -94,7 +211,7 @@ cd server && ./mvnw spring-boot:run
 cd client && bun run dev
 ```
 
-### 生产部署
+### 手动生产部署
 
 **1. 创建 MySQL 数据库**
 ```sql

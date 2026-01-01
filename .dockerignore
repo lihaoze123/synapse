@@ -1,0 +1,29 @@
+# Dependencies (rebuilt in container)
+client/node_modules
+server/target
+
+# Git and IDE
+.git
+.gitignore
+.idea
+*.iml
+.vscode
+
+# Documentation
+*.md
+docs/
+LICENSE
+
+# Local files
+uploads/*
+!uploads/.gitkeep
+*.log
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.jar
+*.war
