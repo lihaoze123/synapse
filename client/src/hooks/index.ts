@@ -30,4 +30,5 @@ export {
 } from "./usePosts";
 export { useSearch } from "./useSearch";
 export { useAllTags, usePopularTags } from "./useTags";
+export { ThemeProvider, useTheme } from "./useTheme.tsx";
 export { useUpdateProfile, useUserPosts } from "./useUsers";

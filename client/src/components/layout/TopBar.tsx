@@ -1,13 +1,9 @@
 import { Hash } from "lucide-react";
+import { ThemeToggle } from "@/components/common";
 import { BreadcrumbWithItems } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useBreadcrumb } from "@/hooks/useBreadcrumb";
 import { SearchBar } from "./SearchBar";
-
-// TODO: Implement theme toggle functionality
-function ThemeToggle() {
-	return <div className="h-8 w-8" />;
-}
 
 export function TopBar() {
 	const breadcrumbItems = useBreadcrumb();
