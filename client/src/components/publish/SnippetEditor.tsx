@@ -1,3 +1,4 @@
+import CodeMirrorEditor from "@/components/editor/CodeMirrorEditor";
 import { cn } from "@/lib/utils";
 
 interface SnippetEditorProps {
@@ -7,6 +8,7 @@ interface SnippetEditorProps {
 	onCodeChange: (code: string) => void;
 	language: string;
 	onLanguageChange: (language: string) => void;
+	isFullscreen?: boolean;
 	className?: string;
 }
 
@@ -40,40 +42,126 @@ export default function SnippetEditor({
 	onCodeChange,
 	language,
 	onLanguageChange,
+	isFullscreen = false,
 	className,
 }: SnippetEditorProps) {
+	// Desktop fullscreen: Full-height code editor (title in sidebar)
+	if (isFullscreen) {
+		return (
+			<div className={cn("flex flex-col h-full", className)}>
+				{/* Language Selector */}
+				<div className="flex items-center justify-between mb-4">
+					<span className="text-sm text-muted-foreground">编写代码</span>
+					<div className="relative shrink-0">
+						<select
+							value={language}
+							onChange={(e) => onLanguageChange(e.target.value)}
+							className={cn(
+								"appearance-none rounded-lg border border-input bg-background",
+								"px-3 py-2 pr-8 text-sm font-medium",
+								"focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring",
+								"transition-shadow duration-200 cursor-pointer",
+							)}
+						>
+							{LANGUAGES.map(({ value, label }) => (
+								<option key={value} value={value}>
+									{label}
+								</option>
+							))}
+						</select>
+						<div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+							<svg
+								className="h-4 w-4 text-muted-foreground"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M19 9l-7 7-7-7"
+								/>
+							</svg>
+						</div>
+					</div>
+				</div>
+
+				{/* Code Editor - Full Height */}
+				<div className="flex-1 min-h-0 rounded-lg overflow-hidden border border-input">
+					<CodeMirrorEditor
+						value={code}
+						onChange={onCodeChange}
+						language={language}
+						placeholder="在此输入代码..."
+						minHeight="100%"
+						className="h-full"
+					/>
+				</div>
+			</div>
+		);
+	}
+
+	// Standard layout (mobile + modal)
 	return (
-		<div className={cn("space-y-3", className)}>
-			{/* Title (optional) */}
-			<input
-				type="text"
-				value={title}
-				onChange={(e) => onTitleChange(e.target.value)}
-				placeholder="标题 (可选)"
-				className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-			/>
+		<div className={cn("flex flex-col gap-4", className)}>
+			<div className="flex flex-col gap-3 sm:flex-row">
+				<input
+					type="text"
+					value={title}
+					onChange={(e) => onTitleChange(e.target.value)}
+					placeholder="标题（可选）"
+					className={cn(
+						"flex-1 rounded-lg border border-input bg-background px-3.5 py-2.5",
+						"text-sm placeholder:text-muted-foreground",
+						"focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring",
+						"transition-shadow duration-200",
+					)}
+				/>
 
-			{/* Language selector */}
-			<select
-				value={language}
-				onChange={(e) => onLanguageChange(e.target.value)}
-				className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-			>
-				{LANGUAGES.map(({ value, label }) => (
-					<option key={value} value={value}>
-						{label}
-					</option>
-				))}
-			</select>
+				<div className="relative sm:w-40">
+					<select
+						value={language}
+						onChange={(e) => onLanguageChange(e.target.value)}
+						className={cn(
+							"w-full appearance-none rounded-lg border border-input bg-background",
+							"px-3.5 py-2.5 pr-10 text-sm",
+							"focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring",
+							"transition-shadow duration-200 cursor-pointer",
+						)}
+					>
+						{LANGUAGES.map(({ value, label }) => (
+							<option key={value} value={value}>
+								{label}
+							</option>
+						))}
+					</select>
+					<div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+						<svg
+							className="h-4 w-4 text-muted-foreground"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+							aria-hidden="true"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M19 9l-7 7-7-7"
+							/>
+						</svg>
+					</div>
+				</div>
+			</div>
 
-			{/* Code editor */}
-			<textarea
+			<CodeMirrorEditor
 				value={code}
-				onChange={(e) => onCodeChange(e.target.value)}
-				placeholder="粘贴你的代码..."
-				rows={12}
-				spellCheck={false}
-				className="w-full resize-none rounded-lg border border-input bg-[#1e1e1e] px-3 py-2 font-mono text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-ring"
+				onChange={onCodeChange}
+				language={language}
+				placeholder="在此输入代码..."
+				minHeight="280px"
 			/>
 		</div>
 	);
