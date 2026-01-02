@@ -49,4 +49,35 @@ public class FileController {
                     .body(ApiResponse.error("Failed to upload file"));
         }
     }
+
+    @PostMapping("/upload/attachment")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> uploadAttachment(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request) {
+
+        Object userIdAttr = request.getAttribute("userId");
+        if (userIdAttr == null) {
+            return ResponseEntity.status(401)
+                    .body(ApiResponse.error("Authentication required"));
+        }
+
+        try {
+            String storedName = fileUtil.saveAttachment(file);
+            String url = "/uploads/" + storedName;
+
+            return ResponseEntity.ok(ApiResponse.success(Map.of(
+                    "filename", file.getOriginalFilename(),
+                    "storedName", storedName,
+                    "url", url,
+                    "fileSize", file.getSize(),
+                    "contentType", file.getContentType()
+            )));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Failed to upload file"));
+        }
+    }
 }
