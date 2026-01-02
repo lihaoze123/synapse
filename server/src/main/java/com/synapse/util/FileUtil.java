@@ -42,7 +42,14 @@ public class FileUtil {
             "application/zip",
             "application/x-zip-compressed",
             "application/x-rar-compressed",
-            "application/x-7z-compressed"
+            "application/x-7z-compressed",
+            // Additional MIME types that browsers may send
+            "application/octet-stream"
+    );
+    private static final Set<String> ALLOWED_ATTACHMENT_EXTENSIONS = Set.of(
+            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+            ".txt", ".json", ".xml", ".yaml", ".yml",
+            ".zip", ".rar", ".7z"
     );
     private static final long MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024;
 
@@ -97,14 +104,14 @@ public class FileUtil {
         }
 
         String contentType = file.getContentType();
-        if (contentType == null) {
-            throw new IllegalArgumentException("Unknown file type");
-        }
+        String extension = getExtension(file.getOriginalFilename()).toLowerCase();
 
-        boolean allowed = ALLOWED_ATTACHMENT_TYPES.contains(contentType)
-                || contentType.startsWith("text/");
+        boolean allowedByType = contentType != null
+                && (ALLOWED_ATTACHMENT_TYPES.contains(contentType)
+                    || contentType.startsWith("text/"));
+        boolean allowedByExtension = ALLOWED_ATTACHMENT_EXTENSIONS.contains(extension);
 
-        if (!allowed) {
+        if (!allowedByType && !allowedByExtension) {
             throw new IllegalArgumentException(
                 "不支持的文件类型。支持：PDF、Word、Excel、PPT、TXT、JSON、XML、YAML、ZIP、RAR、7z");
         }
