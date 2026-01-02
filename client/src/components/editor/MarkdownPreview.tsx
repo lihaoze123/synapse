@@ -1,5 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import CodeBlock from "@/components/common/CodeBlock";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +32,8 @@ export default function MarkdownPreview({
 			className={cn("prose prose-sm max-w-none dark:prose-invert", className)}
 		>
 			<ReactMarkdown
-				remarkPlugins={[remarkGfm]}
+				remarkPlugins={[remarkGfm, remarkMath]}
+				rehypePlugins={[rehypeKatex]}
 				components={{
 					code({ className, children, ...props }) {
 						const match = /language-(\w+)/.exec(className || "");

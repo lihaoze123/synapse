@@ -1,4 +1,4 @@
-import { Bold, Code, ImagePlus, Italic, Link, List, Quote } from "lucide-react";
+import { Bold, Code, ImagePlus, Italic, Link, List, Quote, Sigma } from "lucide-react";
 import type { RefObject } from "react";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +63,21 @@ const actions: ToolbarAction[] = [
 		prefix: "- ",
 		suffix: "",
 		placeholder: "列表项",
+		isBlock: true,
+	},
+	{
+		icon: Sigma,
+		label: "行内公式",
+		prefix: "$",
+		suffix: "$",
+		placeholder: "E = mc^2",
+	},
+	{
+		icon: Sigma,
+		label: "块级公式",
+		prefix: "$$\n",
+		suffix: "\n$$",
+		placeholder: "\\int_0^\\infty e^{-x} dx = 1",
 		isBlock: true,
 	},
 ];
