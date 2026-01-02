@@ -26,6 +26,7 @@ interface ImageUploaderProps {
 	disabled?: boolean;
 	className?: string;
 	placeholder?: string;
+	compact?: boolean;
 }
 
 export function ImageUploader({
@@ -37,6 +38,7 @@ export function ImageUploader({
 	disabled = false,
 	className,
 	placeholder,
+	compact = false,
 }: ImageUploaderProps) {
 	const inputId = useId();
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -265,6 +267,62 @@ export function ImageUploader({
 			</span>
 		</button>
 	);
+
+	if (compact) {
+		const hasImage = value.length > 0;
+		const isUploading = uploading.length > 0;
+
+		return (
+			<div className={cn("flex items-center gap-2", className)}>
+				<input
+					ref={inputRef}
+					id={inputId}
+					type="file"
+					accept="image/*"
+					onChange={handleInputChange}
+					className="hidden"
+					disabled={disabled}
+				/>
+				<button
+					type="button"
+					onClick={handleClick}
+					disabled={disabled || isUploading}
+					className={cn(
+						"flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm",
+						"border border-input bg-background",
+						"hover:bg-muted transition-colors",
+						(disabled || isUploading) && "opacity-50 cursor-not-allowed",
+					)}
+				>
+					{isUploading ? (
+						<>
+							<Loader2 className="h-4 w-4 animate-spin" />
+							<span>上传中...</span>
+						</>
+					) : (
+						<>
+							<ImagePlus className="h-4 w-4" />
+							<span>{hasImage ? "更换封面" : "添加封面"}</span>
+						</>
+					)}
+				</button>
+				{hasImage && !isUploading && (
+					<button
+						type="button"
+						onClick={() => handleRemove(value[0])}
+						disabled={disabled}
+						className={cn(
+							"flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm",
+							"text-muted-foreground hover:text-destructive transition-colors",
+						)}
+					>
+						<X className="h-4 w-4" />
+					</button>
+				)}
+				{error && <span className="text-sm text-destructive">{error}</span>}
+			</div>
+		);
+	}
 
 	if (mode === "single") {
 		const hasImage = value.length > 0 || uploading.length > 0;
