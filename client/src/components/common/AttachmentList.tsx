@@ -60,6 +60,7 @@ export function AttachmentList({
 					<a
 						href={`${staticBaseUrl}${attachment.url}`}
 						download={attachment.filename}
+						onClick={(e) => e.stopPropagation()}
 						className="text-primary hover:text-primary/80 transition-colors"
 						title="下载"
 					>
