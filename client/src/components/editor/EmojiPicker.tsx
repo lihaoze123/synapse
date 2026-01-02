@@ -1,7 +1,7 @@
-import { Smile } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
+import { Smile } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
@@ -89,11 +89,12 @@ export default function EmojiPicker({ onSelect, className }: EmojiPickerProps) {
 			{isOpen &&
 				createPortal(
 					<>
-						{/* Full screen overlay to close on outside click. Use a high z-index to sit above modals. */}
+						{/* biome-ignore lint/a11y/noStaticElementInteractions: Overlay for closing dropdown */}
 						<div
 							className="fixed inset-0"
 							style={{ zIndex: 1000 }}
 							onClick={() => setIsOpen(false)}
+							onKeyDown={(e) => e.key === "Escape" && setIsOpen(false)}
 						/>
 						<div
 							className="fixed"
@@ -106,7 +107,7 @@ export default function EmojiPicker({ onSelect, className }: EmojiPickerProps) {
 							<Picker
 								data={data}
 								onEmojiSelect={handleSelect}
-                                set="native"
+								set="native"
 								locale="zh"
 								previewPosition="none"
 								skinTonePosition="search"
