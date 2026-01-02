@@ -42,6 +42,7 @@ export interface Post {
 	summary: string | null;
 	coverImage: string | null;
 	images: string[] | null;
+	attachments: Attachment[] | null;
 	user: User;
 	tags: Tag[];
 	createdAt: string;
@@ -49,6 +50,15 @@ export interface Post {
 	userState?: {
 		liked: boolean;
 	};
+}
+
+export interface Attachment {
+	id: number;
+	filename: string;
+	url: string;
+	fileSize: number;
+	contentType: string;
+	createdAt: string;
 }
 
 export interface Comment {
