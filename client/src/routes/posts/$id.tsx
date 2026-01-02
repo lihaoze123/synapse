@@ -190,16 +190,13 @@ function PostDetailPage() {
 
 								<div className="min-w-0 flex-1">
 									<div className="flex items-center gap-2 sm:gap-3">
-										<div className="flex flex-col min-w-0">
-											<Link
-												to="/users/$userId"
-												params={{ userId: String(post.user.id) }}
-												className="font-medium hover:underline truncate"
-											>
-												{post.user.displayName || post.user.username}
-											</Link>
-											<span className="text-xs text-muted-foreground truncate">@{post.user.username}</span>
-										</div>
+										<Link
+											to="/users/$userId"
+											params={{ userId: String(post.user.id) }}
+											className="font-medium hover:underline truncate"
+										>
+											{post.user.displayName || post.user.username}
+										</Link>
 										{!isAuthor && (
 											<FollowButton userId={post.user.id} size="sm" />
 										)}

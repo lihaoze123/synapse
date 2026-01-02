@@ -36,14 +36,9 @@ export default function UserListItem({
 						{(user.displayName || user.username).slice(0, 2).toUpperCase()}
 					</AvatarFallback>
 				</Avatar>
-				<div className="flex flex-col min-w-0">
-					<span className="font-semibold truncate">
-						{user.displayName || user.username}
-					</span>
-					<span className="text-xs text-muted-foreground truncate">
-						@{user.username}
-					</span>
-				</div>
+				<span className="font-semibold truncate">
+					{user.displayName || user.username}
+				</span>
 			</Link>
 			{showFollowButton && <FollowButton userId={user.id} size="sm" />}
 		</div>
