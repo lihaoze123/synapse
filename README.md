@@ -254,6 +254,49 @@ echo "Backup completed: $BACKUP_DIR"
 
 </details>
 
+### 使用预构建镜像
+
+推荐直接从 GitHub Container Registry 拉取预构建镜像，无需本地构建：
+
+```bash
+# 拉取最新版本镜像
+docker pull ghcr.io/<org>/<repo>:latest
+
+# 拉取指定版本镜像
+docker pull ghcr.io/<org>/<repo>:v1.0.0
+
+# 运行容器
+docker run -d -p 8080:8080 \
+  -e SPRING_DATASOURCE_URL=jdbc:mysql://host:3306/synapse \
+  -e SPRING_DATASOURCE_USERNAME=user \
+  -e SPRING_DATASOURCE_PASSWORD=pass \
+  ghcr.io/<org>/<repo>:latest
+```
+
+<details>
+<summary><b>可用镜像标签</b></summary>
+
+| 标签格式 | 说明 | 示例 |
+|:--------|:-----|:-----|
+| `latest` | 最新稳定版（仅 main 分支） | `ghcr.io/<org>/<repo>:latest` |
+| `v1.0.0` | 语义化版本号（Release 时） | `ghcr.io/<org>/<repo>:v1.0.0` |
+| `v1.0` | 主版本号 | `ghcr.io/<org>/<repo>:v1.0` |
+| `v1` | 主版本号 | `ghcr.io/<org>/<repo>:v1` |
+| `sha-abc123` | Git commit SHA | `ghcr.io/<org>/<repo>:sha-abc123` |
+
+</details>
+
+<details>
+<summary><b>手动触发构建</b></summary>
+
+在 GitHub Actions 页面手动触发 `Docker` workflow，可指定自定义标签：
+
+1. 进入 Actions → Docker workflow
+2. 点击 "Run workflow"
+3. 输入标签名称（可选）
+
+</details>
+
 ### 手动生产部署
 
 <details>
