@@ -4,10 +4,11 @@ import {
 	Code,
 	Edit,
 	FileText,
+	Lock,
 	MessageCircle,
 	Trash2,
 } from "lucide-react";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 // Desktop actions remain as before; mobile hides top action buttons
 import Markdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
@@ -20,6 +21,7 @@ import { BookmarkButton } from "@/components/common/BookmarkButton";
 import FollowButton from "@/components/common/FollowButton";
 import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
 import { LikeButton } from "@/components/common/LikeButton";
+import { PasswordModal } from "@/components/common/PasswordModal";
 import { Layout } from "@/components/layout";
 import PublishModal, {
 	type PublishData,
@@ -29,7 +31,9 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useAuth, useDeletePost, usePost, useUpdatePost } from "@/hooks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { resolveStaticUrl } from "@/services/api";
-import type { PostType } from "@/types";
+import { postsService } from "@/services/posts";
+import type { Post, PostType } from "@/types";
+import { getUnlockedPost, setUnlockedPost } from "@/utils/privatePost";
 
 // No dropdown menu for desktop; restore original inline buttons
 
@@ -77,7 +81,46 @@ function PostDetailPage() {
 	const [editError, setEditError] = useState("");
 	const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
+	const [showPasswordModal, setShowPasswordModal] = useState(false);
+	const [passwordError, setPasswordError] = useState("");
+	const [isVerifying, setIsVerifying] = useState(false);
+	const [unlockedPost, setUnlockedPostState] = useState<Post | null>(null);
+
 	const isAuthor = currentUser && post && currentUser.id === post.user.id;
+	const isPrivateLocked = post?.isPrivate && !post?.content && !isAuthor;
+
+	useEffect(() => {
+		if (post?.isPrivate && !post?.content && !isAuthor) {
+			const cached = getUnlockedPost(postId);
+			if (cached) {
+				setUnlockedPostState(cached);
+			} else {
+				setShowPasswordModal(true);
+			}
+		}
+	}, [post, postId, isAuthor]);
+
+	const displayPost = unlockedPost || post;
+
+	const handlePasswordSubmit = async (password: string) => {
+		setPasswordError("");
+		setIsVerifying(true);
+		try {
+			const fullPost = await postsService.verifyPostPassword(postId, password);
+			setUnlockedPost(fullPost);
+			setUnlockedPostState(fullPost);
+			setShowPasswordModal(false);
+		} catch (err) {
+			setPasswordError(err instanceof Error ? err.message : "密码错误");
+		} finally {
+			setIsVerifying(false);
+		}
+	};
+
+	const handlePasswordCancel = () => {
+		setShowPasswordModal(false);
+		navigate({ to: "/" });
+	};
 
 	const handleEdit = () => {
 		setEditError("");
@@ -154,6 +197,8 @@ function PostDetailPage() {
 		month: "2-digit",
 		day: "2-digit",
 	});
+
+	const showLockedView = isPrivateLocked && !unlockedPost;
 
 	return (
 		<Layout>
@@ -266,85 +311,106 @@ function PostDetailPage() {
 						)}
 
 						<div className="mt-4">
-							{post.type === "SNIPPET" && (
-								<div className="overflow-hidden rounded-lg border bg-muted/30">
-									<CodeBlock
-										code={post.content}
-										language={post.language || "text"}
-										maxLines={500}
-									/>
-								</div>
-							)}
-
-							{post.type === "ARTICLE" && (
-								<div className="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-semibold prose-h1:text-2xl prose-h1:mt-8 prose-h1:mb-4 prose-h2:text-xl prose-h2:mt-6 prose-p:leading-7 prose-p:text-foreground/90 prose-img:rounded-xl prose-img:border prose-pre:p-0 prose-pre:m-0 prose-pre:bg-transparent prose-pre:border-0 prose-code:before:content-none prose-code:after:content-none">
-									<Markdown
-										remarkPlugins={[remarkGfm, remarkMath]}
-										rehypePlugins={[rehypeKatex]}
-										components={{
-											pre({ children }) {
-												return <>{children}</>;
-											},
-											code({ className, children, ...props }) {
-												const match = /language-(\w+)/.exec(className || "");
-												if (match) {
-													return (
-														<CodeBlock
-															code={String(children).replace(/\n$/, "")}
-															language={match[1]}
-															maxLines={500}
-														/>
-													);
-												}
-												return (
-													<code
-														className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm"
-														{...props}
-													>
-														{children}
-													</code>
-												);
-											},
-										}}
+							{showLockedView ? (
+								<div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+									<div className="p-4 rounded-full bg-amber-100 dark:bg-amber-900/30 mb-4">
+										<Lock className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+									</div>
+									<p className="text-lg font-medium">私密内容</p>
+									<p className="text-sm mt-2">需要密码查看</p>
+									<button
+										type="button"
+										onClick={() => setShowPasswordModal(true)}
+										className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
 									>
-										{post.content}
-									</Markdown>
+										输入密码
+									</button>
 								</div>
-							)}
-
-							{post.type === "MOMENT" && (
-								<div className="space-y-4">
-									<p className="text-lg whitespace-pre-wrap leading-relaxed">
-										{post.content}
-									</p>
-									{post.images && post.images.length > 0 && (
-										<div
-											className={`grid gap-2 max-w-[400px] ${
-												post.images.length === 1
-													? "grid-cols-1"
-													: post.images.length === 2
-														? "grid-cols-2"
-														: "grid-cols-3"
-											}`}
-										>
-											{post.images.map((url, index) => (
-												<button
-													key={url}
-													type="button"
-													className="relative overflow-hidden rounded-lg bg-muted aspect-square cursor-pointer ring-1 ring-border/50 hover:ring-primary/50 transition-all"
-													onClick={() => setPreviewIndex(index)}
-												>
-													<img
-														src={resolveStaticUrl(url)}
-														alt={`图片 ${index + 1}`}
-														className="absolute inset-0 h-full w-full object-cover"
-														loading="lazy"
-													/>
-												</button>
-											))}
+							) : (
+								<>
+									{displayPost?.type === "SNIPPET" && (
+										<div className="overflow-hidden rounded-lg border bg-muted/30">
+											<CodeBlock
+												code={displayPost.content || ""}
+												language={displayPost.language || "text"}
+												maxLines={500}
+											/>
 										</div>
 									)}
-								</div>
+
+									{displayPost?.type === "ARTICLE" && (
+										<div className="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-semibold prose-h1:text-2xl prose-h1:mt-8 prose-h1:mb-4 prose-h2:text-xl prose-h2:mt-6 prose-p:leading-7 prose-p:text-foreground/90 prose-img:rounded-xl prose-img:border prose-pre:p-0 prose-pre:m-0 prose-pre:bg-transparent prose-pre:border-0 prose-code:before:content-none prose-code:after:content-none">
+											<Markdown
+												remarkPlugins={[remarkGfm, remarkMath]}
+												rehypePlugins={[rehypeKatex]}
+												components={{
+													pre({ children }) {
+														return <>{children}</>;
+													},
+													code({ className, children, ...props }) {
+														const match = /language-(\w+)/.exec(
+															className || "",
+														);
+														if (match) {
+															return (
+																<CodeBlock
+																	code={String(children).replace(/\n$/, "")}
+																	language={match[1]}
+																	maxLines={500}
+																/>
+															);
+														}
+														return (
+															<code
+																className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm"
+																{...props}
+															>
+																{children}
+															</code>
+														);
+													},
+												}}
+											>
+												{displayPost.content || ""}
+											</Markdown>
+										</div>
+									)}
+
+									{displayPost?.type === "MOMENT" && (
+										<div className="space-y-4">
+											<p className="text-lg whitespace-pre-wrap leading-relaxed">
+												{displayPost.content}
+											</p>
+											{displayPost.images && displayPost.images.length > 0 && (
+												<div
+													className={`grid gap-2 max-w-[400px] ${
+														displayPost.images.length === 1
+															? "grid-cols-1"
+															: displayPost.images.length === 2
+																? "grid-cols-2"
+																: "grid-cols-3"
+													}`}
+												>
+													{displayPost.images.map((url, index) => (
+														<button
+															key={url}
+															type="button"
+															className="relative overflow-hidden rounded-lg bg-muted aspect-square cursor-pointer ring-1 ring-border/50 hover:ring-primary/50 transition-all"
+															onClick={() => setPreviewIndex(index)}
+														>
+															<img
+																src={resolveStaticUrl(url)}
+																alt={`图片 ${index + 1}`}
+																className="absolute inset-0 h-full w-full object-cover"
+																loading="lazy"
+															/>
+														</button>
+													))}
+												</div>
+											)}
+										</div>
+									)}
+								</>
 							)}
 						</div>
 
@@ -364,11 +430,15 @@ function PostDetailPage() {
 							</div>
 						)}
 
-						{post.attachments && post.attachments.length > 0 && (
-							<div className="mt-6 border-t border-border pt-6">
-								<AttachmentList attachments={post.attachments} />
-							</div>
-						)}
+						{post.attachments &&
+							post.attachments.length > 0 &&
+							!showLockedView && (
+								<div className="mt-6 border-t border-border pt-6">
+									<AttachmentList
+										attachments={displayPost?.attachments || post.attachments}
+									/>
+								</div>
+							)}
 					</div>
 				</Card>
 
@@ -401,11 +471,20 @@ function PostDetailPage() {
 			/>
 
 			<ImagePreviewModal
-				images={post.images || []}
+				images={displayPost?.images || post.images || []}
 				open={previewIndex !== null}
 				initialIndex={previewIndex ?? 0}
 				onOpenChange={(open) => setPreviewIndex(open ? 0 : null)}
 			/>
+
+			<PasswordModal
+				open={showPasswordModal}
+				onSubmit={handlePasswordSubmit}
+				onCancel={handlePasswordCancel}
+				isLoading={isVerifying}
+				error={passwordError}
+			/>
+
 			{isMobile && (
 				<Suspense fallback={null}>
 					<MobileActionBar

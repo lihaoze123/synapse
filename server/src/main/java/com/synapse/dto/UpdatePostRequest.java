@@ -1,5 +1,6 @@
 package com.synapse.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,11 @@ public class UpdatePostRequest {
 
     @Size(max = 3, message = "Maximum 3 attachments allowed")
     private List<AttachmentRequest> attachments;
+
+    @JsonProperty("isPrivate")
+    private Boolean isPrivate;
+
+    private String password;
 
     @Data
     @NoArgsConstructor

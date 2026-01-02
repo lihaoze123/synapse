@@ -79,6 +79,12 @@ public class Post {
     @Builder.Default
     private int likeCount = 0;
 
+    @Column(name = "is_private", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean isPrivate = false;
+
+    private String password;
+
     @Column(name = "created_at")
     private Instant createdAt;
 

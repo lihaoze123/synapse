@@ -37,7 +37,7 @@ export interface Post {
 	id: number;
 	type: PostType;
 	title: string | null;
-	content: string;
+	content: string | null;
 	language: string | null;
 	summary: string | null;
 	coverImage: string | null;
@@ -47,6 +47,7 @@ export interface Post {
 	tags: Tag[];
 	createdAt: string;
 	likeCount: number;
+	isPrivate: boolean;
 	userState?: {
 		liked: boolean;
 	};

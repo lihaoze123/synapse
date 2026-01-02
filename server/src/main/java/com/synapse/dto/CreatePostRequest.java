@@ -1,5 +1,6 @@
 package com.synapse.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.synapse.entity.PostType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -35,6 +36,11 @@ public class CreatePostRequest {
 
     @Size(max = 3, message = "Maximum 3 attachments allowed")
     private List<AttachmentRequest> attachments;
+
+    @JsonProperty("isPrivate")
+    private Boolean isPrivate;
+
+    private String password;
 
     @Data
     @NoArgsConstructor

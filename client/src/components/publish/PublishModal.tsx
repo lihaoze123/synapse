@@ -2,6 +2,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import {
 	Code,
 	FileText,
+	Lock,
 	Maximize2,
 	MessageCircle,
 	Minimize2,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
 	FileUploader,
 	type UploadedAttachment,
@@ -47,6 +49,8 @@ export interface PublishData {
 		fileSize: number;
 		contentType: string;
 	}[];
+	isPrivate?: boolean;
+	password?: string;
 }
 
 const TABS = [
@@ -112,23 +116,26 @@ export default function PublishModal({
 
 	const [attachments, setAttachments] = useState<UploadedAttachment[]>([]);
 
+	const [isPrivate, setIsPrivate] = useState(false);
+	const [password, setPassword] = useState("");
+
 	useEffect(() => {
 		if (open && isEditMode && initialData) {
 			setTags(initialData.tags.map((t) => t.name));
 
 			switch (initialData.type) {
 				case "MOMENT":
-					setMomentContent(initialData.content);
+					setMomentContent(initialData.content || "");
 					setMomentImages(initialData.images || []);
 					break;
 				case "SNIPPET":
 					setSnippetTitle(initialData.title || "");
-					setSnippetCode(initialData.content);
+					setSnippetCode(initialData.content || "");
 					setSnippetLanguage(initialData.language || "javascript");
 					break;
 				case "ARTICLE":
 					setArticleTitle(initialData.title || "");
-					setArticleContent(initialData.content);
+					setArticleContent(initialData.content || "");
 					setArticleCoverImage(initialData.coverImage || undefined);
 					break;
 			}
@@ -144,6 +151,9 @@ export default function PublishModal({
 					})),
 				);
 			}
+
+			setIsPrivate(initialData.isPrivate ?? false);
+			setPassword("");
 		} else if (open && !isEditMode) {
 			setMomentContent("");
 			setMomentImages([]);
@@ -155,6 +165,8 @@ export default function PublishModal({
 			setArticleCoverImage(undefined);
 			setTags([]);
 			setAttachments([]);
+			setIsPrivate(false);
+			setPassword("");
 		}
 	}, [open, isEditMode, initialData]);
 
@@ -169,6 +181,8 @@ export default function PublishModal({
 		setArticleCoverImage(undefined);
 		setTags([]);
 		setAttachments([]);
+		setIsPrivate(false);
+		setPassword("");
 	};
 
 	const handleClose = () => {
@@ -179,6 +193,10 @@ export default function PublishModal({
 	const handlePublish = () => {
 		let data: PublishData;
 
+		const privateFields = isPrivate
+			? { isPrivate: true, password: password.trim() || undefined }
+			: { isPrivate: false };
+
 		switch (activeType) {
 			case "MOMENT":
 				data = {
@@ -187,6 +205,7 @@ export default function PublishModal({
 					images: momentImages.length > 0 ? momentImages : undefined,
 					tags,
 					attachments: attachments.length > 0 ? attachments : undefined,
+					...privateFields,
 				};
 				break;
 			case "SNIPPET":
@@ -197,6 +216,7 @@ export default function PublishModal({
 					language: snippetLanguage,
 					tags,
 					attachments: attachments.length > 0 ? attachments : undefined,
+					...privateFields,
 				};
 				break;
 			case "ARTICLE":
@@ -207,6 +227,7 @@ export default function PublishModal({
 					coverImage: articleCoverImage,
 					tags,
 					attachments: attachments.length > 0 ? attachments : undefined,
+					...privateFields,
 				};
 				break;
 		}
@@ -215,6 +236,10 @@ export default function PublishModal({
 	};
 
 	const canPublish = () => {
+		if (isPrivate && !password.trim()) {
+			return false;
+		}
+
 		switch (activeType) {
 			case "MOMENT":
 				return momentContent.trim().length > 0;
@@ -450,6 +475,42 @@ export default function PublishModal({
 												onChange={setAttachments}
 											/>
 										</div>
+
+										{/* Private Toggle */}
+										<div className="space-y-2">
+											<div className="flex items-center justify-between">
+												<div className="flex items-center gap-2">
+													<Lock className="h-4 w-4 text-muted-foreground" />
+													<span className="text-sm font-medium text-foreground">
+														私密帖子
+													</span>
+												</div>
+												<button
+													type="button"
+													onClick={() => setIsPrivate(!isPrivate)}
+													className={cn(
+														"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors",
+														isPrivate ? "bg-primary" : "bg-input",
+													)}
+												>
+													<span
+														className={cn(
+															"pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform",
+															isPrivate ? "translate-x-5" : "translate-x-0",
+														)}
+													/>
+												</button>
+											</div>
+											{isPrivate && (
+												<Input
+													type="password"
+													placeholder="输入访问密码"
+													value={password}
+													onChange={(e) => setPassword(e.target.value)}
+													className="mt-2"
+												/>
+											)}
+										</div>
 									</div>
 
 									{/* Publish Actions */}
@@ -620,6 +681,42 @@ export default function PublishModal({
 						{/* Attachments */}
 						<div className="mt-4">
 							<FileUploader value={attachments} onChange={setAttachments} />
+						</div>
+
+						{/* Private Toggle */}
+						<div className="mt-4 border-t border-border pt-4">
+							<div className="flex items-center justify-between">
+								<div className="flex items-center gap-2">
+									<Lock className="h-4 w-4 text-muted-foreground" />
+									<span className="text-sm font-medium text-foreground">
+										设为私密
+									</span>
+								</div>
+								<button
+									type="button"
+									onClick={() => setIsPrivate(!isPrivate)}
+									className={cn(
+										"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors",
+										isPrivate ? "bg-primary" : "bg-input",
+									)}
+								>
+									<span
+										className={cn(
+											"pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform",
+											isPrivate ? "translate-x-5" : "translate-x-0",
+										)}
+									/>
+								</button>
+							</div>
+							{isPrivate && (
+								<Input
+									type="password"
+									placeholder="输入访问密码"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									className="mt-3"
+								/>
+							)}
 						</div>
 					</div>
 

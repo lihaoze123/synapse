@@ -15,6 +15,8 @@ export interface CreatePostRequest {
 		fileSize: number;
 		contentType: string;
 	}[];
+	isPrivate?: boolean;
+	password?: string;
 }
 
 export interface PostsPage {
@@ -115,5 +117,17 @@ export const postsService = {
 			return response.data.data;
 		}
 		throw new Error(response.data.message || "Failed to search posts");
+	},
+
+	async verifyPostPassword(id: number, password: string): Promise<Post> {
+		const response = await api.post<ApiResponse<Post>>(
+			`/posts/${id}/verify-password`,
+			{ password },
+		);
+
+		if (response.data.success && response.data.data) {
+			return response.data.data;
+		}
+		throw new Error(response.data.message || "Failed to verify password");
 	},
 };
