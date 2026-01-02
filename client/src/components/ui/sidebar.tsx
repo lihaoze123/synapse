@@ -99,6 +99,11 @@ function SidebarProvider({
 				event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
 				(event.metaKey || event.ctrlKey)
 			) {
+				// Don't toggle if focused on a markdown editor
+				const target = event.target as HTMLElement;
+				if (target.closest("[data-markdown-editor]")) {
+					return;
+				}
 				event.preventDefault();
 				toggleSidebar();
 			}

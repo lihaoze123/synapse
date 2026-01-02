@@ -1,5 +1,15 @@
-import { Bold, Code, ImagePlus, Italic, Link, List, Quote, Sigma } from "lucide-react";
+import {
+	Bold,
+	Code,
+	ImagePlus,
+	Italic,
+	Link,
+	List,
+	Quote,
+	Sigma,
+} from "lucide-react";
 import type { RefObject } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface MarkdownToolbarProps {
@@ -17,6 +27,7 @@ interface ToolbarAction {
 	suffix: string;
 	placeholder: string;
 	isBlock?: boolean;
+	shortcut?: string;
 }
 
 const actions: ToolbarAction[] = [
@@ -26,6 +37,7 @@ const actions: ToolbarAction[] = [
 		prefix: "**",
 		suffix: "**",
 		placeholder: "粗体文字",
+		shortcut: "B",
 	},
 	{
 		icon: Italic,
@@ -33,6 +45,7 @@ const actions: ToolbarAction[] = [
 		prefix: "*",
 		suffix: "*",
 		placeholder: "斜体文字",
+		shortcut: "I",
 	},
 	{
 		icon: Link,
@@ -40,6 +53,7 @@ const actions: ToolbarAction[] = [
 		prefix: "[",
 		suffix: "](url)",
 		placeholder: "链接文字",
+		shortcut: "K",
 	},
 	{
 		icon: Code,
@@ -48,6 +62,7 @@ const actions: ToolbarAction[] = [
 		suffix: "\n```",
 		placeholder: "代码",
 		isBlock: true,
+		shortcut: "⇧⌘K",
 	},
 	{
 		icon: Quote,
@@ -71,6 +86,7 @@ const actions: ToolbarAction[] = [
 		prefix: "$",
 		suffix: "$",
 		placeholder: "E = mc^2",
+		shortcut: "M",
 	},
 	{
 		icon: Sigma,
@@ -79,6 +95,7 @@ const actions: ToolbarAction[] = [
 		suffix: "\n$$",
 		placeholder: "\\int_0^\\infty e^{-x} dx = 1",
 		isBlock: true,
+		shortcut: "⇧⌘M",
 	},
 ];
 
@@ -89,6 +106,22 @@ export default function MarkdownToolbar({
 	onImageClick,
 	className,
 }: MarkdownToolbarProps) {
+	const [modKey, setModKey] = useState("⌘");
+
+	useEffect(() => {
+		const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+		setModKey(isMac ? "⌘" : "Ctrl");
+	}, []);
+
+	const formatShortcut = (shortcut?: string) => {
+		if (!shortcut) return "";
+		if (shortcut.includes("⌘")) {
+			return shortcut
+				.replace("⇧⌘", `${modKey}+Shift+`)
+				.replace("⌘", `${modKey}+`);
+		}
+		return `${modKey}+${shortcut}`;
+	};
 	const insertMarkdown = (action: ToolbarAction) => {
 		const textarea = textareaRef.current;
 		if (!textarea) return;
@@ -142,24 +175,28 @@ export default function MarkdownToolbar({
 				className,
 			)}
 		>
-			{actions.map((action) => (
-				<button
-					key={action.label}
-					type="button"
-					onClick={() => insertMarkdown(action)}
-					title={action.label}
-					className={cn(
-						"flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
-						"text-muted-foreground",
-						"hover:bg-background hover:text-foreground hover:shadow-sm",
-						"active:scale-95",
-						"transition-all duration-150",
-						"sm:h-7 sm:w-7",
-					)}
-				>
-					<action.icon className="h-4 w-4" />
-				</button>
-			))}
+			{actions.map((action) => {
+				const shortcut = formatShortcut(action.shortcut);
+				const title = shortcut ? `${action.label} (${shortcut})` : action.label;
+				return (
+					<button
+						key={action.label}
+						type="button"
+						onClick={() => insertMarkdown(action)}
+						title={title}
+						className={cn(
+							"flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
+							"text-muted-foreground",
+							"hover:bg-background hover:text-foreground hover:shadow-sm",
+							"active:scale-95",
+							"transition-all duration-150",
+							"sm:h-7 sm:w-7",
+						)}
+					>
+						<action.icon className="h-4 w-4" />
+					</button>
+				);
+			})}
 
 			{onImageClick && (
 				<>

@@ -69,20 +69,88 @@ export default function ArticleEditor({
 		{ key: "preview", label: "预览" },
 	];
 
+	const insertMarkdown = (
+		prefix: string,
+		suffix: string,
+		placeholder: string,
+	) => {
+		const textarea = textareaRef.current;
+		if (!textarea) return;
+
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const selectedText = content.substring(start, end);
+
+		const textToWrap = selectedText || placeholder;
+		const newText = `${prefix}${textToWrap}${suffix}`;
+		const newContent =
+			content.substring(0, start) + newText + content.substring(end);
+		onContentChange(newContent);
+
+		setTimeout(() => {
+			textarea.focus();
+			if (selectedText) {
+				textarea.setSelectionRange(
+					start + newText.length,
+					start + newText.length,
+				);
+			} else {
+				textarea.setSelectionRange(
+					start + prefix.length,
+					start + prefix.length + placeholder.length,
+				);
+			}
+		}, 0);
+	};
+
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-		if (e.key === "Tab") {
-			e.preventDefault();
-			const textarea = e.currentTarget;
-			const start = textarea.selectionStart;
-			const end = textarea.selectionEnd;
+		const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+		const modKey = isMac ? e.metaKey : e.ctrlKey;
 
-			const newContent = `${content.substring(0, start)}\t${content.substring(end)}`;
-			onContentChange(newContent);
+		if (!modKey) {
+			// Handle Tab when no modifier key
+			if (e.key === "Tab") {
+				e.preventDefault();
+				const textarea = e.currentTarget;
+				const start = textarea.selectionStart;
+				const end = textarea.selectionEnd;
 
-			// Restore cursor position after tab
-			setTimeout(() => {
-				textarea.selectionStart = textarea.selectionEnd = start + 1;
-			}, 0);
+				const newContent = `${content.substring(0, start)}\t${content.substring(end)}`;
+				onContentChange(newContent);
+
+				setTimeout(() => {
+					textarea.selectionStart = textarea.selectionEnd = start + 1;
+				}, 0);
+			}
+			return;
+		}
+
+		// Markdown shortcuts with Ctrl/Cmd
+		switch (e.key) {
+			case "b":
+				e.preventDefault();
+				insertMarkdown("**", "**", "粗体文字");
+				break;
+			case "i":
+				e.preventDefault();
+				insertMarkdown("*", "*", "斜体文字");
+				break;
+			case "k":
+				e.preventDefault();
+				if (e.shiftKey) {
+					insertMarkdown("```\n", "\n```", "代码");
+				} else {
+					insertMarkdown("[", "](url)", "链接文字");
+				}
+				break;
+			case "m":
+				e.preventDefault();
+				if (e.shiftKey) {
+					insertMarkdown("$$\n", "\n$$", "\\int_0^\\infty e^{-x} dx = 1");
+				} else {
+					insertMarkdown("$", "$", "E = mc^2");
+				}
+				break;
 		}
 	};
 
@@ -106,6 +174,7 @@ export default function ArticleEditor({
 							onChange={(e) => onContentChange(e.target.value)}
 							onKeyDown={handleKeyDown}
 							placeholder="使用 Markdown 撰写文章内容..."
+							data-markdown-editor
 							className={cn(
 								"flex-1 min-h-0 w-full resize-none",
 								"rounded-b-lg rounded-t-none",
@@ -263,6 +332,7 @@ export default function ArticleEditor({
 							onKeyDown={handleKeyDown}
 							placeholder="使用 Markdown 撰写文章内容..."
 							rows={10}
+							data-markdown-editor
 							className={cn(
 								"w-full resize-none rounded-b-lg rounded-t-none",
 								"border border-t-0 border-input bg-background",
