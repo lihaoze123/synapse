@@ -178,25 +178,28 @@ function PostDetailPage() {
 									{post.user.avatarUrl ? (
 										<img
 											src={post.user.avatarUrl}
-											alt={`${post.user.username} 的头像`}
+											alt={`${post.user.displayName || post.user.username} 的头像`}
 											className="h-10 w-10 rounded-full object-cover ring-2 ring-border/30 hover:ring-primary/50 transition-all"
 										/>
 									) : (
 										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-medium ring-2 ring-border/30 hover:ring-primary/50 transition-all">
-											{post.user.username.charAt(0).toUpperCase()}
+											{(post.user.displayName || post.user.username).charAt(0).toUpperCase()}
 										</div>
 									)}
 								</Link>
 
 								<div className="min-w-0 flex-1">
 									<div className="flex items-center gap-2 sm:gap-3">
-										<Link
-											to="/users/$userId"
-											params={{ userId: String(post.user.id) }}
-											className="font-medium hover:underline"
-										>
-											{post.user.username}
-										</Link>
+										<div className="flex flex-col min-w-0">
+											<Link
+												to="/users/$userId"
+												params={{ userId: String(post.user.id) }}
+												className="font-medium hover:underline truncate"
+											>
+												{post.user.displayName || post.user.username}
+											</Link>
+											<span className="text-xs text-muted-foreground truncate">@{post.user.username}</span>
+										</div>
 										{!isAuthor && (
 											<FollowButton userId={post.user.id} size="sm" />
 										)}
