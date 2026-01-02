@@ -28,6 +28,8 @@ Synapse 后端基于 **Spring Boot** 构建，提供完整的 RESTful API 支持
 - 💬 **评论系统** - 帖子评论，支持编辑/删除
 - 🔖 **书签收藏** - 收藏帖子功能
 - 👥 **关注系统** - 用户关注/粉丝
+- 🔔 **消息通知** - 点赞、评论、关注、提及通知
+- 🔐 **私密帖子** - 支持密码保护的私密内容
 - 📤 **文件上传** - 本地存储，UUID 命名
 - 🔍 **全文搜索** - 支持关键词搜索和类型筛选
 - 📄 **分页查询** - 高效的数据分页加载
@@ -69,7 +71,8 @@ com.synapse/
 │   ├── FollowController.java    # 👥 关注接口
 │   ├── TagController.java    # 🏷️ 标签接口
 │   ├── UserController.java   # 👤 用户接口
-│   └── FileController.java   # 📤 文件上传接口
+│   ├── FileController.java   # 📤 文件上传接口
+│   └── NotificationController.java  # 🔔 通知接口
 │
 ├── 📂 dto/                    # 📦 数据传输对象
 │   ├── request/              # ← 请求 DTO
@@ -84,6 +87,8 @@ com.synapse/
 │   ├── Bookmark.java         # 🔖 书签实体
 │   ├── Follow.java           # 👥 关注实体
 │   ├── Tag.java              # 🏷️ 标签实体
+│   ├── Notification.java     # 🔔 通知实体
+│   ├── NotificationType.java # 📋 通知类型枚举
 │   └── PostType.java         # 📋 帖子类型枚举
 │
 ├── 📂 repository/             # 💾 数据访问层
@@ -95,7 +100,11 @@ com.synapse/
 │   ├── AuthService.java
 │   ├── PostService.java
 │   ├── TagService.java
-│   └── UserService.java
+│   ├── UserService.java
+│   ├── NotificationService.java
+│   ├── CommentService.java
+│   ├── FollowService.java
+│   └── LikeService.java
 │
 └── 📂 util/                   # 🔧 工具类
     ├── FileUtil.java         # 📤 文件上传工具
@@ -148,6 +157,8 @@ com.synapse/
 | language | VARCHAR(50) | | 代码语言（仅 SNIPPET） |
 | summary | VARCHAR(500) | | 摘要（自动生成） |
 | cover_image | VARCHAR(500) | | 封面图 URL |
+| is_private | BOOLEAN | DEFAULT false | 是否为私密帖子 |
+| password | VARCHAR(255) | | 密码（私密帖子） |
 | user_id | BIGINT | FK | 作者 ID |
 | created_at | DATETIME | | 创建时间（自动） |
 
@@ -243,6 +254,22 @@ com.synapse/
 
 </details>
 
+<details>
+<summary><b>🔔 notifications - 通知表</b></summary>
+
+| 字段 | 类型 | 约束 | 说明 |
+|:-----|:-----|:-----|:-----|
+| id | BIGINT | PK | 主键（自增） |
+| user_id | BIGINT | FK | 接收者 ID |
+| actor_id | BIGINT | FK | 触发者 ID |
+| type | ENUM | NOT NULL | LIKE/COMMENT/FOLLOW/MENTION |
+| post_id | BIGINT | FK | 关联帖子 ID |
+| comment_id | BIGINT | FK | 关联评论 ID |
+| is_read | BOOLEAN | DEFAULT false | 是否已读 |
+| created_at | DATETIME | | 创建时间 |
+
+</details>
+
 ---
 
 ## 🔌 API 接口
@@ -269,6 +296,7 @@ com.synapse/
 | POST | `/api/posts` | 创建帖子 | ✅ |
 | PUT | `/api/posts/{id}` | 更新帖子（仅作者） | ✅ |
 | DELETE | `/api/posts/{id}` | 删除帖子（仅作者） | ✅ |
+| POST | `/api/posts/{id}/verify-password` | 验证私密帖子密码 | ✅ |
 
 **查询参数示例：**
 ```
@@ -345,6 +373,24 @@ GET /api/posts/search?keyword=Spring&type=ARTICLE
 | GET | `/api/follows/counts/{userId}` | 获取用户关注数/粉丝数 | ❌ |
 | POST | `/api/follows/{userId}` | 关注用户 | ✅ |
 | DELETE | `/api/follows/{userId}` | 取消关注 | ✅ |
+
+</details>
+
+<details>
+<summary><b>🔔 通知接口 /api/notifications</b></summary>
+
+| 方法 | 路径 | 说明 | 认证 |
+|:-----|:-----|:-----|:-----|
+| GET | `/api/notifications` | 获取通知列表（分页） | ✅ |
+| GET | `/api/notifications/unread-count` | 获取未读通知数量 | ✅ |
+| POST | `/api/notifications/read/{id}` | 标记通知为已读 | ✅ |
+| POST | `/api/notifications/read-all` | 标记所有通知为已读 | ✅ |
+
+**通知类型：**
+- `LIKE` - 点赞通知
+- `COMMENT` - 评论通知
+- `FOLLOW` - 关注通知
+- `MENTION` - 提及通知
 
 </details>
 

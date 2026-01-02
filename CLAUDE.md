@@ -17,13 +17,15 @@ This is a course project (课程设计). Implementation is in progress - basic C
 | Layer | Technology |
 |-------|------------|
 | Frontend | React 19, Vite 7, Tailwind CSS 4, Coss UI, TanStack Query + Router |
-| Code/Text | react-syntax-highlighter (code highlighting), react-markdown |
+| Code/Text | CodeMirror (code editor with syntax highlighting), react-markdown |
 | Lint/Format | Biome (frontend), Checkstyle (backend) |
 | Testing | Vitest + Testing Library (frontend), JUnit 5 (backend) |
 | Backend | Spring Boot 3.2, Spring Data JPA (Hibernate) |
 | Database | MySQL (production) / H2 (demo) |
 | Auth | JWT (jjwt library) |
 | File Storage | Local `uploads/` folder with UUID naming |
+| Theme | Custom dark mode with system preference detection |
+| State | localStorage (drafts, theme), sessionStorage (unlocked posts) |
 
 ## Build & Run Commands
 
@@ -116,12 +118,12 @@ java -jar target/synapse-0.0.1-SNAPSHOT.jar
 ### Backend Package Structure
 ```
 com.synapse/
-├── config/           # CORS, StaticResourceConfig
-├── controller/       # AuthController, PostController, TagController, CommentController, CommentLikeController, BookmarkController, FollowController, LikeController, UserController, FileController
-├── dto/              # Request/Response DTOs (ApiResponse, PostDto, CommentDto, etc.)
-├── entity/           # User, Post, Tag, Comment, CommentLike, Bookmark, Follow, Like (JPA Entities)
+├── config/           # CORS, StaticResourceConfig, JwtConfig
+├── controller/       # AuthController, PostController, TagController, CommentController, CommentLikeController, BookmarkController, FollowController, LikeController, UserController, FileController, NotificationController
+├── dto/              # Request/Response DTOs (ApiResponse, PostDto, CommentDto, NotificationDto, VerifyPasswordRequest, etc.)
+├── entity/           # User, Post, Tag, Comment, CommentLike, Bookmark, Follow, Like, Notification (JPA Entities)
 ├── repository/       # JPA Repository interfaces
-├── service/          # Business logic
+├── service/          # Business logic (AuthService, PostService, NotificationService, etc.)
 └── utils/            # JWTUtil, FileUtil
 ```
 
@@ -129,26 +131,27 @@ com.synapse/
 ```
 src/
 ├── components/
-│   ├── common/       # Reusable UI (Button, Input, Tag, CodeBlock, FollowButton, FollowStats, UserInfo, UserListItem)
-│   ├── layout/       # Navbar, Sidebar, Layout
-│   ├── editor/       # MarkdownEditor, CodeEditor
+│   ├── common/       # Reusable UI (Button, Input, Tag, CodeBlock, FollowButton, FollowStats, UserInfo, UserListItem, ThemeToggle)
+│   ├── layout/       # Navbar, Sidebar, Layout, TopBar
+│   ├── editor/       # MarkdownEditor, CodeMirrorEditor
 │   ├── cards/        # PostCardFactory, SnippetCard, ArticleCard, MomentCard, PostCard
 │   ├── feed/         # Feed, ComposeCard, EmptyState
-│   ├── publish/      # PublishModal, SnippetEditor, ArticleEditor, MomentEditor, TagInput
+│   ├── publish/      # PublishModal, SnippetEditor, ArticleEditor, MomentEditor, TagInput, RestoreDraftModal
 │   ├── upload/       # ImageUploader
 │   ├── profile/      # AvatarUpload
 │   ├── comments/     # CommentSection, CommentItem
-│   └── ui/           # UI components (Card, Button, Input, etc.)
-├── hooks/            # useAuth, usePosts
-├── routes/           # TanStack Router definitions (index, login, search, profile, posts/$id, users/$userId.*)
-├── services/         # Axios API client
-└── utils/
+│   ├── notifications/ # NotificationItem, NotificationsPanel
+│   └── ui/           # UI components (Card, Button, Input, PasswordModal, etc.)
+├── hooks/            # useAuth, usePosts, useNotifications, useTheme
+├── routes/           # TanStack Router definitions (index, login, search, profile, posts/$id, users/$userId.*, notifications)
+├── services/         # Axios API client (notificationsService, etc.)
+└── utils/            # draftStorage, privatePost
 ```
 
-### Database Schema (9 tables)
+### Database Schema (10 tables)
 
 - **Users**: id, username, password (encrypted), avatar_url
-- **Posts**: id, type (SNIPPET/ARTICLE/MOMENT), title, content, language, summary, cover_image, user_id, created_at
+- **Posts**: id, type (SNIPPET/ARTICLE/MOMENT), title, content, language, summary, cover_image, is_private, password, user_id, created_at
 - **Tags**: id, name, icon
 - **Post_Tags**: post_id, tag_id (junction table)
 - **Comments**: id, post_id, user_id, content, created_at, updated_at
@@ -156,6 +159,7 @@ src/
 - **Bookmarks**: id, user_id, post_id, created_at
 - **Follows**: follower_id, following_id, created_at
 - **Likes**: id, user_id, post_id, created_at
+- **Notifications**: id, user_id (recipient), actor_id (who performed action), type (LIKE/COMMENT/FOLLOW/MENTION), post_id, comment_id, is_read, created_at
 
 ### Core API Endpoints
 ```
@@ -170,6 +174,7 @@ POST /api/posts          # Publish content (type in JSON body)
 PUT  /api/posts/{id}     # Update post (owner only)
 DELETE /api/posts/{id}   # Delete post (owner only)
 GET  /api/posts/search   # Search by keyword with optional type filter
+POST /api/posts/{id}/verify-password # Verify password for private post
 
 # Comments
 GET  /api/posts/{postId}/comments  # Get post comments (paginated)
@@ -196,6 +201,12 @@ GET  /api/follows/check/{userId}   # Check if following user
 GET  /api/follows/counts/{userId}  # Get follower/following counts
 POST /api/follows/{userId}         # Follow user
 DELETE /api/follows/{userId}       # Unfollow user
+
+# Notifications
+GET  /api/notifications            # Get user notifications (paginated)
+GET  /api/notifications/unread-count # Get unread notification count
+POST /api/notifications/read/{id}  # Mark notification as read
+POST /api/notifications/read-all   # Mark all notifications as read
 
 # Users
 GET  /api/users/{id}               # Get user by ID
@@ -224,6 +235,27 @@ Frontend dynamically renders cards based on `post.type`:
 - **Bookmarks**: Toggle bookmark on posts, separate bookmarks page
 - **Follows**: Follow/unfollow users, view followers/following lists with stats
 - **User Profiles**: Public profile pages with user info and posts
+- **Notifications**: Real-time notifications for likes, comments, follows, and mentions with unread count badge
+
+### Editor Features
+- **Draft Auto-Save**: Automatically saves drafts to localStorage with 1-second debounce
+- **CodeMirror Integration**: Advanced code editor with 20+ languages, syntax highlighting, line numbers
+- **Fullscreen Mode**: All editors support fullscreen for focused writing
+- **Markdown Toolbar**: Article editor has formatting buttons for common Markdown syntax
+- **Character Counter**: Moment editor shows character count with visual progress bar
+- **Image Upload**: Support for multiple images with preview
+
+### Theme System
+- **Three Modes**: Light, Dark, System (follows OS preference)
+- **Persistence**: Theme preference saved to localStorage
+- **Real-time Toggle**: Instant theme switching without page refresh
+- **Tailwind Dark Mode**: Uses `dark:` prefix for conditional styling
+
+### Private Posts
+- **Password Protection**: Posts can be marked as private with optional password
+- **Session-based Unlocking**: Unlocked posts stored in sessionStorage
+- **Owner Access**: Post owners can always access their private posts
+- **Visual Indicators**: Lock icons indicate private content
 
 ### Search
 - Real-time search with debouncing (500ms)
@@ -239,12 +271,14 @@ spring.web.resources.static-locations=file:./uploads/,classpath:/static/
 Files saved to project root `uploads/` folder, accessible at `localhost:8080/filename.png`.
 
 ### Code Highlighting
-- react-syntax-highlighter for code blocks in posts
+- CodeMirror editor for snippet creation with 20+ language support
+- ReactMarkdown + Shiki for displaying code in posts
 - Language detection from post metadata
 - Custom CodeBlock component with copy button
 
 ### UI Style
 - Minimalist warm color palette (cream background, dark gray text, amber/orange accents)
+- Dark mode with slate/gray tones for reduced eye strain
 - Soft shadows (`shadow-sm` to `shadow-md`), rounded corners (`rounded-xl`)
 - TanStack Router Loader for data pre-loading
 - Responsive design with mobile-first approach
