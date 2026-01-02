@@ -69,6 +69,10 @@ function HomePage() {
 				coverImage: data.coverImage || undefined,
 				images: data.images && data.images.length > 0 ? data.images : undefined,
 				tags: data.tags.length > 0 ? data.tags : undefined,
+				attachments:
+					data.attachments && data.attachments.length > 0
+						? data.attachments
+						: undefined,
 			});
 			setPublishOpen(false);
 		} catch {}
