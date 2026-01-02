@@ -9,7 +9,7 @@ import {
 	Sigma,
 } from "lucide-react";
 import type { RefObject } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface MarkdownToolbarProps {
@@ -28,6 +28,8 @@ interface ToolbarAction {
 	placeholder: string;
 	isBlock?: boolean;
 	shortcut?: string;
+	key?: string;
+	shiftKey?: boolean;
 }
 
 const actions: ToolbarAction[] = [
@@ -38,6 +40,7 @@ const actions: ToolbarAction[] = [
 		suffix: "**",
 		placeholder: "粗体文字",
 		shortcut: "B",
+		key: "b",
 	},
 	{
 		icon: Italic,
@@ -46,6 +49,7 @@ const actions: ToolbarAction[] = [
 		suffix: "*",
 		placeholder: "斜体文字",
 		shortcut: "I",
+		key: "i",
 	},
 	{
 		icon: Link,
@@ -54,6 +58,7 @@ const actions: ToolbarAction[] = [
 		suffix: "](url)",
 		placeholder: "链接文字",
 		shortcut: "K",
+		key: "k",
 	},
 	{
 		icon: Code,
@@ -63,6 +68,8 @@ const actions: ToolbarAction[] = [
 		placeholder: "代码",
 		isBlock: true,
 		shortcut: "⇧⌘K",
+		key: "k",
+		shiftKey: true,
 	},
 	{
 		icon: Quote,
@@ -87,6 +94,7 @@ const actions: ToolbarAction[] = [
 		suffix: "$",
 		placeholder: "E = mc^2",
 		shortcut: "M",
+		key: "m",
 	},
 	{
 		icon: Sigma,
@@ -96,6 +104,8 @@ const actions: ToolbarAction[] = [
 		placeholder: "\\int_0^\\infty e^{-x} dx = 1",
 		isBlock: true,
 		shortcut: "⇧⌘M",
+		key: "m",
+		shiftKey: true,
 	},
 ];
 
@@ -122,49 +132,76 @@ export default function MarkdownToolbar({
 		}
 		return `${modKey}+${shortcut}`;
 	};
-	const insertMarkdown = (action: ToolbarAction) => {
+
+	const insertMarkdown = useCallback(
+		(action: ToolbarAction) => {
+			const textarea = textareaRef.current;
+			if (!textarea) return;
+
+			const start = textarea.selectionStart;
+			const end = textarea.selectionEnd;
+			const selectedText = content.substring(start, end);
+
+			const textToWrap = selectedText || action.placeholder;
+			let newText: string;
+			let cursorOffset: number;
+
+			if (action.isBlock && start > 0 && content[start - 1] !== "\n") {
+				newText = `\n${action.prefix}${textToWrap}${action.suffix}`;
+			} else {
+				newText = `${action.prefix}${textToWrap}${action.suffix}`;
+			}
+
+			const newContent =
+				content.substring(0, start) + newText + content.substring(end);
+			onContentChange(newContent);
+
+			if (selectedText) {
+				cursorOffset = start + newText.length;
+			} else {
+				cursorOffset =
+					start +
+					action.prefix.length +
+					(action.isBlock && start > 0 && content[start - 1] !== "\n" ? 1 : 0);
+			}
+
+			setTimeout(() => {
+				textarea.focus();
+				if (selectedText) {
+					textarea.setSelectionRange(cursorOffset, cursorOffset);
+				} else {
+					textarea.setSelectionRange(
+						cursorOffset,
+						cursorOffset + action.placeholder.length,
+					);
+				}
+			}, 0);
+		},
+		[textareaRef, content, onContentChange],
+	);
+
+	useEffect(() => {
 		const textarea = textareaRef.current;
 		if (!textarea) return;
 
-		const start = textarea.selectionStart;
-		const end = textarea.selectionEnd;
-		const selectedText = content.substring(start, end);
+		const handleKeyDown = (e: KeyboardEvent) => {
+			const isMod = e.metaKey || e.ctrlKey;
+			if (!isMod) return;
 
-		const textToWrap = selectedText || action.placeholder;
-		let newText: string;
-		let cursorOffset: number;
+			const key = e.key.toLowerCase();
+			const action = actions.find(
+				(a) => a.key === key && (a.shiftKey ? e.shiftKey : !e.shiftKey),
+			);
 
-		if (action.isBlock && start > 0 && content[start - 1] !== "\n") {
-			newText = `\n${action.prefix}${textToWrap}${action.suffix}`;
-		} else {
-			newText = `${action.prefix}${textToWrap}${action.suffix}`;
-		}
-
-		const newContent =
-			content.substring(0, start) + newText + content.substring(end);
-		onContentChange(newContent);
-
-		if (selectedText) {
-			cursorOffset = start + newText.length;
-		} else {
-			cursorOffset =
-				start +
-				action.prefix.length +
-				(action.isBlock && start > 0 && content[start - 1] !== "\n" ? 1 : 0);
-		}
-
-		setTimeout(() => {
-			textarea.focus();
-			if (selectedText) {
-				textarea.setSelectionRange(cursorOffset, cursorOffset);
-			} else {
-				textarea.setSelectionRange(
-					cursorOffset,
-					cursorOffset + action.placeholder.length,
-				);
+			if (action) {
+				e.preventDefault();
+				insertMarkdown(action);
 			}
-		}, 0);
-	};
+		};
+
+		textarea.addEventListener("keydown", handleKeyDown);
+		return () => textarea.removeEventListener("keydown", handleKeyDown);
+	}, [textareaRef, insertMarkdown]);
 
 	return (
 		<div

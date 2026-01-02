@@ -1,9 +1,11 @@
-import { CheckCircle2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { createRef, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks";
 import { useCreateComment, usePostComments } from "@/hooks/useComments";
+import type { Comment } from "@/types";
+import CommentEditor, { type CommentEditorRef } from "./CommentEditor";
 import CommentItem from "./CommentItem";
+import CommentSkeleton from "./CommentSkeleton";
 
 interface CommentSectionProps {
 	postId: number;
@@ -15,7 +17,6 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 		data,
 		isLoading,
 		isError,
-		refetch,
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
@@ -28,21 +29,34 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 		username: string;
 		floor: number;
 	} | null>(null);
-	const [showSuccess, setShowSuccess] = useState(false);
+	const [highlightedCommentId, setHighlightedCommentId] = useState<
+		number | null
+	>(null);
+
+	const editorRef = useRef<CommentEditorRef>(null);
+	const commentRefs = useRef<
+		Map<number, React.RefObject<HTMLDivElement | null>>
+	>(new Map());
 
 	const allComments = data?.pages.flatMap((page) => page.content) ?? [];
 
-	// Auto-hide success message after 3 seconds
+	const getCommentRef = (commentId: number) => {
+		let ref = commentRefs.current.get(commentId);
+		if (!ref) {
+			ref = createRef<HTMLDivElement | null>();
+			commentRefs.current.set(commentId, ref);
+		}
+		return ref;
+	};
+
 	useEffect(() => {
-		if (showSuccess) {
-			const timer = setTimeout(() => setShowSuccess(false), 3000);
+		if (highlightedCommentId) {
+			const timer = setTimeout(() => setHighlightedCommentId(null), 2500);
 			return () => clearTimeout(timer);
 		}
-	}, [showSuccess]);
+	}, [highlightedCommentId]);
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-
+	const handleSubmit = () => {
 		if (!content.trim()) return;
 
 		const parentId = replyTo?.id;
@@ -56,11 +70,18 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 				},
 			},
 			{
-				onSuccess: () => {
+				onSuccess: (newComment: Comment) => {
 					setContent("");
 					setReplyTo(null);
-					setShowSuccess(true);
-					refetch();
+					setHighlightedCommentId(newComment.id);
+
+					setTimeout(() => {
+						const ref = commentRefs.current.get(newComment.id);
+						ref?.current?.scrollIntoView({
+							behavior: "smooth",
+							block: "center",
+						});
+					}, 100);
 				},
 			},
 		);
@@ -69,59 +90,30 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 	const handleReply = (commentId: number, username: string, floor: number) => {
 		setReplyTo({ id: commentId, username, floor });
 		setContent("");
+		editorRef.current?.scrollIntoView();
 	};
 
-	const cancelReply = () => {
+	const handleCancelReply = () => {
 		setReplyTo(null);
 		setContent("");
 	};
 
 	return (
 		<div className="space-y-6">
-			{/* Success Toast */}
-			{showSuccess && (
-				<div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-4 py-2 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
-					<CheckCircle2 className="h-4 w-4" />
-					<span>评论发表成功</span>
-				</div>
-			)}
-
-			{/* Comment Form */}
+			{/* Comment Editor */}
 			{user ? (
-				<form onSubmit={handleSubmit} className="space-y-3">
-					{replyTo && (
-						<div className="flex items-center justify-between bg-muted/50 rounded-lg px-3 py-2">
-							<span className="text-sm text-muted-foreground">
-								回复{" "}
-								<span className="font-semibold text-foreground">
-									{replyTo.floor} 楼
-								</span>
-							</span>
-							<button
-								type="button"
-								className="text-muted-foreground hover:text-foreground text-sm"
-								onClick={cancelReply}
-							>
-								取消
-							</button>
-						</div>
-					)}
-					<textarea
-						value={content}
-						onChange={(e) => setContent(e.target.value)}
-						placeholder="写下你的评论..."
-						className="w-full min-h-[100px] p-4 rounded-xl border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground/60"
-					/>
-					<div className="flex justify-end">
-						<Button
-							type="submit"
-							size="sm"
-							disabled={!content.trim() || createComment.isPending}
-						>
-							{createComment.isPending ? "发送中..." : "发送评论"}
-						</Button>
-					</div>
-				</form>
+				<CommentEditor
+					ref={editorRef}
+					value={content}
+					onChange={setContent}
+					onSubmit={handleSubmit}
+					onCancel={replyTo ? handleCancelReply : undefined}
+					isSubmitting={createComment.isPending}
+					replyTo={replyTo}
+					placeholder={
+						replyTo ? `回复 ${replyTo.username}...` : "写下你的评论..."
+					}
+				/>
 			) : (
 				<div className="text-center py-6 bg-muted/30 rounded-xl">
 					<p className="text-muted-foreground text-sm">
@@ -131,28 +123,28 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 				</div>
 			)}
 
-			{/* Mobile bottom action bar handles comment entry; no floating composer needed */}
-
 			{/* Comments List */}
 			<div className="space-y-4">
 				{isError ? (
 					<p className="text-center text-muted-foreground text-sm">
 						加载评论失败
 					</p>
-				) : isLoading && allComments.length === 0 ? (
-					<p className="text-center text-muted-foreground text-sm">加载中...</p>
+				) : isLoading ? (
+					<CommentSkeleton count={3} />
 				) : allComments.length > 0 ? (
 					<>
 						{allComments.map((comment) => (
 							<CommentItem
 								key={comment.id}
+								ref={getCommentRef(comment.id)}
 								comment={comment}
 								postId={postId}
+								isHighlighted={highlightedCommentId === comment.id}
 								onReply={handleReply}
 							/>
 						))}
 						{hasNextPage && (
-							<div className="text-center">
+							<div className="text-center pt-2">
 								<Button
 									variant="outline"
 									size="sm"
