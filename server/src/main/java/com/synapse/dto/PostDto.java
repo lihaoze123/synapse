@@ -34,6 +34,7 @@ public class PostDto {
     private Instant createdAt;
     private int likeCount;
     private UserStateDto userState;
+    private List<AttachmentDto> attachments;
 
     public static PostDto fromEntity(Post post) {
         List<String> imageList = Collections.emptyList();
@@ -69,6 +70,11 @@ public class PostDto {
                 .createdAt(post.getCreatedAt())
                 .likeCount(post.getLikeCount())
                 .userState(new UserStateDto(false)) // default not liked; controller/service may enrich
+                .attachments(post.getAttachments() != null
+                        ? post.getAttachments().stream()
+                                .map(AttachmentDto::fromEntity)
+                                .toList()
+                        : Collections.emptyList())
                 .build();
     }
 }
