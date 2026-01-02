@@ -105,7 +105,8 @@ public class FileUtil {
                 || contentType.startsWith("text/");
 
         if (!allowed) {
-            throw new IllegalArgumentException("File type not allowed");
+            throw new IllegalArgumentException(
+                "不支持的文件类型。支持：PDF、Word、Excel、PPT、TXT、JSON、XML、YAML、ZIP、RAR、7z");
         }
     }
 

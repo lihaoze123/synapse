@@ -53,6 +53,24 @@ function getFileIcon(contentType: string): string {
 	return "📎";
 }
 
+const ACCEPTED_TYPES = [
+	".pdf",
+	".doc",
+	".docx",
+	".xls",
+	".xlsx",
+	".ppt",
+	".pptx",
+	".txt",
+	".json",
+	".xml",
+	".yaml",
+	".yml",
+	".zip",
+	".rar",
+	".7z",
+].join(",");
+
 export function FileUploader({
 	maxFiles = 3,
 	maxSize = 5 * 1024 * 1024,
@@ -149,6 +167,7 @@ export function FileUploader({
 				ref={inputRef}
 				id={inputId}
 				type="file"
+				accept={ACCEPTED_TYPES}
 				multiple
 				onChange={handleInputChange}
 				className="hidden"
@@ -215,18 +234,24 @@ export function FileUploader({
 			))}
 
 			{canAddMore && (
-				<button
-					type="button"
-					onClick={() => inputRef.current?.click()}
-					className={cn(
-						"flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/25 px-3 py-2 text-sm",
-						"text-muted-foreground hover:border-primary/50 hover:bg-muted/50 transition-colors",
-						"w-full justify-center",
-					)}
-				>
-					<Paperclip className="h-4 w-4" />
-					<span>添加附件（最多 {maxFiles} 个，单个不超过 5MB）</span>
-				</button>
+				<div className="space-y-1">
+					<button
+						type="button"
+						onClick={() => inputRef.current?.click()}
+						className={cn(
+							"flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/25 px-3 py-2 text-sm",
+							"text-muted-foreground hover:border-primary/50 hover:bg-muted/50 transition-colors",
+							"w-full justify-center",
+						)}
+					>
+						<Paperclip className="h-4 w-4" />
+						<span>添加附件</span>
+					</button>
+					<p className="text-xs text-muted-foreground text-center">
+						支持 PDF、Word、Excel、PPT、TXT、JSON、ZIP 等，最多 {maxFiles}{" "}
+						个，单个不超过 5MB
+					</p>
+				</div>
 			)}
 
 			{error && <p className="text-sm text-destructive">{error}</p>}
