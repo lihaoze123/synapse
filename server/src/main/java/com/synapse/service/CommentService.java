@@ -4,11 +4,17 @@ import com.synapse.dto.CommentDto;
 import com.synapse.dto.CreateCommentRequest;
 import com.synapse.dto.UpdateCommentRequest;
 import com.synapse.entity.Comment;
+import com.synapse.entity.NotificationType;
 import com.synapse.entity.Post;
 import com.synapse.entity.User;
 import com.synapse.repository.CommentRepository;
 import com.synapse.repository.PostRepository;
 import com.synapse.repository.UserRepository;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +25,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CommentService {
 
+	private static final Pattern MENTION_PATTERN = Pattern.compile("@([a-zA-Z0-9_]+)");
+
 	private final CommentRepository commentRepository;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
+	private final NotificationService notificationService;
 
 	@Transactional(readOnly = true)
 	public Page<CommentDto> getPostComments(Long postId, Pageable pageable) {
@@ -75,7 +84,32 @@ public class CommentService {
 				.build();
 
 		Comment saved = commentRepository.save(comment);
+
+		notificationService.createNotification(
+				post.getUser(), user, NotificationType.COMMENT, post, saved);
+
+		Set<String> mentionedUsernames = parseMentions(request.getContent());
+		if (!mentionedUsernames.isEmpty()) {
+			List<User> mentionedUsers = userRepository.findByUsernameIn(mentionedUsernames);
+			for (User mentioned : mentionedUsers) {
+				if (!mentioned.getId().equals(userId)
+						&& !mentioned.getId().equals(post.getUser().getId())) {
+					notificationService.createNotification(
+							mentioned, user, NotificationType.MENTION, post, saved);
+				}
+			}
+		}
+
 		return CommentDto.fromEntity(saved);
+	}
+
+	private Set<String> parseMentions(String content) {
+		Set<String> usernames = new HashSet<>();
+		Matcher matcher = MENTION_PATTERN.matcher(content);
+		while (matcher.find()) {
+			usernames.add(matcher.group(1));
+		}
+		return usernames;
 	}
 
 	@Transactional

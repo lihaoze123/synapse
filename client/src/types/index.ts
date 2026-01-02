@@ -104,3 +104,28 @@ export interface FollowsPage {
 	number: number;
 	last: boolean;
 }
+
+export type NotificationType = "LIKE" | "COMMENT" | "FOLLOW" | "MENTION";
+
+export interface NotificationActor {
+	id: number;
+	username: string;
+	avatarUrl: string | null;
+	displayName: string | null;
+}
+
+export interface NotificationPostSummary {
+	id: number;
+	title: string | null;
+	type: PostType;
+}
+
+export interface Notification {
+	id: number;
+	type: NotificationType;
+	actor: NotificationActor;
+	post: NotificationPostSummary | null;
+	commentId: number | null;
+	isRead: boolean;
+	createdAt: string;
+}

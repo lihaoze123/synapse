@@ -1,6 +1,7 @@
 package com.synapse.service;
 
 import com.synapse.entity.Like;
+import com.synapse.entity.NotificationType;
 import com.synapse.entity.Post;
 import com.synapse.entity.User;
 import com.synapse.repository.LikeRepository;
@@ -17,6 +18,7 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public record ToggleResult(boolean liked, long count) {}
 
@@ -35,6 +37,8 @@ public class LikeService {
             Like like = Like.builder().user(user).post(post).build();
             likeRepository.save(like);
             likeRepository.incrementPostLikeCount(postId);
+            notificationService.createNotification(
+                    post.getUser(), user, NotificationType.LIKE, post, null);
         }
         long count = likeRepository.countByPostId(postId);
         return new ToggleResult(!exists, count);
