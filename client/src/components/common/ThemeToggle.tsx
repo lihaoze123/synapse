@@ -23,10 +23,7 @@ export function ThemeToggle() {
 				className="h-4 w-4 rotate-0 scale-100 dark:hidden"
 				aria-hidden="true"
 			/>
-			<Moon
-				className="absolute h-4 w-4 hidden dark:block"
-				aria-hidden="true"
-			/>
+			<Moon className="absolute h-4 w-4 hidden dark:block" aria-hidden="true" />
 		</button>
 	);
 }
