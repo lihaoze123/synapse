@@ -34,6 +34,13 @@ function getFileIcon(contentType: string): string {
 	return "📎";
 }
 
+function getDownloadUrl(attachment: Attachment): string {
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api";
+	const storedName = attachment.url.replace("/uploads/", "");
+	const encodedFilename = encodeURIComponent(attachment.filename);
+	return `${apiBaseUrl}/download/${storedName}?filename=${encodedFilename}`;
+}
+
 export function AttachmentList({
 	attachments,
 	className,
@@ -41,8 +48,6 @@ export function AttachmentList({
 	if (!attachments || attachments.length === 0) {
 		return null;
 	}
-
-	const staticBaseUrl = import.meta.env.VITE_STATIC_BASE_URL || "";
 
 	return (
 		<div className={cn("space-y-1", className)}>
@@ -58,8 +63,7 @@ export function AttachmentList({
 						{formatFileSize(attachment.fileSize)}
 					</span>
 					<a
-						href={`${staticBaseUrl}${attachment.url}`}
-						download={attachment.filename}
+						href={getDownloadUrl(attachment)}
 						onClick={(e) => e.stopPropagation()}
 						className="text-primary hover:text-primary/80 transition-colors"
 						title="下载"
