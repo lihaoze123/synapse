@@ -2,7 +2,8 @@ import type { ApiResponse, Post, User } from "../types";
 import api from "./api";
 
 export interface UpdateProfileRequest {
-	username?: string;
+	displayName?: string;
+	bio?: string;
 	avatarUrl?: string;
 }
 

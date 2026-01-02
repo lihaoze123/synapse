@@ -47,11 +47,12 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
-            if (userRepository.existsByUsername(request.getUsername())) {
-                throw new IllegalArgumentException("Username already taken");
-            }
-            user.setUsername(request.getUsername());
+        if (request.getDisplayName() != null) {
+            user.setDisplayName(request.getDisplayName());
+        }
+
+        if (request.getBio() != null) {
+            user.setBio(request.getBio());
         }
 
         if (request.getAvatarUrl() != null) {

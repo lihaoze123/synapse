@@ -28,12 +28,22 @@ export default function UserListItem({
 				className="flex items-center gap-3 flex-1 min-w-0"
 			>
 				<Avatar className="h-10 w-10 ring-2 ring-border/30">
-					<AvatarImage src={user.avatarUrl || undefined} alt={user.username} />
+					<AvatarImage
+						src={user.avatarUrl || undefined}
+						alt={user.displayName || user.username}
+					/>
 					<AvatarFallback className="text-sm font-medium">
-						{user.username.slice(0, 2).toUpperCase()}
+						{(user.displayName || user.username).slice(0, 2).toUpperCase()}
 					</AvatarFallback>
 				</Avatar>
-				<span className="font-semibold truncate">{user.username}</span>
+				<div className="flex flex-col min-w-0">
+					<span className="font-semibold truncate">
+						{user.displayName || user.username}
+					</span>
+					<span className="text-xs text-muted-foreground truncate">
+						@{user.username}
+					</span>
+				</div>
 			</Link>
 			{showFollowButton && <FollowButton userId={user.id} size="sm" />}
 		</div>

@@ -91,16 +91,26 @@ function UserProfilePage() {
 							<Avatar className="h-24 w-24 ring-4 ring-border/30">
 								<AvatarImage
 									src={targetUser.avatarUrl || undefined}
-									alt={targetUser.username}
+									alt={targetUser.displayName || targetUser.username}
 								/>
 								<AvatarFallback className="text-2xl font-medium">
-									{targetUser.username.slice(0, 2).toUpperCase()}
+									{(targetUser.displayName || targetUser.username)
+										.slice(0, 2)
+										.toUpperCase()}
 								</AvatarFallback>
 							</Avatar>
 
 							<div className="text-center">
-								<h1 className="text-xl font-semibold">{targetUser.username}</h1>
-								<p className="text-sm text-muted-foreground mt-1">
+								<h1 className="text-xl font-semibold">
+									{targetUser.displayName || targetUser.username}
+								</h1>
+								<p className="text-sm text-muted-foreground mt-0.5">
+									@{targetUser.username}
+								</p>
+								{targetUser.bio && (
+									<p className="text-sm mt-2 max-w-md">{targetUser.bio}</p>
+								)}
+								<p className="text-sm text-muted-foreground mt-2">
 									{posts.length > 0
 										? `${data?.pages[0]?.totalElements ?? 0} 篇内容`
 										: "暂无内容"}
@@ -126,7 +136,9 @@ function UserProfilePage() {
 
 					<div>
 						<h2 className="text-lg font-semibold mb-4">
-							{isMe ? "我的内容" : `${targetUser.username} 的内容`}
+							{isMe
+								? "我的内容"
+								: `${targetUser.displayName || targetUser.username} 的内容`}
 						</h2>
 						<Feed
 							posts={posts}

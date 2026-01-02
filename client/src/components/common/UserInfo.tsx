@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface UserInfoProps {
 	userId: number;
 	username: string;
+	displayName?: string | null;
 	avatarUrl?: string | null;
 	timestamp?: string;
 	size?: "sm" | "md";
@@ -35,6 +36,7 @@ function formatRelativeTime(dateString: string): string {
 export default function UserInfo({
 	userId,
 	username,
+	displayName,
 	avatarUrl,
 	timestamp,
 	size = "md",
@@ -42,17 +44,18 @@ export default function UserInfo({
 	asLink = true,
 }: UserInfoProps) {
 	const avatarSize = size === "sm" ? "h-6 w-6" : "h-8 w-8";
+	const displayLabel = displayName || username;
 
 	const content = (
 		<>
 			<Avatar className={avatarSize}>
-				<AvatarImage src={avatarUrl || undefined} alt={username} />
+				<AvatarImage src={avatarUrl || undefined} alt={displayLabel} />
 				<AvatarFallback className="text-xs font-medium">
-					{username.slice(0, 2).toUpperCase()}
+					{displayLabel.slice(0, 2).toUpperCase()}
 				</AvatarFallback>
 			</Avatar>
 			<div className="flex items-center gap-1">
-				<span className="font-medium text-sm">{username}</span>
+				<span className="font-medium text-sm">{displayLabel}</span>
 				{timestamp && (
 					<>
 						<span className="text-muted-foreground/50">·</span>
