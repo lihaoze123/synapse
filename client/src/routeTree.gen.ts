@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsersUserIdRouteImport } from './routes/users/$userId'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as PostsIdRouteImport } from './routes/posts/$id'
 import { Route as UsersUserIdIndexRouteImport } from './routes/users/$userId.index'
 import { Route as UsersUserIdFollowingRouteImport } from './routes/users/$userId.following'
@@ -56,6 +57,11 @@ const UsersUserIdRoute = UsersUserIdRouteImport.update({
   path: '/users/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsIdRoute = PostsIdRouteImport.update({
   id: '/posts/$id',
   path: '/posts/$id',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/posts/$id': typeof PostsIdRoute
+  '/u/$username': typeof UUsernameRoute
   '/users/$userId': typeof UsersUserIdRouteWithChildren
   '/users/$userId/followers': typeof UsersUserIdFollowersRoute
   '/users/$userId/following': typeof UsersUserIdFollowingRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/posts/$id': typeof PostsIdRoute
+  '/u/$username': typeof UUsernameRoute
   '/users/$userId/followers': typeof UsersUserIdFollowersRoute
   '/users/$userId/following': typeof UsersUserIdFollowingRoute
   '/users/$userId': typeof UsersUserIdIndexRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/posts/$id': typeof PostsIdRoute
+  '/u/$username': typeof UUsernameRoute
   '/users/$userId': typeof UsersUserIdRouteWithChildren
   '/users/$userId/followers': typeof UsersUserIdFollowersRoute
   '/users/$userId/following': typeof UsersUserIdFollowingRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/posts/$id'
+    | '/u/$username'
     | '/users/$userId'
     | '/users/$userId/followers'
     | '/users/$userId/following'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/posts/$id'
+    | '/u/$username'
     | '/users/$userId/followers'
     | '/users/$userId/following'
     | '/users/$userId'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/posts/$id'
+    | '/u/$username'
     | '/users/$userId'
     | '/users/$userId/followers'
     | '/users/$userId/following'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   PostsIdRoute: typeof PostsIdRoute
+  UUsernameRoute: typeof UUsernameRoute
   UsersUserIdRoute: typeof UsersUserIdRouteWithChildren
 }
 
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       path: '/users/$userId'
       fullPath: '/users/$userId'
       preLoaderRoute: typeof UsersUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/posts/$id': {
@@ -274,6 +294,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   PostsIdRoute: PostsIdRoute,
+  UUsernameRoute: UUsernameRoute,
   UsersUserIdRoute: UsersUserIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport

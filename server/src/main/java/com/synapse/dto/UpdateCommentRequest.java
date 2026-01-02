@@ -14,6 +14,6 @@ import lombok.NoArgsConstructor;
 public class UpdateCommentRequest {
 
     @NotBlank(message = "评论内容不能为空")
-    @Size(min = 1, max = 1000, message = "评论内容长度必须在1-1000字符之间")
+    @Size(min = 1, max = 2000, message = "评论内容长度必须在1-2000字符之间")
     private String content;
 }
