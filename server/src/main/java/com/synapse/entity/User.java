@@ -31,4 +31,10 @@ public class User {
 
     @Column(name = "avatar_url")
     private String avatarUrl;
+
+    @Column(name = "display_name")
+    private String displayName;
+
+    @Column(name = "bio", length = 500)
+    private String bio;
 }

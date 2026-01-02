@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth, useUpdateProfile } from "@/hooks";
+import { cn } from "@/lib/utils";
 import { authService } from "@/services/auth";
 
 export const Route = createFileRoute("/settings")({
@@ -28,9 +29,12 @@ function SettingsPage() {
 	const navigate = useNavigate();
 	const updateProfile = useUpdateProfile();
 	const usernameInputId = useId();
+	const displayNameInputId = useId();
+	const bioInputId = useId();
 	const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	const [username, setUsername] = useState(user?.username ?? "");
+	const [displayName, setDisplayName] = useState(user?.displayName ?? "");
+	const [bio, setBio] = useState(user?.bio ?? "");
 	const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? "");
 	const [success, setSuccess] = useState(false);
 
@@ -47,16 +51,22 @@ function SettingsPage() {
 	}
 
 	const hasChanges =
-		username !== user.username || avatarUrl !== (user.avatarUrl ?? "");
-	const isUsernameValid = username.length >= 3 && username.length <= 20;
+		displayName !== (user.displayName ?? "") ||
+		bio !== (user.bio ?? "") ||
+		avatarUrl !== (user.avatarUrl ?? "");
+	const isDisplayNameValid =
+		displayName.length >= 1 && displayName.length <= 50;
+	const isBioValid = bio.length <= 500;
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!hasChanges || !isUsernameValid) return;
+		if (!hasChanges || !isDisplayNameValid || !isBioValid) return;
 
 		try {
 			await updateProfile.mutateAsync({
-				username: username !== user.username ? username : undefined,
+				displayName:
+					displayName !== (user.displayName ?? "") ? displayName : undefined,
+				bio: bio !== (user.bio ?? "") ? bio : undefined,
 				avatarUrl: avatarUrl !== (user.avatarUrl ?? "") ? avatarUrl : undefined,
 			});
 			setSuccess(true);
@@ -103,24 +113,66 @@ function SettingsPage() {
 						<Label htmlFor={usernameInputId}>用户名</Label>
 						<Input
 							id={usernameInputId}
-							value={username}
-							onChange={(e) => setUsername(e.target.value)}
-							placeholder="输入用户名"
-							minLength={3}
-							maxLength={20}
+							value={user.username}
+							disabled
+							className="bg-muted cursor-not-allowed opacity-60"
 						/>
-						{username.length > 0 && !isUsernameValid && (
+						<p className="text-xs text-muted-foreground">
+							用户名创建后不可更改
+						</p>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor={displayNameInputId}>显示名</Label>
+						<Input
+							id={displayNameInputId}
+							value={displayName}
+							onChange={(e) => setDisplayName(e.target.value)}
+							placeholder="输入显示名"
+							maxLength={50}
+						/>
+						{displayName.length > 0 && !isDisplayNameValid && (
 							<p className="text-sm text-destructive">
-								用户名长度需要在 3-20 个字符之间
+								显示名长度需要在 1-50 个字符之间
 							</p>
 						)}
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor={bioInputId}>个人简介</Label>
+						<textarea
+							id={bioInputId}
+							value={bio}
+							onChange={(e) => setBio(e.target.value)}
+							placeholder="介绍一下自己..."
+							rows={4}
+							maxLength={500}
+							className={cn(
+								"w-full resize-none rounded-md border border-input bg-background",
+								"px-3 py-2 text-sm",
+								"placeholder:text-muted-foreground",
+								"focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring",
+								"transition-shadow duration-200",
+							)}
+						/>
+						<div className="flex items-center justify-between">
+							<p className="text-xs text-muted-foreground">{bio.length}/500</p>
+							{!isBioValid && (
+								<p className="text-sm text-destructive">
+									个人简介不能超过 500 个字符
+								</p>
+							)}
+						</div>
 					</div>
 
 					<div className="flex items-center gap-3">
 						<Button
 							type="submit"
 							disabled={
-								!hasChanges || !isUsernameValid || updateProfile.isPending
+								!hasChanges ||
+								!isDisplayNameValid ||
+								!isBioValid ||
+								updateProfile.isPending
 							}
 						>
 							{updateProfile.isPending ? (

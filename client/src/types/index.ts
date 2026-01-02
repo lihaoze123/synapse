@@ -2,6 +2,8 @@ export interface User {
 	id: number;
 	username: string;
 	avatarUrl: string | null;
+	displayName?: string | null;
+	bio?: string | null;
 }
 
 export interface AuthResponse {

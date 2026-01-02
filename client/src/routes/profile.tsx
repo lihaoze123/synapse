@@ -45,16 +45,22 @@ function ProfilePage() {
 					<Avatar className="h-24 w-24 ring-4 ring-border/30">
 						<AvatarImage
 							src={user.avatarUrl || undefined}
-							alt={user.username}
+							alt={user.displayName || user.username}
 						/>
 						<AvatarFallback className="text-2xl font-medium">
-							{user.username.slice(0, 2).toUpperCase()}
+							{(user.displayName || user.username).slice(0, 2).toUpperCase()}
 						</AvatarFallback>
 					</Avatar>
 
 					<div className="text-center">
-						<h1 className="text-xl font-semibold">{user.username}</h1>
-						<p className="text-sm text-muted-foreground mt-1">
+						<h1 className="text-xl font-semibold">
+							{user.displayName || user.username}
+						</h1>
+						<p className="text-sm text-muted-foreground mt-0.5">
+							@{user.username}
+						</p>
+						{user.bio && <p className="text-sm mt-2 max-w-md">{user.bio}</p>}
+						<p className="text-sm text-muted-foreground mt-2">
 							{posts.length > 0
 								? `${data?.pages[0]?.totalElements ?? 0} 篇内容`
 								: "暂无内容"}

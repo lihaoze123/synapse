@@ -58,6 +58,7 @@ export default function PostCard({ post, className }: PostCardProps) {
 						<UserInfo
 							userId={post.user.id}
 							username={post.user.username}
+							displayName={post.user.displayName}
 							avatarUrl={post.user.avatarUrl}
 							timestamp={post.createdAt}
 							asLink={false}

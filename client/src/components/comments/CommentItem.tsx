@@ -108,6 +108,8 @@ const CommentItem = forwardRef<HTMLDivElement, CommentItemProps>(
 			}
 		};
 
+		const displayLabel = comment.user.displayName || comment.user.username;
+
 		return (
 			<div
 				ref={ref}
@@ -126,10 +128,10 @@ const CommentItem = forwardRef<HTMLDivElement, CommentItemProps>(
 						<Avatar className="h-8 w-8 ring-2 ring-border/30 hover:ring-primary/50 transition-all">
 							<AvatarImage
 								src={comment.user.avatarUrl || undefined}
-								alt={comment.user.username}
+								alt={displayLabel}
 							/>
 							<AvatarFallback className="text-xs font-medium">
-								{comment.user.username.slice(0, 2).toUpperCase()}
+								{displayLabel.slice(0, 2).toUpperCase()}
 							</AvatarFallback>
 						</Avatar>
 					</Link>
@@ -147,7 +149,7 @@ const CommentItem = forwardRef<HTMLDivElement, CommentItemProps>(
 							params={{ userId: String(comment.user.id) }}
 							className="font-semibold text-sm hover:underline"
 						>
-							{comment.user.username}
+							{displayLabel}
 						</Link>
 						<span className="text-muted-foreground/60 text-xs">·</span>
 						<span className="text-muted-foreground text-xs">
