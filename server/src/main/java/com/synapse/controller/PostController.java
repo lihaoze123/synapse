@@ -4,6 +4,7 @@ import com.synapse.dto.ApiResponse;
 import com.synapse.dto.CreatePostRequest;
 import com.synapse.dto.PostDto;
 import com.synapse.dto.UpdatePostRequest;
+import com.synapse.dto.VerifyPasswordRequest;
 import com.synapse.entity.PostType;
 import com.synapse.service.PostService;
 import com.synapse.service.LikeService;
@@ -84,8 +85,8 @@ public class PostController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PostDto>> getPost(HttpServletRequest request, @PathVariable Long id) {
         try {
-            PostDto post = postService.getPost(id);
             Long userId = (Long) request.getAttribute("userId");
+            PostDto post = postService.getPost(id, userId);
             if (userId != null && post.getUserState() != null) {
                 post.getUserState().setLiked(likeService.hasLikedPost(userId, post.getId()));
             }
@@ -141,6 +142,26 @@ public class PostController {
             return ResponseEntity.ok(ApiResponse.success("Post deleted successfully", null));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/verify-password")
+    public ResponseEntity<ApiResponse<PostDto>> verifyPassword(
+            HttpServletRequest request,
+            @PathVariable Long id,
+            @Valid @RequestBody VerifyPasswordRequest verifyRequest) {
+        try {
+            Long userId = (Long) request.getAttribute("userId");
+            PostDto post = postService.verifyPassword(id, verifyRequest.getPassword(), userId);
+            if (userId != null && post.getUserState() != null) {
+                post.getUserState().setLiked(likeService.hasLikedPost(userId, post.getId()));
+            }
+            return ResponseEntity.ok(ApiResponse.success(post));
+        } catch (IllegalArgumentException e) {
+            if ("Incorrect password".equals(e.getMessage())) {
+                return ResponseEntity.status(401).body(ApiResponse.error(e.getMessage()));
+            }
+            return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
         }
     }
 }

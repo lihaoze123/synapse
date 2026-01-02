@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import type { Post } from "@/types";
 import ArticleContent from "./ArticleContent";
 import MomentContent from "./MomentContent";
+import PrivateOverlay from "./PrivateOverlay";
 import SnippetContent from "./SnippetContent";
 
 interface PostCardProps {
@@ -92,28 +93,36 @@ export default function PostCard({ post, className }: PostCardProps) {
 				</div>
 
 				<div className="mb-3">
-					{post.type === "SNIPPET" && (
-						<SnippetContent
-							title={post.title}
-							content={post.content}
-							language={post.language}
-						/>
-					)}
-					{post.type === "ARTICLE" && (
-						<ArticleContent
-							title={post.title || "无标题"}
-							summary={post.summary}
-							coverImage={post.coverImage}
-						/>
-					)}
-					{post.type === "MOMENT" && (
-						<MomentContent content={post.content} images={post.images} />
+					{post.isPrivate && !post.content ? (
+						<PrivateOverlay />
+					) : (
+						<>
+							{post.type === "SNIPPET" && (
+								<SnippetContent
+									title={post.title}
+									content={post.content}
+									language={post.language}
+								/>
+							)}
+							{post.type === "ARTICLE" && (
+								<ArticleContent
+									title={post.title || "无标题"}
+									summary={post.summary}
+									coverImage={post.coverImage}
+								/>
+							)}
+							{post.type === "MOMENT" && (
+								<MomentContent content={post.content} images={post.images} />
+							)}
+						</>
 					)}
 				</div>
 
-				{post.attachments && post.attachments.length > 0 && (
-					<AttachmentList attachments={post.attachments} className="mt-4" />
-				)}
+				{post.attachments &&
+					post.attachments.length > 0 &&
+					!(post.isPrivate && !post.content) && (
+						<AttachmentList attachments={post.attachments} className="mt-4" />
+					)}
 
 				{post.tags && post.tags.length > 0 && (
 					<div className="flex flex-wrap gap-1.5">

@@ -36,6 +36,10 @@ public class CreatePostRequest {
     @Size(max = 3, message = "Maximum 3 attachments allowed")
     private List<AttachmentRequest> attachments;
 
+    private Boolean isPrivate;
+
+    private String password;
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

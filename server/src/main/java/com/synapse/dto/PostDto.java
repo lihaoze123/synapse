@@ -33,6 +33,7 @@ public class PostDto {
     private List<TagDto> tags;
     private Instant createdAt;
     private int likeCount;
+    private boolean isPrivate;
     private UserStateDto userState;
     private List<AttachmentDto> attachments;
 
@@ -69,6 +70,7 @@ public class PostDto {
                         .toList())
                 .createdAt(post.getCreatedAt())
                 .likeCount(post.getLikeCount())
+                .isPrivate(post.isPrivate())
                 .userState(new UserStateDto(false)) // default not liked; controller/service may enrich
                 .attachments(post.getAttachments() != null
                         ? post.getAttachments().stream()

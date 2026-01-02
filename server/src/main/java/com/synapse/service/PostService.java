@@ -56,13 +56,61 @@ public class PostService {
             posts = postRepository.findAllByOrderByCreatedAtDesc(pageable);
         }
 
-        return posts.map(PostDto::fromEntity);
+        return posts.map(this::sanitizePrivatePost);
+    }
+
+    private PostDto sanitizePrivatePost(Post post) {
+        PostDto dto = PostDto.fromEntity(post);
+        if (post.isPrivate()) {
+            dto.setContent(null);
+            dto.setImages(null);
+            dto.setAttachments(null);
+        }
+        return dto;
     }
 
     @Transactional(readOnly = true)
     public PostDto getPost(Long id) {
+        return getPost(id, null);
+    }
+
+    @Transactional(readOnly = true)
+    public PostDto getPost(Long id, Long requesterId) {
         Post post = postRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        PostDto dto = PostDto.fromEntity(post);
+
+        if (post.isPrivate() && !isOwner(post, requesterId)) {
+            dto.setContent(null);
+            dto.setImages(null);
+            dto.setAttachments(null);
+        }
+
+        return dto;
+    }
+
+    private boolean isOwner(Post post, Long userId) {
+        return userId != null && post.getUser().getId().equals(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public PostDto verifyPassword(Long postId, String password, Long requesterId) {
+        Post post = postRepository.findWithDetailsById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        if (!post.isPrivate()) {
+            return PostDto.fromEntity(post);
+        }
+
+        if (isOwner(post, requesterId)) {
+            return PostDto.fromEntity(post);
+        }
+
+        if (post.getPassword() == null || !post.getPassword().equals(password)) {
+            throw new IllegalArgumentException("Incorrect password");
+        }
+
         return PostDto.fromEntity(post);
     }
 
@@ -70,6 +118,11 @@ public class PostService {
     public PostDto createPost(Long userId, CreatePostRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        boolean isPrivate = Boolean.TRUE.equals(request.getIsPrivate());
+        if (isPrivate && (request.getPassword() == null || request.getPassword().isBlank())) {
+            throw new IllegalArgumentException("Password is required for private posts");
+        }
 
         Post post = Post.builder()
                 .type(request.getType())
@@ -79,6 +132,8 @@ public class PostService {
                 .coverImage(request.getCoverImage())
                 .images(convertImagesToJson(request.getImages()))
                 .user(user)
+                .isPrivate(isPrivate)
+                .password(isPrivate ? request.getPassword() : null)
                 .build();
 
         if (request.getType() == PostType.ARTICLE && request.getContent() != null) {
@@ -205,6 +260,23 @@ public class PostService {
             }
         }
 
+        if (request.getIsPrivate() != null) {
+            boolean isPrivate = request.getIsPrivate();
+            if (isPrivate && (request.getPassword() == null || request.getPassword().isBlank())
+                    && (post.getPassword() == null || post.getPassword().isBlank())) {
+                throw new IllegalArgumentException("Password is required for private posts");
+            }
+            post.setPrivate(isPrivate);
+            if (isPrivate && request.getPassword() != null && !request.getPassword().isBlank()) {
+                post.setPassword(request.getPassword());
+            }
+            if (!isPrivate) {
+                post.setPassword(null);
+            }
+        } else if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            post.setPassword(request.getPassword());
+        }
+
         Post saved = postRepository.save(post);
         return PostDto.fromEntity(saved);
     }
@@ -252,6 +324,6 @@ public class PostService {
             }
         }
 
-        return posts.map(PostDto::fromEntity);
+        return posts.map(this::sanitizePrivatePost);
     }
 }
