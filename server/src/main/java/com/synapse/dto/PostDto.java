@@ -1,5 +1,6 @@
 package com.synapse.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.entity.Post;
@@ -33,6 +34,7 @@ public class PostDto {
     private List<TagDto> tags;
     private Instant createdAt;
     private int likeCount;
+    @JsonProperty("isPrivate")
     private boolean isPrivate;
     private UserStateDto userState;
     private List<AttachmentDto> attachments;
