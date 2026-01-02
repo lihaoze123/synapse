@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.dto.CreatePostRequest;
 import com.synapse.dto.PostDto;
 import com.synapse.dto.UpdatePostRequest;
+import com.synapse.entity.Attachment;
 import com.synapse.entity.Post;
 import com.synapse.entity.PostType;
 import com.synapse.entity.Tag;
@@ -108,6 +109,21 @@ public class PostService {
         }
 
         Post saved = postRepository.save(post);
+
+        if (request.getAttachments() != null && !request.getAttachments().isEmpty()) {
+            for (var attachmentReq : request.getAttachments()) {
+                Attachment attachment = Attachment.builder()
+                        .post(saved)
+                        .filename(attachmentReq.getFilename())
+                        .storedName(attachmentReq.getStoredName())
+                        .fileSize(attachmentReq.getFileSize())
+                        .contentType(attachmentReq.getContentType())
+                        .build();
+                saved.getAttachments().add(attachment);
+            }
+            saved = postRepository.save(saved);
+        }
+
         return PostDto.fromEntity(saved);
     }
 
@@ -173,6 +189,20 @@ public class PostService {
                 tags.add(tag);
             }
             post.setTags(tags);
+        }
+
+        if (request.getAttachments() != null) {
+            post.getAttachments().clear();
+            for (var attachmentReq : request.getAttachments()) {
+                Attachment attachment = Attachment.builder()
+                        .post(post)
+                        .filename(attachmentReq.getFilename())
+                        .storedName(attachmentReq.getStoredName())
+                        .fileSize(attachmentReq.getFileSize())
+                        .contentType(attachmentReq.getContentType())
+                        .build();
+                post.getAttachments().add(attachment);
+            }
         }
 
         Post saved = postRepository.save(post);
