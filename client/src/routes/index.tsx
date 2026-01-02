@@ -73,6 +73,8 @@ function HomePage() {
 					data.attachments && data.attachments.length > 0
 						? data.attachments
 						: undefined,
+				isPrivate: data.isPrivate,
+				password: data.password,
 			});
 			setPublishOpen(false);
 		} catch {}
