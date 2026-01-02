@@ -22,6 +22,14 @@ export interface UploadResponse {
 	url: string;
 }
 
+export interface AttachmentUploadResponse {
+	filename: string;
+	storedName: string;
+	url: string;
+	fileSize: number;
+	contentType: string;
+}
+
 export const userService = {
 	async getUser(id: number): Promise<User> {
 		const response = await api.get<ApiResponse<User>>(`/users/${id}`);
@@ -83,5 +91,25 @@ export const userService = {
 			return data;
 		}
 		throw new Error(response.data.message || "Failed to upload file");
+	},
+
+	async uploadAttachment(file: File): Promise<AttachmentUploadResponse> {
+		const formData = new FormData();
+		formData.append("file", file);
+
+		const response = await api.post<ApiResponse<AttachmentUploadResponse>>(
+			"/upload/attachment",
+			formData,
+			{
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			},
+		);
+
+		if (response.data.success && response.data.data) {
+			return response.data.data;
+		}
+		throw new Error(response.data.message || "Failed to upload attachment");
 	},
 };
