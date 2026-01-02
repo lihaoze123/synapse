@@ -257,7 +257,11 @@ function PostDetailPage() {
 						</div>
 
 						{post.title && (
-							<h1 className="mb-4 text-2xl font-bold">{post.title}</h1>
+							<div className="mb-8 border-b border-border pb-6">
+								<h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl">
+									{post.title}
+								</h1>
+							</div>
 						)}
 
 						<div className="mt-4">
@@ -421,7 +425,7 @@ function PostDetailSkeleton() {
 							<div className="h-3 w-32 animate-pulse rounded bg-secondary/50" />
 						</div>
 					</div>
-					<div className="mb-4 h-8 w-3/4 animate-pulse rounded bg-secondary/50" />
+					<div className="mb-10 h-12 w-11/12 animate-pulse rounded bg-secondary/50" />
 					<div className="space-y-3">
 						<div className="h-4 w-full animate-pulse rounded bg-secondary/50" />
 						<div className="h-4 w-full animate-pulse rounded bg-secondary/50" />
