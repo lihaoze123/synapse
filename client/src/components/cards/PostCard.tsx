@@ -100,7 +100,7 @@ export default function PostCard({ post, className }: PostCardProps) {
 							{post.type === "SNIPPET" && (
 								<SnippetContent
 									title={post.title}
-									content={post.content}
+									content={post.content || ""}
 									language={post.language}
 								/>
 							)}
@@ -112,7 +112,10 @@ export default function PostCard({ post, className }: PostCardProps) {
 								/>
 							)}
 							{post.type === "MOMENT" && (
-								<MomentContent content={post.content} images={post.images} />
+								<MomentContent
+									content={post.content || ""}
+									images={post.images}
+								/>
 							)}
 						</>
 					)}

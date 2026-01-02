@@ -125,17 +125,17 @@ export default function PublishModal({
 
 			switch (initialData.type) {
 				case "MOMENT":
-					setMomentContent(initialData.content);
+					setMomentContent(initialData.content || "");
 					setMomentImages(initialData.images || []);
 					break;
 				case "SNIPPET":
 					setSnippetTitle(initialData.title || "");
-					setSnippetCode(initialData.content);
+					setSnippetCode(initialData.content || "");
 					setSnippetLanguage(initialData.language || "javascript");
 					break;
 				case "ARTICLE":
 					setArticleTitle(initialData.title || "");
-					setArticleContent(initialData.content);
+					setArticleContent(initialData.content || "");
 					setArticleCoverImage(initialData.coverImage || undefined);
 					break;
 			}
