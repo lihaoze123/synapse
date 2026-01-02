@@ -13,10 +13,17 @@ INSERT INTO tags (name, icon) VALUES ('数据库', '🗄️');
 INSERT INTO tags (name, icon) VALUES ('前端', '🎨');
 
 -- Users (测试用户) - 使用 DiceBear API 生成 Notion 风格头像
-INSERT INTO users (username, password, avatar_url) VALUES ('admin', 'admin123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Admin');
-INSERT INTO users (username, password, avatar_url) VALUES ('alice', 'alice123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Alice');
-INSERT INTO users (username, password, avatar_url) VALUES ('bob', 'bob123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Bob');
-INSERT INTO users (username, password, avatar_url) VALUES ('charlie', 'charlie123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Charlie');
+INSERT INTO users (username, password, avatar_url, display_name, bio) VALUES
+('admin', 'admin123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Admin', '管理员', '全栈开发者，热爱开源。专注于 Java 和 React 技术栈。');
+
+INSERT INTO users (username, password, avatar_url, display_name, bio) VALUES
+('alice', 'alice123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Alice', '爱丽丝', 'Python 爱好者，数据科学工程师。喜欢分享编程技巧和最佳实践。');
+
+INSERT INTO users (username, password, avatar_url, display_name, bio) VALUES
+('bob', 'bob123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Bob', '鲍勃', '前端开发者，React 和 TypeScript 粉丝。致力于构建优雅的用户界面。');
+
+INSERT INTO users (username, password, avatar_url, display_name, bio) VALUES
+('charlie', 'charlie123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Charlie', '查理', '后端架构师，专注微服务和分布式系统。Spring Boot 布道师。');
 
 -- Posts (文章/代码片段/动态)
 
