@@ -183,7 +183,9 @@ function PostDetailPage() {
 										/>
 									) : (
 										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-medium ring-2 ring-border/30 hover:ring-primary/50 transition-all">
-											{(post.user.displayName || post.user.username).charAt(0).toUpperCase()}
+											{(post.user.displayName || post.user.username)
+												.charAt(0)
+												.toUpperCase()}
 										</div>
 									)}
 								</Link>

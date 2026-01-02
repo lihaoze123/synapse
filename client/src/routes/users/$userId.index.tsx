@@ -104,6 +104,9 @@ function UserProfilePage() {
 								<h1 className="text-xl font-semibold">
 									{targetUser.displayName || targetUser.username}
 								</h1>
+								<p className="text-sm text-muted-foreground mt-0.5">
+									@{targetUser.username}
+								</p>
 								{targetUser.bio && (
 									<p className="text-sm mt-2 max-w-md">{targetUser.bio}</p>
 								)}
