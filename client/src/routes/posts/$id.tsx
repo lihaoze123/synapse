@@ -10,8 +10,9 @@ import {
 import { lazy, Suspense, useState } from "react";
 // Desktop actions remain as before; mobile hides top action buttons
 import Markdown from "react-markdown";
-import rehypeSanitize from "rehype-sanitize";
+import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import CommentSection from "@/components/comments/CommentSection";
 import { CodeBlock } from "@/components/common";
 import { AttachmentList } from "@/components/common/AttachmentList";
@@ -257,12 +258,16 @@ function PostDetailPage() {
 						</div>
 
 						{post.title && (
-							<h1 className="mb-4 text-2xl font-bold">{post.title}</h1>
+							<div className="mb-8 border-b border-border pb-6">
+								<h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl">
+									{post.title}
+								</h1>
+							</div>
 						)}
 
 						<div className="mt-4">
 							{post.type === "SNIPPET" && (
-								<div className="overflow-hidden rounded-lg">
+								<div className="overflow-hidden rounded-lg border bg-muted/30">
 									<CodeBlock
 										code={post.content}
 										language={post.language || "text"}
@@ -272,16 +277,15 @@ function PostDetailPage() {
 							)}
 
 							{post.type === "ARTICLE" && (
-								<div className="prose prose-neutral max-w-none dark:prose-invert">
+								<div className="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-semibold prose-h1:text-2xl prose-h1:mt-8 prose-h1:mb-4 prose-h2:text-xl prose-h2:mt-6 prose-p:leading-7 prose-p:text-foreground/90 prose-img:rounded-xl prose-img:border prose-pre:p-0 prose-pre:m-0 prose-pre:bg-transparent prose-pre:border-0 prose-code:before:content-none prose-code:after:content-none">
 									<Markdown
-										remarkPlugins={[remarkGfm]}
-										rehypePlugins={[rehypeSanitize]}
+										remarkPlugins={[remarkGfm, remarkMath]}
+										rehypePlugins={[rehypeKatex]}
 										components={{
 											pre({ children }) {
 												return <>{children}</>;
 											},
-											code(props) {
-												const { children, className } = props;
+											code({ className, children, ...props }) {
 												const match = /language-(\w+)/.exec(className || "");
 												if (match) {
 													return (
@@ -292,7 +296,14 @@ function PostDetailPage() {
 														/>
 													);
 												}
-												return <code className={className}>{children}</code>;
+												return (
+													<code
+														className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm"
+														{...props}
+													>
+														{children}
+													</code>
+												);
 											},
 										}}
 									>
@@ -303,10 +314,12 @@ function PostDetailPage() {
 
 							{post.type === "MOMENT" && (
 								<div className="space-y-4">
-									<p className="text-lg whitespace-pre-wrap">{post.content}</p>
+									<p className="text-lg whitespace-pre-wrap leading-relaxed">
+										{post.content}
+									</p>
 									{post.images && post.images.length > 0 && (
 										<div
-											className={`grid gap-1.5 max-w-[300px] ${
+											className={`grid gap-2 max-w-[400px] ${
 												post.images.length === 1
 													? "grid-cols-1"
 													: post.images.length === 2
@@ -318,7 +331,7 @@ function PostDetailPage() {
 												<button
 													key={url}
 													type="button"
-													className="relative overflow-hidden rounded-md bg-muted aspect-square cursor-pointer p-0 border-0"
+													className="relative overflow-hidden rounded-lg bg-muted aspect-square cursor-pointer ring-1 ring-border/50 hover:ring-primary/50 transition-all"
 													onClick={() => setPreviewIndex(index)}
 												>
 													<img
@@ -421,7 +434,7 @@ function PostDetailSkeleton() {
 							<div className="h-3 w-32 animate-pulse rounded bg-secondary/50" />
 						</div>
 					</div>
-					<div className="mb-4 h-8 w-3/4 animate-pulse rounded bg-secondary/50" />
+					<div className="mb-10 h-12 w-11/12 animate-pulse rounded bg-secondary/50" />
 					<div className="space-y-3">
 						<div className="h-4 w-full animate-pulse rounded bg-secondary/50" />
 						<div className="h-4 w-full animate-pulse rounded bg-secondary/50" />

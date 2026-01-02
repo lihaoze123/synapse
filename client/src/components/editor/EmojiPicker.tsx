@@ -1,6 +1,8 @@
-import { Popover } from "@base-ui/react/popover";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 import { Smile } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 interface EmojiPickerProps {
@@ -8,108 +10,68 @@ interface EmojiPickerProps {
 	className?: string;
 }
 
-const QUICK_EMOJIS = ["😀", "😂", "❤️", "👍", "🔥", "✨", "🎉", "🚀"];
-
-const EMOJI_CATEGORIES = [
-	{
-		name: "常用",
-		emojis: [
-			"😀",
-			"😂",
-			"🥰",
-			"😎",
-			"🤔",
-			"😅",
-			"👍",
-			"❤️",
-			"🔥",
-			"✨",
-			"🎉",
-			"🚀",
-			"💯",
-			"✅",
-			"⭐",
-			"💪",
-		],
-	},
-	{
-		name: "表情",
-		emojis: [
-			"😃",
-			"😄",
-			"😁",
-			"😊",
-			"😇",
-			"🙂",
-			"😉",
-			"😌",
-			"😍",
-			"😘",
-			"😋",
-			"😛",
-			"😜",
-			"🤪",
-			"🤗",
-			"🤭",
-			"🤫",
-			"🤐",
-			"🤨",
-			"😏",
-			"😒",
-			"🙄",
-			"😬",
-			"🥲",
-		],
-	},
-	{
-		name: "手势",
-		emojis: [
-			"👎",
-			"👊",
-			"✊",
-			"🤛",
-			"🤜",
-			"🤞",
-			"✌️",
-			"🤟",
-			"🤘",
-			"👌",
-			"👏",
-			"🙌",
-			"🙏",
-		],
-	},
-	{
-		name: "符号",
-		emojis: [
-			"🧡",
-			"💛",
-			"💚",
-			"💙",
-			"💜",
-			"💔",
-			"💕",
-			"💖",
-			"💥",
-			"💫",
-			"🎊",
-			"❌",
-			"⚡",
-		],
-	},
-];
-
 export default function EmojiPicker({ onSelect, className }: EmojiPickerProps) {
 	const [isOpen, setIsOpen] = useState(false);
+	const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+	const btnRef = useRef<HTMLButtonElement>(null);
+	// Fallback dimensions used for simple positioning and viewport clamping.
+	// The actual picker size is dynamic, but these are good approximations.
+	const PICKER_WIDTH = 320;
+	const PICKER_HEIGHT = 380;
 
-	const handleSelect = (emoji: string) => {
-		onSelect(emoji);
+	const handleSelect = (emojiData: { native: string }) => {
+		onSelect(emojiData.native);
 		setIsOpen(false);
 	};
 
+	const updateRect = useCallback(() => {
+		const el = btnRef.current;
+		if (!el) return;
+		setAnchorRect(el.getBoundingClientRect());
+	}, []);
+
+	useEffect(() => {
+		if (!isOpen) return;
+		updateRect();
+		const onScrollOrResize = () => updateRect();
+		window.addEventListener("resize", onScrollOrResize, { passive: true });
+		window.addEventListener("scroll", onScrollOrResize, { passive: true });
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setIsOpen(false);
+		};
+		document.addEventListener("keydown", onKey);
+		return () => {
+			window.removeEventListener("resize", onScrollOrResize);
+			window.removeEventListener("scroll", onScrollOrResize);
+			document.removeEventListener("keydown", onKey);
+		};
+	}, [isOpen, updateRect]);
+
+	// Compute a fixed position in the viewport to avoid clipping by overflow hidden parents.
+	const position = useMemo(() => {
+		if (!anchorRect) return { left: 0, top: 0 };
+		const gap = 8;
+		let left = anchorRect.left;
+		let top = anchorRect.top - PICKER_HEIGHT - gap; // prefer above
+		// If not enough space above, place below.
+		if (top < 0) top = anchorRect.bottom + gap;
+		// Clamp within viewport horizontally.
+		const maxLeft = Math.max(0, window.innerWidth - PICKER_WIDTH - 8);
+		if (left > maxLeft) left = maxLeft;
+		if (left < 8) left = 8;
+		// If still overflowing bottom when placed below, move above.
+		if (top + PICKER_HEIGHT > window.innerHeight) {
+			const tryAbove = anchorRect.top - PICKER_HEIGHT - gap;
+			if (tryAbove >= 0) top = tryAbove;
+		}
+		return { left, top };
+	}, [anchorRect]);
+
 	return (
-		<Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-			<Popover.Trigger
+		<div className="relative">
+			<button
+				ref={btnRef}
+				type="button"
 				className={cn(
 					"flex h-9 w-9 items-center justify-center rounded-lg",
 					"text-muted-foreground",
@@ -118,69 +80,44 @@ export default function EmojiPicker({ onSelect, className }: EmojiPickerProps) {
 					"transition-all duration-150",
 					className,
 				)}
+				onClick={() => setIsOpen(!isOpen)}
 				title="表情"
 			>
 				<Smile className="h-5 w-5" />
-			</Popover.Trigger>
+			</button>
 
-			<Popover.Portal>
-				<Popover.Positioner sideOffset={8} side="top" align="start">
-					<Popover.Popup
-						className={cn(
-							"w-72 rounded-xl border border-border bg-card p-3 shadow-xl",
-							"outline-none",
-							"data-[ending-style]:opacity-0 data-[ending-style]:scale-95",
-							"data-[starting-style]:opacity-0 data-[starting-style]:scale-95",
-							"transition-all duration-150",
-						)}
-					>
-						{/* Quick access */}
-						<div className="flex items-center gap-1 pb-2 mb-2 border-b border-border">
-							{QUICK_EMOJIS.map((emoji) => (
-								<button
-									key={emoji}
-									type="button"
-									onClick={() => handleSelect(emoji)}
-									className={cn(
-										"flex h-8 w-8 items-center justify-center rounded-md text-lg",
-										"hover:bg-muted active:scale-95",
-										"transition-all duration-100",
-									)}
-								>
-									{emoji}
-								</button>
-							))}
+			{isOpen &&
+				createPortal(
+					<>
+						{/* biome-ignore lint/a11y/noStaticElementInteractions: Overlay for closing dropdown */}
+						<div
+							className="fixed inset-0"
+							style={{ zIndex: 1000 }}
+							onClick={() => setIsOpen(false)}
+							onKeyDown={(e) => e.key === "Escape" && setIsOpen(false)}
+						/>
+						<div
+							className="fixed"
+							style={{
+								left: position.left,
+								top: position.top,
+								zIndex: 1001,
+							}}
+						>
+							<Picker
+								data={data}
+								onEmojiSelect={handleSelect}
+								set="native"
+								locale="zh"
+								previewPosition="none"
+								skinTonePosition="search"
+								navPosition="bottom"
+								perLine={8}
+							/>
 						</div>
-
-						{/* Categories */}
-						<div className="max-h-48 overflow-y-auto space-y-3 pr-1">
-							{EMOJI_CATEGORIES.map((category) => (
-								<div key={category.name}>
-									<div className="text-[11px] font-medium text-muted-foreground mb-1.5 uppercase tracking-wide">
-										{category.name}
-									</div>
-									<div className="grid grid-cols-8 gap-0.5">
-										{category.emojis.map((emoji) => (
-											<button
-												key={emoji}
-												type="button"
-												onClick={() => handleSelect(emoji)}
-												className={cn(
-													"flex h-7 w-7 items-center justify-center rounded text-base",
-													"hover:bg-muted active:scale-95",
-													"transition-all duration-100",
-												)}
-											>
-												{emoji}
-											</button>
-										))}
-									</div>
-								</div>
-							))}
-						</div>
-					</Popover.Popup>
-				</Popover.Positioner>
-			</Popover.Portal>
-		</Popover.Root>
+					</>,
+					document.body,
+				)}
+		</div>
 	);
 }
