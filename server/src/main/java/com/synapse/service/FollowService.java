@@ -2,6 +2,7 @@ package com.synapse.service;
 
 import com.synapse.dto.FollowDto;
 import com.synapse.entity.Follow;
+import com.synapse.entity.NotificationType;
 import com.synapse.entity.User;
 import com.synapse.repository.FollowRepository;
 import com.synapse.repository.UserRepository;
@@ -17,6 +18,7 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public Page<FollowDto> getFollowing(Long userId, Pageable pageable) {
@@ -63,6 +65,10 @@ public class FollowService {
                 .build();
 
         Follow saved = followRepository.save(follow);
+
+        notificationService.createNotification(
+                following, follower, NotificationType.FOLLOW, null, null);
+
         return FollowDto.fromEntity(saved);
     }
 

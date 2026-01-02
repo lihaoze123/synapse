@@ -1,12 +1,15 @@
 import { Hash } from "lucide-react";
 import { ThemeToggle } from "@/components/common";
+import { NotificationBell } from "@/components/notifications";
 import { BreadcrumbWithItems } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks";
 import { useBreadcrumb } from "@/hooks/useBreadcrumb";
 import { SearchBar } from "./SearchBar";
 
 export function TopBar() {
 	const breadcrumbItems = useBreadcrumb();
+	const { user } = useAuth();
 
 	return (
 		<header className="sticky top-0 z-10 h-14 shrink-0 border-b bg-white dark:bg-gray-950 dark:border-gray-800 sa-pt">
@@ -26,7 +29,8 @@ export function TopBar() {
 					<SearchBar />
 				</div>
 
-				<div className="hidden sm:block justify-self-end">
+				<div className="hidden sm:flex items-center gap-1 justify-self-end">
+					{user && <NotificationBell />}
 					<ThemeToggle />
 				</div>
 			</div>

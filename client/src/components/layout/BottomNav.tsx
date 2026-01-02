@@ -1,15 +1,29 @@
 import { Link } from "@tanstack/react-router";
-import { Bookmark, Home, Search, User } from "lucide-react";
+import { Bell, Bookmark, Home, Search, User } from "lucide-react";
 import { useAuth } from "@/hooks";
+import { useUnreadCount } from "@/hooks/useNotifications";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
 	const { user } = useAuth();
+	const { data: unreadCount = 0 } = useUnreadCount({
+		refetchInterval: user ? 30000 : undefined,
+	});
 
 	const items = [
 		{ to: "/", label: "首页", icon: Home },
 		{ to: "/search", label: "搜索", icon: Search },
-		...(user ? [{ to: "/bookmarks", label: "收藏", icon: Bookmark }] : []),
+		...(user
+			? [
+					{
+						to: "/notifications",
+						label: "通知",
+						icon: Bell,
+						badge: unreadCount,
+					},
+					{ to: "/bookmarks", label: "收藏", icon: Bookmark },
+				]
+			: []),
 		{
 			to: user ? "/profile" : "/login",
 			label: user ? "我的" : "登录",
@@ -22,6 +36,7 @@ export function BottomNav() {
 			<ul className="flex items-stretch justify-around h-14">
 				{items.map((it) => {
 					const Icon = it.icon;
+					const badge = "badge" in it ? (it.badge ?? 0) : 0;
 					return (
 						<li key={it.to} className="flex-1">
 							<Link
@@ -29,6 +44,7 @@ export function BottomNav() {
 									it.to as
 										| "/"
 										| "/search"
+										| "/notifications"
 										| "/bookmarks"
 										| "/profile"
 										| "/login"
@@ -41,9 +57,19 @@ export function BottomNav() {
 							>
 								{({ isActive }) => (
 									<>
-										<Icon
-											className={cn("h-6 w-6 mb-0.5", isActive && "scale-110")}
-										/>
+										<div className="relative">
+											<Icon
+												className={cn(
+													"h-6 w-6 mb-0.5",
+													isActive && "scale-110",
+												)}
+											/>
+											{badge > 0 && (
+												<span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
+													{badge > 99 ? "99+" : badge}
+												</span>
+											)}
+										</div>
 										<span className="leading-none">{it.label}</span>
 									</>
 								)}
