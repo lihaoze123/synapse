@@ -9,6 +9,10 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+	FileUploader,
+	type UploadedAttachment,
+} from "@/components/upload/FileUploader";
 import { ImageUploader } from "@/components/upload/ImageUploader";
 import { useAllTags } from "@/hooks";
 import { cn } from "@/lib/utils";
@@ -37,6 +41,12 @@ export interface PublishData {
 	coverImage?: string;
 	images?: string[];
 	tags: string[];
+	attachments?: {
+		filename: string;
+		storedName: string;
+		fileSize: number;
+		contentType: string;
+	}[];
 }
 
 const TABS = [
@@ -100,6 +110,8 @@ export default function PublishModal({
 		string | undefined
 	>(undefined);
 
+	const [attachments, setAttachments] = useState<UploadedAttachment[]>([]);
+
 	useEffect(() => {
 		if (open && isEditMode && initialData) {
 			setTags(initialData.tags.map((t) => t.name));
@@ -120,6 +132,18 @@ export default function PublishModal({
 					setArticleCoverImage(initialData.coverImage || undefined);
 					break;
 			}
+
+			if (initialData?.attachments) {
+				setAttachments(
+					initialData.attachments.map((a) => ({
+						filename: a.filename,
+						storedName: a.url.replace("/uploads/", ""),
+						url: a.url,
+						fileSize: a.fileSize,
+						contentType: a.contentType,
+					})),
+				);
+			}
 		} else if (open && !isEditMode) {
 			setMomentContent("");
 			setMomentImages([]);
@@ -130,6 +154,7 @@ export default function PublishModal({
 			setArticleContent("");
 			setArticleCoverImage(undefined);
 			setTags([]);
+			setAttachments([]);
 		}
 	}, [open, isEditMode, initialData]);
 
@@ -143,6 +168,7 @@ export default function PublishModal({
 		setArticleContent("");
 		setArticleCoverImage(undefined);
 		setTags([]);
+		setAttachments([]);
 	};
 
 	const handleClose = () => {
@@ -160,6 +186,7 @@ export default function PublishModal({
 					content: momentContent,
 					images: momentImages.length > 0 ? momentImages : undefined,
 					tags,
+					attachments: attachments.length > 0 ? attachments : undefined,
 				};
 				break;
 			case "SNIPPET":
@@ -169,6 +196,7 @@ export default function PublishModal({
 					content: snippetCode,
 					language: snippetLanguage,
 					tags,
+					attachments: attachments.length > 0 ? attachments : undefined,
 				};
 				break;
 			case "ARTICLE":
@@ -178,6 +206,7 @@ export default function PublishModal({
 					content: articleContent,
 					coverImage: articleCoverImage,
 					tags,
+					attachments: attachments.length > 0 ? attachments : undefined,
 				};
 				break;
 		}
@@ -410,6 +439,17 @@ export default function PublishModal({
 												suggestions={tagSuggestions}
 											/>
 										</div>
+
+										{/* Attachments */}
+										<div className="space-y-2">
+											<span className="text-sm font-medium text-foreground">
+												附件
+											</span>
+											<FileUploader
+												value={attachments}
+												onChange={setAttachments}
+											/>
+										</div>
 									</div>
 
 									{/* Publish Actions */}
@@ -575,6 +615,11 @@ export default function PublishModal({
 								onChange={setTags}
 								suggestions={tagSuggestions}
 							/>
+						</div>
+
+						{/* Attachments */}
+						<div className="mt-4">
+							<FileUploader value={attachments} onChange={setAttachments} />
 						</div>
 					</div>
 

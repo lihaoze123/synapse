@@ -9,6 +9,12 @@ export interface CreatePostRequest {
 	coverImage?: string;
 	images?: string[];
 	tags?: string[];
+	attachments?: {
+		filename: string;
+		storedName: string;
+		fileSize: number;
+		contentType: string;
+	}[];
 }
 
 export interface PostsPage {

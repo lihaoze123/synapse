@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Code, FileText, MessageCircle } from "lucide-react";
 import { UserInfo } from "@/components/common";
+import { AttachmentList } from "@/components/common/AttachmentList";
 import { BookmarkButton } from "@/components/common/BookmarkButton";
 import FollowButton from "@/components/common/FollowButton";
 import { LikeButton } from "@/components/common/LikeButton";
@@ -109,6 +110,10 @@ export default function PostCard({ post, className }: PostCardProps) {
 						<MomentContent content={post.content} images={post.images} />
 					)}
 				</div>
+
+				{post.attachments && post.attachments.length > 0 && (
+					<AttachmentList attachments={post.attachments} className="mt-4" />
+				)}
 
 				{post.tags && post.tags.length > 0 && (
 					<div className="flex flex-wrap gap-1.5">

@@ -21,6 +21,37 @@ public class FileUtil {
             "image/webp"
     );
     private static final long MAX_SIZE = 10 * 1024 * 1024;
+    private static final Set<String> ALLOWED_ATTACHMENT_TYPES = Set.of(
+            // Documents
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "text/plain",
+            // Code/Data
+            "application/json",
+            "application/xml",
+            "text/xml",
+            "text/yaml",
+            "text/x-yaml",
+            "application/x-yaml",
+            // Archives
+            "application/zip",
+            "application/x-zip-compressed",
+            "application/x-rar-compressed",
+            "application/x-7z-compressed",
+            // Additional MIME types that browsers may send
+            "application/octet-stream"
+    );
+    private static final Set<String> ALLOWED_ATTACHMENT_EXTENSIONS = Set.of(
+            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+            ".txt", ".json", ".xml", ".yaml", ".yml",
+            ".zip", ".rar", ".7z"
+    );
+    private static final long MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024;
 
     public FileUtil() {
         createUploadDirectory();
@@ -48,6 +79,42 @@ public class FileUtil {
         Files.copy(file.getInputStream(), filePath);
 
         return newFilename;
+    }
+
+    public String saveAttachment(MultipartFile file) throws IOException {
+        validateAttachment(file);
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = getExtension(originalFilename);
+        String newFilename = UUID.randomUUID().toString() + extension;
+
+        Path filePath = Paths.get(UPLOAD_DIR, newFilename);
+        Files.copy(file.getInputStream(), filePath);
+
+        return newFilename;
+    }
+
+    private void validateAttachment(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        if (file.getSize() > MAX_ATTACHMENT_SIZE) {
+            throw new IllegalArgumentException("File size exceeds 5MB limit");
+        }
+
+        String contentType = file.getContentType();
+        String extension = getExtension(file.getOriginalFilename()).toLowerCase();
+
+        boolean allowedByType = contentType != null
+                && (ALLOWED_ATTACHMENT_TYPES.contains(contentType)
+                    || contentType.startsWith("text/"));
+        boolean allowedByExtension = ALLOWED_ATTACHMENT_EXTENSIONS.contains(extension);
+
+        if (!allowedByType && !allowedByExtension) {
+            throw new IllegalArgumentException(
+                "不支持的文件类型。支持：PDF、Word、Excel、PPT、TXT、JSON、XML、YAML、ZIP、RAR、7z");
+        }
     }
 
     private void validateFile(MultipartFile file) {

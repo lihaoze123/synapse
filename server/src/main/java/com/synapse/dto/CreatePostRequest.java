@@ -32,4 +32,17 @@ public class CreatePostRequest {
 
     @Size(max = 5, message = "Maximum 5 tags allowed")
     private List<String> tags;
+
+    @Size(max = 3, message = "Maximum 3 attachments allowed")
+    private List<AttachmentRequest> attachments;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AttachmentRequest {
+        private String filename;
+        private String storedName;
+        private Long fileSize;
+        private String contentType;
+    }
 }

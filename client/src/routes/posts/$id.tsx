@@ -14,6 +14,7 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import CommentSection from "@/components/comments/CommentSection";
 import { CodeBlock } from "@/components/common";
+import { AttachmentList } from "@/components/common/AttachmentList";
 import { BookmarkButton } from "@/components/common/BookmarkButton";
 import FollowButton from "@/components/common/FollowButton";
 import { ImagePreviewModal } from "@/components/common/ImagePreviewModal";
@@ -347,6 +348,12 @@ function PostDetailPage() {
 										<span>{tag.name}</span>
 									</Link>
 								))}
+							</div>
+						)}
+
+						{post.attachments && post.attachments.length > 0 && (
+							<div className="mt-6 border-t border-border pt-6">
+								<AttachmentList attachments={post.attachments} />
 							</div>
 						)}
 					</div>
