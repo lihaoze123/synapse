@@ -8,6 +8,9 @@ import com.synapse.repository.LikeRepository;
 import com.synapse.repository.PostRepository;
 import com.synapse.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,11 @@ public class LikeService {
 
     public record ToggleResult(boolean liked, long count) {}
 
+    @Caching(evict = {
+        @CacheEvict(value = "counts", key = "'postLikes:' + #postId"),
+        @CacheEvict(value = "counts", key = "'hasLikedPost:' + #userId + ':' + #postId"),
+        @CacheEvict(value = "posts", allEntries = true)
+    })
     @Transactional
     public ToggleResult togglePostLike(Long userId, Long postId) {
         User user = userRepository.findById(userId)
@@ -44,6 +52,7 @@ public class LikeService {
         return new ToggleResult(!exists, count);
     }
 
+    @Cacheable(value = "counts", key = "'hasLikedPost:' + #userId + ':' + #postId")
     @Transactional(readOnly = true)
     public boolean hasLikedPost(Long userId, Long postId) {
         return likeRepository.existsByUserIdAndPostId(userId, postId);

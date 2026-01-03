@@ -7,6 +7,9 @@ import com.synapse.repository.CommentLikeRepository;
 import com.synapse.repository.CommentRepository;
 import com.synapse.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +23,10 @@ public class CommentLikeService {
 
     public record ToggleResult(boolean liked, long count) {}
 
+    @Caching(evict = {
+        @CacheEvict(value = "counts", key = "'commentLikes:' + #commentId"),
+        @CacheEvict(value = "counts", key = "'hasLikedComment:' + #userId + ':' + #commentId")
+    })
     @Transactional
     public ToggleResult toggleCommentLike(Long userId, Long commentId) {
         User user = userRepository.findById(userId)
@@ -40,6 +47,7 @@ public class CommentLikeService {
         return new ToggleResult(!exists, count);
     }
 
+    @Cacheable(value = "counts", key = "'hasLikedComment:' + #userId + ':' + #commentId")
     @Transactional(readOnly = true)
     public boolean hasLikedComment(Long userId, Long commentId) {
         return commentLikeRepository.existsByUserIdAndCommentId(userId, commentId);
