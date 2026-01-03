@@ -17,6 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -69,11 +72,7 @@ public class PostService {
         return dto;
     }
 
-    @Transactional(readOnly = true)
-    public PostDto getPost(Long id) {
-        return getPost(id, null);
-    }
-
+    @Cacheable(value = "posts", key = "#id + ':' + (#requesterId ?: 'null')", unless = "#result == null || #result.content == null")
     @Transactional(readOnly = true)
     public PostDto getPost(Long id, Long requesterId) {
         Post post = postRepository.findWithDetailsById(id)
@@ -114,6 +113,10 @@ public class PostService {
         return PostDto.fromEntity(post);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "posts", allEntries = true),
+        @CacheEvict(value = "tags", allEntries = true)
+    })
     @Transactional
     public PostDto createPost(Long userId, CreatePostRequest request) {
         User user = userRepository.findById(userId)
@@ -182,6 +185,10 @@ public class PostService {
         return PostDto.fromEntity(saved);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "posts", allEntries = true),
+        @CacheEvict(value = "tags", allEntries = true)
+    })
     @Transactional
     public void deletePost(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
@@ -194,6 +201,10 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "posts", allEntries = true),
+        @CacheEvict(value = "tags", allEntries = true)
+    })
     @Transactional
     public PostDto updatePost(Long postId, Long userId, UpdatePostRequest request) {
         Post post = postRepository.findById(postId)

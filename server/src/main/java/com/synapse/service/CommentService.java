@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,7 @@ public class CommentService {
 		return page.map(CommentDto::fromEntity);
 	}
 
+	@Cacheable(value = "comments", key = "#id", unless = "#result == null")
 	@Transactional(readOnly = true)
 	public CommentDto getComment(Long id) {
 		Comment comment = commentRepository.findByIdWithUser(id)
@@ -112,6 +115,7 @@ public class CommentService {
 		return usernames;
 	}
 
+	@CacheEvict(value = "comments", key = "#commentId")
 	@Transactional
 	public CommentDto updateComment(Long commentId, Long userId, UpdateCommentRequest request) {
 		Long ownerUserId = commentRepository.findUserIdById(commentId)
@@ -133,6 +137,7 @@ public class CommentService {
 		return CommentDto.fromEntity(saved);
 	}
 
+	@CacheEvict(value = "comments", key = "#commentId")
 	@Transactional
 	public void deleteComment(Long commentId, Long userId) {
 		Long ownerUserId = commentRepository.findUserIdById(commentId)

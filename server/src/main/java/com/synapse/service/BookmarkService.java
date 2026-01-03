@@ -8,6 +8,9 @@ import com.synapse.repository.BookmarkRepository;
 import com.synapse.repository.PostRepository;
 import com.synapse.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,11 +42,16 @@ public class BookmarkService {
                 .map(BookmarkDto::fromEntity);
     }
 
+    @Cacheable(value = "counts", key = "'isBookmarked:' + #userId + ':' + #postId")
     @Transactional(readOnly = true)
     public boolean isBookmarked(Long userId, Long postId) {
         return bookmarkRepository.existsByUserIdAndPostId(userId, postId);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "counts", key = "'bookmarks:' + #postId"),
+        @CacheEvict(value = "counts", key = "'isBookmarked:' + #userId + ':' + #postId")
+    })
     @Transactional
     public BookmarkDto addBookmark(Long userId, Long postId) {
         User user = userRepository.findById(userId)
@@ -65,6 +73,10 @@ public class BookmarkService {
         return BookmarkDto.fromEntity(saved);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "counts", key = "'bookmarks:' + #postId"),
+        @CacheEvict(value = "counts", key = "'isBookmarked:' + #userId + ':' + #postId")
+    })
     @Transactional
     public void removeBookmark(Long userId, Long postId) {
         if (!bookmarkRepository.existsByUserIdAndPostId(userId, postId)) {
@@ -73,6 +85,7 @@ public class BookmarkService {
         bookmarkRepository.deleteByUserIdAndPostId(userId, postId);
     }
 
+    @Cacheable(value = "counts", key = "'bookmarks:' + #postId")
     @Transactional(readOnly = true)
     public long getBookmarkCount(Long postId) {
         return bookmarkRepository.countByPostId(postId);

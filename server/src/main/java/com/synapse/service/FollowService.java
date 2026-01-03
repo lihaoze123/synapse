@@ -7,6 +7,9 @@ import com.synapse.entity.User;
 import com.synapse.repository.FollowRepository;
 import com.synapse.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,11 +41,17 @@ public class FollowService {
                 .map(FollowDto::fromEntity);
     }
 
+    @Cacheable(value = "counts", key = "'isFollowing:' + #followerId + ':' + #followingId")
     @Transactional(readOnly = true)
     public boolean isFollowing(Long followerId, Long followingId) {
         return followRepository.existsByFollowerIdAndFollowingId(followerId, followingId);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "counts", key = "'following:' + #followerId"),
+        @CacheEvict(value = "counts", key = "'followers:' + #followingId"),
+        @CacheEvict(value = "counts", key = "'isFollowing:' + #followerId + ':' + #followingId")
+    })
     @Transactional
     public FollowDto followUser(Long followerId, Long followingId) {
         if (followerId.equals(followingId)) {
@@ -72,6 +81,11 @@ public class FollowService {
         return FollowDto.fromEntity(saved);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "counts", key = "'following:' + #followerId"),
+        @CacheEvict(value = "counts", key = "'followers:' + #followingId"),
+        @CacheEvict(value = "counts", key = "'isFollowing:' + #followerId + ':' + #followingId")
+    })
     @Transactional
     public void unfollowUser(Long followerId, Long followingId) {
         if (!followRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
@@ -80,11 +94,13 @@ public class FollowService {
         followRepository.deleteByFollowerIdAndFollowingId(followerId, followingId);
     }
 
+    @Cacheable(value = "counts", key = "'following:' + #userId")
     @Transactional(readOnly = true)
     public long getFollowingCount(Long userId) {
         return followRepository.countByFollowerId(userId);
     }
 
+    @Cacheable(value = "counts", key = "'followers:' + #userId")
     @Transactional(readOnly = true)
     public long getFollowerCount(Long userId) {
         return followRepository.countByFollowingId(userId);

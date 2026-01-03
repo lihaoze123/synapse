@@ -7,6 +7,9 @@ import com.synapse.entity.User;
 import com.synapse.repository.PostRepository;
 import com.synapse.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
+    @Cacheable(value = "users", key = "#id")
     @Transactional(readOnly = true)
     public UserDto getUser(Long id) {
         User user = userRepository.findById(id)
@@ -26,6 +30,7 @@ public class UserService {
         return UserDto.fromEntity(user);
     }
 
+    @Cacheable(value = "users", key = "'username:' + #username")
     @Transactional(readOnly = true)
     public UserDto getUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
@@ -42,6 +47,10 @@ public class UserService {
                 .map(PostDto::fromEntity);
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "users", key = "#userId"),
+        @CacheEvict(value = "users", key = "'username:' + #result.username")
+    })
     @Transactional
     public UserDto updateProfile(Long userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
