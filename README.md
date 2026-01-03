@@ -13,6 +13,7 @@
 
 [![Docker](https://img.shields.io/badge/docker-supported-2496ED?style=flat-square&logo=docker)]()
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql)]()
+[![Redis](https://img.shields.io/badge/Redis-cache-DC382D?style=flat-square&logo=redis)]()
 [![JWT](https://img.shields.io/badge/JWT-auth-FF6B6B?style=flat-square)]()
 
 </div>
@@ -141,6 +142,7 @@ bun run dev
 | **草稿自动保存** | 编辑器自动保存草稿，防止丢失内容 |
 | **暗色模式** | 支持亮色/暗色/跟随系统三种主题 |
 | **私密帖子** | 支持密码保护的私密内容 |
+| **Redis 缓存** | 可选缓存层，提升响应速度（Demo 模式） |
 
 ---
 
