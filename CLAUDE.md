@@ -22,6 +22,7 @@ This is a course project (课程设计). Implementation is in progress - basic C
 | Testing | Vitest + Testing Library (frontend), JUnit 5 (backend) |
 | Backend | Spring Boot 3.2, Spring Data JPA (Hibernate) |
 | Database | MySQL (production) / H2 (demo) |
+| Cache | Redis (optional, for demo profile) |
 | Auth | JWT (jjwt library) |
 | File Storage | Local `uploads/` folder with UUID naming |
 | Theme | Custom dark mode with system preference detection |
@@ -118,7 +119,7 @@ java -jar target/synapse-0.0.1-SNAPSHOT.jar
 ### Backend Package Structure
 ```
 com.synapse/
-├── config/           # CORS, StaticResourceConfig, JwtConfig
+├── config/           # CORS, StaticResourceConfig, JwtConfig, RedisConfig
 ├── controller/       # AuthController, PostController, TagController, CommentController, CommentLikeController, BookmarkController, FollowController, LikeController, UserController, FileController, NotificationController
 ├── dto/              # Request/Response DTOs (ApiResponse, PostDto, CommentDto, NotificationDto, VerifyPasswordRequest, etc.)
 ├── entity/           # User, Post, Tag, Comment, CommentLike, Bookmark, Follow, Like, Notification (JPA Entities)
@@ -270,6 +271,18 @@ spring.web.resources.static-locations=file:./uploads/,classpath:/static/
 ```
 Files saved to project root `uploads/` folder, accessible at `localhost:8080/filename.png`.
 
+### Caching
+- **Spring Cache + Redis**: Optional caching layer for improved performance
+- **Cache Categories**:
+  - `posts`: 10 min TTL - Full post data with user and tags
+  - `users`: 15 min TTL - User profiles by ID or username
+  - `tags`: 30 min TTL - Popular and all tags lists
+  - `comments`: 10 min TTL - Individual comment data
+  - `counts`: 5 min TTL - Likes, bookmarks, followers, unread notifications
+- **HTTP Caching**: Static resources cached (uploads: 7 days, assets: 1 year)
+- **Graceful Degradation**: App works without Redis, just without caching benefits
+- **Docker Demo**: Use `docker-compose --profile demo up` to enable Redis
+
 ### Code Highlighting
 - CodeMirror editor for snippet creation with 20+ language support
 - ReactMarkdown + Shiki for displaying code in posts
@@ -285,6 +298,6 @@ Files saved to project root `uploads/` folder, accessible at `localhost:8080/fil
 
 ## Important Constraints
 
-- This is an MVP demo - avoid production-level complexity (no message queues, caching, MinIO/OSS)
+- This is an MVP demo - avoid production-level complexity (no message queues, MinIO/OSS)
 - Keep the implementation simple and focused on demonstrating the multi-type content model
 - **Never** comment, unless it's useful
