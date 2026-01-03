@@ -38,7 +38,7 @@ const createStorageMock = () => {
 
 	// Make it enumerable like real localStorage
 	return new Proxy(mock, {
-		ownTarget: () => Object.keys(store),
+		ownKeys: () => [...Object.keys(mock), ...Object.keys(store)],
 		getOwnPropertyDescriptor: (target, prop) => {
 			if (typeof prop === "string" && Object.hasOwn(store, prop)) {
 				return { enumerable: true, configurable: true, value: store[prop] };

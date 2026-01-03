@@ -1,12 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { PostsPage } from "../services/posts";
 import { postsService } from "../services/posts";
 import { useSearch } from "./useSearch";
 
 vi.mock("../services/posts");
 
-const mockPostsService = vi.mocked(postsService);
+const mockPostsService = vi.mocked(postsService, { deep: true });
 
 describe("useSearch hook", () => {
 	let queryClient: QueryClient;
@@ -211,7 +212,7 @@ describe("useSearch hook", () => {
 				size: 10,
 				first: true,
 				last: false,
-			};
+			} as unknown as PostsPage;
 			mockPostsService.searchPosts.mockResolvedValue(firstPage);
 
 			const { result } = renderHook(() => useSearch({ keyword: "test" }), {
@@ -230,7 +231,7 @@ describe("useSearch hook", () => {
 				size: 10,
 				first: true,
 				last: true,
-			};
+			} as unknown as PostsPage;
 			mockPostsService.searchPosts.mockResolvedValue(lastPage);
 
 			const { result } = renderHook(() => useSearch({ keyword: "test" }), {

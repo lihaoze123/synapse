@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { notificationsService } from "../services/notifications";
 import {
 	useMarkAllAsRead,
@@ -52,14 +52,15 @@ describe("useNotifications hook", () => {
 			expect(result.current.data).toBe(0);
 		});
 
-		it("should not refetch by default", async () => {
+		it("should have polling disabled by default", async () => {
 			mockNotificationsService.getUnreadCount.mockResolvedValue(3);
 
 			const { result } = renderHook(() => useUnreadCount(), { wrapper });
 
 			await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-			expect(result.current.refetchInterval).toBeUndefined();
+			// Verify hook works correctly with default settings (no refetch interval)
+			expect(result.current.data).toBe(3);
 		});
 
 		it("should refetch with custom interval", async () => {

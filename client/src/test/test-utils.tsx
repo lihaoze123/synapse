@@ -1,8 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-	type createMemoryRouter,
-	RouterProvider,
-} from "@tanstack/react-router";
+import { type AnyRouter, RouterProvider } from "@tanstack/react-router";
 import { type RenderOptions, render } from "@testing-library/react";
 
 // Test-friendly QueryClient
@@ -23,7 +20,7 @@ export function createTestQueryClient() {
 interface TestProvidersProps {
 	children: React.ReactNode;
 	queryClient?: QueryClient;
-	router?: ReturnType<typeof createMemoryRouter>;
+	router?: AnyRouter;
 }
 
 export function TestProviders({
@@ -46,7 +43,7 @@ export function TestProviders({
 
 interface CustomRenderOptions extends Omit<RenderOptions, "wrapper"> {
 	queryClient?: QueryClient;
-	router?: ReturnType<typeof createMemoryRouter>;
+	router?: AnyRouter;
 }
 
 export function renderWithProviders(

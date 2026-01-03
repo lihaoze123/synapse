@@ -1,12 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { bookmarksService } from "../services/bookmarks";
 import {
 	useBookmarkCount,
 	useBookmarkStatus,
-	useBookmarkToggle,
 	useBookmarks,
+	useBookmarkToggle,
 } from "./useBookmarks";
 
 vi.mock("../services/bookmarks");

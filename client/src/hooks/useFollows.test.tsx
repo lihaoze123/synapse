@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { followsService } from "../services/follows";
+import { useAuth } from "./useAuth";
 import {
 	useFollowCounts,
 	useFollowers,
@@ -10,7 +11,6 @@ import {
 	useIsFollowing,
 	useUnfollowUser,
 } from "./useFollows";
-import { useAuth } from "./useAuth";
 
 vi.mock("../services/follows");
 vi.mock("./useAuth");

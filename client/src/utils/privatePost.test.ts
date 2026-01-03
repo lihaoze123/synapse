@@ -15,8 +15,9 @@ describe("privatePost", () => {
 		language: "javascript",
 		summary: null,
 		coverImage: null,
+		images: null,
+		attachments: null,
 		isPrivate: true,
-		password: "secret",
 		createdAt: "2024-01-01T00:00:00Z",
 		user: {
 			id: 1,
@@ -24,10 +25,7 @@ describe("privatePost", () => {
 			avatarUrl: null,
 		},
 		tags: [],
-		likesCount: 0,
-		commentsCount: 0,
-		isLiked: false,
-		isBookmarked: false,
+		likeCount: 0,
 	};
 
 	describe("setUnlockedPost and getUnlockedPost", () => {

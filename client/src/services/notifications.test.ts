@@ -4,7 +4,7 @@ import { notificationsService } from "./notifications";
 
 vi.mock("./api");
 
-const mockApi = vi.mocked(api);
+const mockApi = vi.mocked(api, { deep: true });
 
 describe("notificationsService", () => {
 	describe("list", () => {

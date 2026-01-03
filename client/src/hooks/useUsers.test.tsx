@@ -1,12 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { useUpdateProfile, useUserPosts } from "./useUsers";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { UserPostsPage } from "../services/users";
 import { userService } from "../services/users";
+import type { User } from "../types";
+import { useUpdateProfile, useUserPosts } from "./useUsers";
 
 vi.mock("../services/users");
 
-const mockUserService = vi.mocked(userService);
+const mockUserService = vi.mocked(userService, { deep: true });
 
 describe("useUsers", () => {
 	let queryClient: QueryClient;
@@ -45,8 +47,10 @@ describe("useUsers", () => {
 				totalElements: 1,
 				totalPages: 1,
 				number: 0,
+				size: 10,
+				first: true,
 				last: true,
-			};
+			} as unknown as UserPostsPage;
 			mockUserService.getUserPosts.mockResolvedValue(mockPage);
 
 			const { result } = renderHook(() => useUserPosts(1), { wrapper });
@@ -76,15 +80,19 @@ describe("useUsers", () => {
 				totalElements: 2,
 				totalPages: 2,
 				number: 0,
+				size: 10,
+				first: true,
 				last: false,
-			};
+			} as unknown as UserPostsPage;
 			const mockPage2 = {
 				content: [{ id: 2, title: "Post 2" }],
 				totalElements: 2,
 				totalPages: 2,
 				number: 1,
+				size: 10,
+				first: false,
 				last: true,
-			};
+			} as unknown as UserPostsPage;
 			mockUserService.getUserPosts
 				.mockResolvedValueOnce(mockPage1)
 				.mockResolvedValueOnce(mockPage2);
@@ -140,7 +148,7 @@ describe("useUsers", () => {
 		});
 
 		it("should show pending state during update", async () => {
-			let resolvePromise: (value: unknown) => void;
+			let resolvePromise: (value: User) => void;
 			mockUserService.updateProfile.mockReturnValue(
 				new Promise((resolve) => {
 					resolvePromise = resolve;
@@ -158,7 +166,7 @@ describe("useUsers", () => {
 				expect(mockUserService.updateProfile).toHaveBeenCalled();
 			});
 
-			resolvePromise!({ id: 1, username: "test" });
+			resolvePromise!({ id: 1, username: "test", avatarUrl: null });
 
 			await mutatePromise;
 		});

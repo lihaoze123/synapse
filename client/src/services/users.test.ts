@@ -4,7 +4,7 @@ import { userService } from "./users";
 
 vi.mock("./api");
 
-const mockApi = vi.mocked(api);
+const mockApi = vi.mocked(api, { deep: true });
 
 describe("userService", () => {
 	describe("getUser", () => {

@@ -1,10 +1,16 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { LikeButton } from "./LikeButton";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
+import { toast } from "sonner";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuth } from "../../hooks/useAuth";
 import { useLikeComment, useLikePost } from "../../hooks/useLikes";
-import { toast } from "sonner";
+import { LikeButton } from "./LikeButton";
 
 vi.mock("../../hooks/useAuth");
 vi.mock("../../hooks/useLikes");

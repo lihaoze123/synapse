@@ -4,7 +4,7 @@ import { bookmarksService } from "./bookmarks";
 
 vi.mock("./api");
 
-const mockApi = vi.mocked(api);
+const mockApi = vi.mocked(api, { deep: true });
 
 describe("bookmarksService", () => {
 	describe("getCount", () => {

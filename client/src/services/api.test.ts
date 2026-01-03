@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach, beforeAll } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Use vi.hoisted to create store that's available when mock runs
 const mockStore = vi.hoisted(() => ({
@@ -108,8 +108,10 @@ describe("api module", () => {
 
 		it("should handle 401 error and redirect to login", async () => {
 			const originalLocation = window.location;
-			delete (window as any).location;
-			window.location = { href: "" } as Location;
+			Object.defineProperty(window, "location", {
+				value: { href: "" },
+				writable: true,
+			});
 
 			localStorage.setItem("token", "expired-token");
 			localStorage.setItem("user", JSON.stringify({ id: 1 }));
@@ -118,13 +120,18 @@ describe("api module", () => {
 				response: { status: 401 },
 			};
 
-			await expect(mockStore.responseErrorInterceptor!(error)).rejects.toBe(error);
+			await expect(mockStore.responseErrorInterceptor!(error)).rejects.toBe(
+				error,
+			);
 
 			expect(localStorage.getItem("token")).toBeNull();
 			expect(localStorage.getItem("user")).toBeNull();
 			expect(window.location.href).toBe("/login");
 
-			window.location = originalLocation;
+			Object.defineProperty(window, "location", {
+				value: originalLocation,
+				writable: true,
+			});
 		});
 
 		it("should call custom auth error handler on 401", async () => {
@@ -138,7 +145,9 @@ describe("api module", () => {
 				response: { status: 401 },
 			};
 
-			await expect(mockStore.responseErrorInterceptor!(error)).rejects.toBe(error);
+			await expect(mockStore.responseErrorInterceptor!(error)).rejects.toBe(
+				error,
+			);
 
 			expect(customHandler).toHaveBeenCalled();
 			expect(localStorage.getItem("token")).toBeNull();
@@ -150,7 +159,9 @@ describe("api module", () => {
 				response: { status: 500 },
 			};
 
-			await expect(mockStore.responseErrorInterceptor!(error)).rejects.toBe(error);
+			await expect(mockStore.responseErrorInterceptor!(error)).rejects.toBe(
+				error,
+			);
 			expect(localStorage.getItem("token")).toBeNull();
 		});
 	});

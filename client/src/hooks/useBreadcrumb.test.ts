@@ -14,7 +14,7 @@ describe("useBreadcrumb", () => {
 	it("should return default home breadcrumb when no routes have breadcrumb config", () => {
 		mockUseMatches.mockReturnValue([
 			{ id: "1", pathname: "/", staticData: undefined },
-		]);
+		] as any);
 
 		const { result } = renderHook(() => useBreadcrumb());
 
@@ -33,7 +33,7 @@ describe("useBreadcrumb", () => {
 					},
 				},
 			},
-		]);
+		] as any);
 
 		const { result } = renderHook(() => useBreadcrumb());
 
@@ -65,7 +65,7 @@ describe("useBreadcrumb", () => {
 				},
 				params: { id: "123" },
 			},
-		]);
+		] as any);
 
 		const { result } = renderHook(() => useBreadcrumb());
 
@@ -87,7 +87,7 @@ describe("useBreadcrumb", () => {
 					},
 				},
 			},
-		]);
+		] as any);
 
 		const { result } = renderHook(() => useBreadcrumb());
 
@@ -119,7 +119,7 @@ describe("useBreadcrumb", () => {
 					},
 				},
 			},
-		]);
+		] as any);
 
 		const { result } = renderHook(() => useBreadcrumb());
 
@@ -160,7 +160,7 @@ describe("useBreadcrumb", () => {
 					},
 				},
 			},
-		]);
+		] as any);
 
 		const { result } = renderHook(() => useBreadcrumb());
 
@@ -198,7 +198,7 @@ describe("useBreadcrumb", () => {
 					},
 				},
 			},
-		]);
+		] as any);
 
 		const { result } = renderHook(() => useBreadcrumb());
 

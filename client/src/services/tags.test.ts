@@ -1,10 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import api from "./api";
 import { tagsService } from "./tags";
 
 vi.mock("./api");
 
-const mockApi = vi.mocked(api);
+const mockApi = vi.mocked(api, { deep: true });
 
 describe("tagsService", () => {
 	beforeEach(() => {
@@ -48,7 +48,9 @@ describe("tagsService", () => {
 				data: { success: false, message: "Server error" },
 			});
 
-			await expect(tagsService.getPopularTags()).rejects.toThrow("Server error");
+			await expect(tagsService.getPopularTags()).rejects.toThrow(
+				"Server error",
+			);
 		});
 
 		it("should throw default error message when no message provided", async () => {

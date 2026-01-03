@@ -4,7 +4,7 @@ import { authService } from "./auth";
 
 vi.mock("./api");
 
-const mockApi = vi.mocked(api);
+const mockApi = vi.mocked(api, { deep: true });
 
 describe("authService", () => {
 	describe("login", () => {
