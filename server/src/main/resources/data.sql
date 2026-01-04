@@ -2,27 +2,27 @@
 -- Synapse Mock Data
 -- ============================================
 
--- Tags (话题标签)
-INSERT INTO tags (name, icon) VALUES ('Java', '☕');
-INSERT INTO tags (name, icon) VALUES ('Python', '🐍');
-INSERT INTO tags (name, icon) VALUES ('JavaScript', '📜');
-INSERT INTO tags (name, icon) VALUES ('React', '⚛️');
-INSERT INTO tags (name, icon) VALUES ('Spring Boot', '🍃');
-INSERT INTO tags (name, icon) VALUES ('算法', '🧮');
-INSERT INTO tags (name, icon) VALUES ('数据库', '🗄️');
-INSERT INTO tags (name, icon) VALUES ('前端', '🎨');
+-- Tags (话题标签) - Use MERGE to handle duplicate key errors
+MERGE INTO tags (name, icon) KEY (name) VALUES ('Java', '☕');
+MERGE INTO tags (name, icon) KEY (name) VALUES ('Python', '🐍');
+MERGE INTO tags (name, icon) KEY (name) VALUES ('JavaScript', '📜');
+MERGE INTO tags (name, icon) KEY (name) VALUES ('React', '⚛️');
+MERGE INTO tags (name, icon) KEY (name) VALUES ('Spring Boot', '🍃');
+MERGE INTO tags (name, icon) KEY (name) VALUES ('算法', '🧮');
+MERGE INTO tags (name, icon) KEY (name) VALUES ('数据库', '🗄️');
+MERGE INTO tags (name, icon) KEY (name) VALUES ('前端', '🎨');
 
--- Users (测试用户) - 使用 DiceBear API 生成 Notion 风格头像
-INSERT INTO users (username, password, avatar_url, display_name, bio) VALUES
+-- Users (测试用户) - 使用 DiceBear API 生成 Notion 风格头像 - Use MERGE for username uniqueness
+MERGE INTO users (username, password, avatar_url, display_name, bio) KEY (username) VALUES
 ('admin', 'admin123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Admin', '管理员', '全栈开发者，热爱开源。专注于 Java 和 React 技术栈。');
 
-INSERT INTO users (username, password, avatar_url, display_name, bio) VALUES
+MERGE INTO users (username, password, avatar_url, display_name, bio) KEY (username) VALUES
 ('alice', 'alice123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Alice', '爱丽丝', 'Python 爱好者，数据科学工程师。喜欢分享编程技巧和最佳实践。');
 
-INSERT INTO users (username, password, avatar_url, display_name, bio) VALUES
+MERGE INTO users (username, password, avatar_url, display_name, bio) KEY (username) VALUES
 ('bob', 'bob123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Bob', '鲍勃', '前端开发者，React 和 TypeScript 粉丝。致力于构建优雅的用户界面。');
 
-INSERT INTO users (username, password, avatar_url, display_name, bio) VALUES
+MERGE INTO users (username, password, avatar_url, display_name, bio) KEY (username) VALUES
 ('charlie', 'charlie123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Charlie', '查理', '后端架构师，专注微服务和分布式系统。Spring Boot 布道师。');
 
 -- Posts (文章/代码片段/动态)
@@ -164,22 +164,22 @@ INSERT INTO posts (type, content, user_id) VALUES
 INSERT INTO posts (type, content, user_id) VALUES
 ('MOMENT', '有人用过 H2 数据库吗？内存模式下数据重启就没了，适合开发测试用。', 2);
 
--- Post_Tags (文章-标签关联)
-INSERT INTO post_tags (post_id, tag_id) VALUES (1, 1);  -- QuickSort - Java
-INSERT INTO post_tags (post_id, tag_id) VALUES (1, 6);  -- QuickSort - 算法
-INSERT INTO post_tags (post_id, tag_id) VALUES (2, 2);  -- Python - Python
-INSERT INTO post_tags (post_id, tag_id) VALUES (2, 6);  -- Python - 算法
-INSERT INTO post_tags (post_id, tag_id) VALUES (3, 3);  -- React - JavaScript
-INSERT INTO post_tags (post_id, tag_id) VALUES (3, 4);  -- React - React
-INSERT INTO post_tags (post_id, tag_id) VALUES (4, 1);  -- Spring Guide - Java
-INSERT INTO post_tags (post_id, tag_id) VALUES (4, 5);  -- Spring Guide - Spring Boot
-INSERT INTO post_tags (post_id, tag_id) VALUES (5, 3);  -- JS Async - JavaScript
-INSERT INTO post_tags (post_id, tag_id) VALUES (5, 4);  -- JS Async - React
-INSERT INTO post_tags (post_id, tag_id) VALUES (6, 1);  -- Moment - Java
-INSERT INTO post_tags (post_id, tag_id) VALUES (6, 5);  -- Moment - Spring Boot
-INSERT INTO post_tags (post_id, tag_id) VALUES (7, 2);  -- Moment - Python
-INSERT INTO post_tags (post_id, tag_id) VALUES (8, 4);  -- Moment - React
-INSERT INTO post_tags (post_id, tag_id) VALUES (9, 7);  -- Moment - 数据库
+-- Post_Tags (文章-标签关联) - Use MERGE for composite key uniqueness
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (1, 1);  -- QuickSort - Java
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (1, 6);  -- QuickSort - 算法
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (2, 2);  -- Python - Python
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (2, 6);  -- Python - 算法
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (3, 3);  -- React - JavaScript
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (3, 4);  -- React - React
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (4, 1);  -- Spring Guide - Java
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (4, 5);  -- Spring Guide - Spring Boot
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (5, 3);  -- JS Async - JavaScript
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (5, 4);  -- JS Async - React
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (6, 1);  -- Moment - Java
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (6, 5);  -- Moment - Spring Boot
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (7, 2);  -- Moment - Python
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (8, 4);  -- Moment - React
+MERGE INTO post_tags (post_id, tag_id) KEY (post_id, tag_id) VALUES (9, 7);  -- Moment - 数据库
 
 -- ============================================
 -- Comments Mock Data (支持 Markdown 格式)
@@ -484,27 +484,27 @@ INSERT INTO comments (content, user_id, post_id, parent_id, floor, created_at, i
 -- Follows Mock Data
 -- ============================================
 
--- Follow relationships between users
+-- Follow relationships between users - Use MERGE for composite key uniqueness
 -- alice (id=2) follows admin (id=1)
-INSERT INTO follows (follower_id, following_id, created_at) VALUES
+MERGE INTO follows (follower_id, following_id, created_at) KEY (follower_id, following_id) VALUES
 (2, 1, TIMESTAMP '2024-01-02 09:00:00');
 
 -- bob (id=3) follows admin (id=1) and alice (id=2)
-INSERT INTO follows (follower_id, following_id, created_at) VALUES
+MERGE INTO follows (follower_id, following_id, created_at) KEY (follower_id, following_id) VALUES
 (3, 1, TIMESTAMP '2024-01-03 10:00:00'),
 (3, 2, TIMESTAMP '2024-01-03 10:05:00');
 
 -- charlie (id=4) follows admin (id=1), alice (id=2), and bob (id=3)
-INSERT INTO follows (follower_id, following_id, created_at) VALUES
+MERGE INTO follows (follower_id, following_id, created_at) KEY (follower_id, following_id) VALUES
 (4, 1, TIMESTAMP '2024-01-04 11:00:00'),
 (4, 2, TIMESTAMP '2024-01-04 11:05:00'),
 (4, 3, TIMESTAMP '2024-01-04 11:10:00');
 
 -- admin (id=1) follows bob (id=3) and charlie (id=4)
-INSERT INTO follows (follower_id, following_id, created_at) VALUES
+MERGE INTO follows (follower_id, following_id, created_at) KEY (follower_id, following_id) VALUES
 (1, 3, TIMESTAMP '2024-01-05 14:00:00'),
 (1, 4, TIMESTAMP '2024-01-05 14:05:00');
 
 -- alice (id=2) also follows charlie (id=4)
-INSERT INTO follows (follower_id, following_id, created_at) VALUES
+MERGE INTO follows (follower_id, following_id, created_at) KEY (follower_id, following_id) VALUES
 (2, 4, TIMESTAMP '2024-01-06 16:00:00');
