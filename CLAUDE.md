@@ -17,12 +17,14 @@ This is a course project (课程设计). Implementation is in progress - basic C
 | Layer | Technology |
 |-------|------------|
 | Frontend | React 19, Vite 7, Tailwind CSS 4, Coss UI, TanStack Query + Router |
+| Real-time | WebSocket (Spring WebSocket + react-use-websocket) |
 | Code/Text | CodeMirror (code editor with syntax highlighting), react-markdown |
 | Lint/Format | Biome (frontend), Checkstyle (backend) |
 | Testing | Vitest + Testing Library (frontend), JUnit 5 (backend) |
 | Backend | Spring Boot 3.2, Spring Data JPA (Hibernate) |
 | Database | MySQL (production) / H2 (demo) |
 | Cache | Redis (optional, for demo profile) |
+| Monitoring | Prometheus + Grafana (demo profile) |
 | Auth | JWT (jjwt library) |
 | File Storage | Local `uploads/` folder with UUID naming |
 | Theme | Custom dark mode with system preference detection |
@@ -119,13 +121,14 @@ java -jar target/synapse-0.0.1-SNAPSHOT.jar
 ### Backend Package Structure
 ```
 com.synapse/
-├── config/           # CORS, StaticResourceConfig, JwtConfig, RedisConfig
+├── config/           # CORS, StaticResourceConfig, JwtConfig, RedisConfig, WebSocketConfig
 ├── controller/       # AuthController, PostController, TagController, CommentController, CommentLikeController, BookmarkController, FollowController, LikeController, UserController, FileController, NotificationController
 ├── dto/              # Request/Response DTOs (ApiResponse, PostDto, CommentDto, NotificationDto, VerifyPasswordRequest, etc.)
 ├── entity/           # User, Post, Tag, Comment, CommentLike, Bookmark, Follow, Like, Notification (JPA Entities)
 ├── repository/       # JPA Repository interfaces
-├── service/          # Business logic (AuthService, PostService, NotificationService, etc.)
-└── utils/            # JWTUtil, FileUtil
+├── service/          # Business logic (AuthService, PostService, NotificationService, MetricsService, etc.)
+├── utils/            # JWTUtil, FileUtil
+└── websocket/        # WebSocket handlers (NotificationWebSocketHandler, JwtHandshakeInterceptor, NotificationBroadcaster)
 ```
 
 ### Frontend Structure
@@ -143,7 +146,7 @@ src/
 │   ├── comments/     # CommentSection, CommentItem
 │   ├── notifications/ # NotificationItem, NotificationsPanel
 │   └── ui/           # UI components (Card, Button, Input, PasswordModal, etc.)
-├── hooks/            # useAuth, usePosts, useNotifications, useTheme
+├── hooks/            # useAuth, usePosts, useNotifications, useNotificationRealtime, useTheme
 ├── routes/           # TanStack Router definitions (index, login, search, profile, posts/$id, users/$userId.*, notifications)
 ├── services/         # Axios API client (notificationsService, etc.)
 └── utils/            # draftStorage, privatePost
@@ -220,6 +223,9 @@ GET  /api/tags                     # Popular topics for sidebar
 
 # File Upload
 POST /api/upload                   # Image upload → /static/uploads/{uuid}.png
+
+# WebSocket
+WS   /api/ws/notifications?token=xxx  # Real-time notifications (JWT in query param)
 ```
 
 ## Key Implementation Details
@@ -237,6 +243,12 @@ Frontend dynamically renders cards based on `post.type`:
 - **Follows**: Follow/unfollow users, view followers/following lists with stats
 - **User Profiles**: Public profile pages with user info and posts
 - **Notifications**: Real-time notifications for likes, comments, follows, and mentions with unread count badge
+
+### Real-time Features
+- **WebSocket Notifications**: Push-based real-time notifications via `/api/ws/notifications`
+- **JWT Handshake Auth**: WebSocket connection authenticated via JWT token in query parameter
+- **Auto Reconnect**: Frontend automatically reconnects on connection drop
+- **Message Types**: `unreadCount` (updates badge), `notification` (invalidates list query)
 
 ### Editor Features
 - **Draft Auto-Save**: Automatically saves drafts to localStorage with 1-second debounce
@@ -282,6 +294,25 @@ Files saved to project root `uploads/` folder, accessible at `localhost:8080/fil
 - **HTTP Caching**: Static resources cached (uploads: 7 days, assets: 1 year)
 - **Graceful Degradation**: App works without Redis, just without caching benefits
 - **Docker Demo**: Use `docker-compose --profile demo up` to enable Redis
+
+### Monitoring
+- **Prometheus**: Metrics collection on port 9090 (demo profile)
+- **Grafana**: Visualization dashboards on port 3001 (demo profile)
+- **Micrometer Integration**: Spring Boot Actuator metrics exposed to Prometheus
+- **Custom Business Metrics**:
+  - `synapse.users.total` - Total registered users
+  - `synapse.posts.total` - Total posts (with `type` tag breakdown)
+  - `synapse.posts.private` - Private post count
+  - `synapse.comments.total` - Total comments
+  - `synapse.likes.total` - Total post likes
+  - `synapse.comment_likes.total` - Total comment likes
+  - `synapse.bookmarks.total` - Total bookmarks
+  - `synapse.follows.total` - Total follow relationships
+  - `synapse.notifications.total` - Total notifications (with `type` tag)
+  - `synapse.notifications.unread` - Unread notification count
+  - `synapse.tags.total` - Total tags
+- **Infrastructure Metrics**: MySQL and Redis exporters for database monitoring
+- **Pre-built Dashboards**: Spring Boot, MySQL, Redis, and Synapse business metrics
 
 ### Code Highlighting
 - CodeMirror editor for snippet creation with 20+ language support
