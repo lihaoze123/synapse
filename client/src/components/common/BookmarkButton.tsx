@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Bookmark, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,22 @@ import {
 	useBookmarkToggle,
 } from "@/hooks/useBookmarks";
 import { cn } from "@/lib/utils";
+
+const bookmarkVariants = {
+	initial: { scale: 1, rotate: 0 },
+	bookmarked: {
+		scale: [1, 1.2, 0.9, 1],
+		rotate: [0, -10, 5, 0],
+		transition: {
+			duration: 0.4,
+			ease: "easeOut" as const,
+		},
+	},
+	unbookmarked: {
+		scale: [1, 0.8, 1],
+		transition: { duration: 0.2 },
+	},
+};
 
 interface BookmarkButtonProps {
 	postId: number;
@@ -61,16 +78,22 @@ export function BookmarkButton({
 			aria-busy={isWorking}
 			className={cn(
 				isBookmarked && "border-amber-200 bg-amber-50 text-amber-700",
+				"active:scale-95 transition-transform",
 				className,
 			)}
 		>
 			{isWorking ? (
 				<Loader2 className="h-3.5 w-3.5 animate-spin" />
 			) : (
-				<Bookmark
-					className="h-4 w-4"
-					fill={isBookmarked ? "currentColor" : "none"}
-				/>
+				<motion.div
+					animate={isBookmarked ? "bookmarked" : "unbookmarked"}
+					variants={bookmarkVariants}
+				>
+					<Bookmark
+						className="h-4 w-4"
+						fill={isBookmarked ? "currentColor" : "none"}
+					/>
+				</motion.div>
 			)}
 			{showCount && (
 				<span className="tabular-nums text-xs text-foreground/80">

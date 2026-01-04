@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Heart, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -5,6 +6,22 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks";
 import { useLikeComment, useLikePost } from "@/hooks/useLikes";
 import { cn } from "@/lib/utils";
+
+const heartVariants = {
+	initial: { scale: 1 },
+	liked: {
+		scale: [1, 1.3, 0.9, 1.1, 1],
+		transition: {
+			duration: 0.4,
+			times: [0, 0.2, 0.4, 0.7, 1],
+			ease: "easeOut" as const,
+		},
+	},
+	unliked: {
+		scale: [1, 0.8, 1],
+		transition: { duration: 0.2 },
+	},
+};
 
 interface LikeButtonProps {
 	targetId: number;
@@ -63,16 +80,17 @@ export function LikeButton({
 	const buttonSize = size === "sm" ? "xs" : "default";
 
 	if (appearance === "fab") {
-		// Round FAB-like button to align with MobileActionBar bookmark button
 		return (
-			<button
+			<motion.button
 				type="button"
 				onClick={handleToggle}
 				disabled={isWorking}
 				aria-pressed={liked}
 				aria-busy={isWorking}
+				whileTap={{ scale: 0.9 }}
+				whileHover={{ scale: 1.05 }}
 				className={cn(
-					"relative h-11 w-11 rounded-full border flex items-center justify-center shadow-sm",
+					"relative h-11 w-11 rounded-full border flex items-center justify-center shadow-sm transition-colors",
 					liked
 						? "border-rose-300 bg-rose-50 text-rose-700"
 						: "border-gray-300 bg-white text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200",
@@ -82,14 +100,24 @@ export function LikeButton({
 				{isWorking ? (
 					<Loader2 className="h-5 w-5 animate-spin" />
 				) : (
-					<Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} />
+					<motion.div
+						animate={liked ? "liked" : "unliked"}
+						variants={heartVariants}
+					>
+						<Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} />
+					</motion.div>
 				)}
 				{count > 0 && (
-					<span className="absolute -top-1 -right-1 rounded-full bg-rose-500 text-white text-[10px] leading-none px-1.5 py-0.5">
+					<motion.span
+						key={count}
+						initial={{ scale: 0.5, opacity: 0 }}
+						animate={{ scale: 1, opacity: 1 }}
+						className="absolute -top-1 -right-1 rounded-full bg-rose-500 text-white text-[10px] leading-none px-1.5 py-0.5"
+					>
 						{count > 999 ? "999+" : count}
-					</span>
+					</motion.span>
 				)}
-			</button>
+			</motion.button>
 		);
 	}
 
@@ -104,14 +132,19 @@ export function LikeButton({
 			aria-busy={isWorking}
 			className={cn(
 				liked && "border-rose-200 bg-rose-50 text-rose-700",
-				"gap-1",
+				"gap-1 active:scale-95 transition-transform",
 				className,
 			)}
 		>
 			{isWorking ? (
 				<Loader2 className="h-3.5 w-3.5 animate-spin" />
 			) : (
-				<Heart className="h-4 w-4" fill={liked ? "currentColor" : "none"} />
+				<motion.div
+					animate={liked ? "liked" : "unliked"}
+					variants={heartVariants}
+				>
+					<Heart className="h-4 w-4" fill={liked ? "currentColor" : "none"} />
+				</motion.div>
 			)}
 			<span className="tabular-nums text-xs text-foreground/80">{count}</span>
 		</Button>

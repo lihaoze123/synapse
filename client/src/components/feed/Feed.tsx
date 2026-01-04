@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { PostCard, PostCardSkeleton } from "@/components/cards";
+import { IllustratedEmptyState } from "@/components/common/IllustratedEmptyState";
+import { StaggerContainer, StaggerItem } from "@/components/ui/animations";
 import type { Post } from "@/types";
-import EmptyState from "./EmptyState";
 
 interface FeedProps {
 	posts: Post[];
@@ -62,13 +63,15 @@ export default function Feed({
 	}
 
 	if (posts.length === 0) {
-		return <EmptyState description={emptyMessage} />;
+		return <IllustratedEmptyState variant="posts" description={emptyMessage} />;
 	}
 
 	return (
-		<div className="space-y-5">
+		<StaggerContainer className="space-y-5">
 			{posts.map((post) => (
-				<PostCard key={post.id} post={post} />
+				<StaggerItem key={post.id}>
+					<PostCard post={post} />
+				</StaggerItem>
 			))}
 
 			<div ref={loadMoreRef} className="h-4" />
@@ -78,6 +81,6 @@ export default function Feed({
 					<div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
 				</div>
 			)}
-		</div>
+		</StaggerContainer>
 	);
 }

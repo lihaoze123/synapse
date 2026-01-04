@@ -2,6 +2,7 @@ import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { Feed } from "@/components/feed";
 import { Layout } from "@/components/layout";
+import { AnimatedPage } from "@/components/ui/animations";
 import { useSearch as useSearchPosts } from "@/hooks/useSearch";
 import type { PostType } from "@/types";
 
@@ -82,50 +83,55 @@ function SearchPage() {
 
 	return (
 		<Layout>
-			<div className="space-y-4">
-				{search.keyword && (
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
-						<span>搜索:</span>
-						<span className="px-2 py-0.5 bg-secondary rounded-full">
-							"{search.keyword}"
-						</span>
-						{search.type && (
+			<AnimatedPage transition="fade">
+				<div className="space-y-4">
+					{search.keyword && (
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+							<span>搜索:</span>
 							<span className="px-2 py-0.5 bg-secondary rounded-full">
-								{search.type === "SNIPPET" && "代码片段"}
-								{search.type === "ARTICLE" && "文章"}
-								{search.type === "MOMENT" && "动态"}
+								"{search.keyword}"
 							</span>
-						)}
-						{search.tags &&
-							search.tags.length > 0 &&
-							search.tags.slice(0, 3).map((t) => (
-								<span key={t} className="px-2 py-0.5 bg-secondary rounded-full">
-									标签: {t}
+							{search.type && (
+								<span className="px-2 py-0.5 bg-secondary rounded-full">
+									{search.type === "SNIPPET" && "代码片段"}
+									{search.type === "ARTICLE" && "文章"}
+									{search.type === "MOMENT" && "动态"}
 								</span>
-							))}
-						{search.tags && search.tags.length > 3 && (
-							<span className="px-2 py-0.5 bg-secondary rounded-full">
-								+{search.tags.length - 3}
-							</span>
-						)}
-					</div>
-				)}
+							)}
+							{search.tags &&
+								search.tags.length > 0 &&
+								search.tags.slice(0, 3).map((t) => (
+									<span
+										key={t}
+										className="px-2 py-0.5 bg-secondary rounded-full"
+									>
+										标签: {t}
+									</span>
+								))}
+							{search.tags && search.tags.length > 3 && (
+								<span className="px-2 py-0.5 bg-secondary rounded-full">
+									+{search.tags.length - 3}
+								</span>
+							)}
+						</div>
+					)}
 
-				{error && (
-					<div className="p-4 text-center text-red-600 bg-red-50 rounded-lg">
-						搜索失败：{error.message}
-					</div>
-				)}
+					{error && (
+						<div className="p-4 text-center text-red-600 bg-red-50 rounded-lg">
+							搜索失败：{error.message}
+						</div>
+					)}
 
-				<Feed
-					posts={posts}
-					isLoading={isLoading}
-					isFetchingNextPage={isFetchingNextPage}
-					hasNextPage={hasNextPage}
-					fetchNextPage={fetchNextPage}
-					emptyMessage={getEmptyMessage()}
-				/>
-			</div>
+					<Feed
+						posts={posts}
+						isLoading={isLoading}
+						isFetchingNextPage={isFetchingNextPage}
+						hasNextPage={hasNextPage}
+						fetchNextPage={fetchNextPage}
+						emptyMessage={getEmptyMessage()}
+					/>
+				</div>
+			</AnimatedPage>
 		</Layout>
 	);
 }
