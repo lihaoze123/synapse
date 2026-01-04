@@ -1,0 +1,5 @@
+[client]
+user = root
+password = synapse123
+host = mysql
+port = 3306
