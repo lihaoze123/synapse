@@ -15,6 +15,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
+    long countByType(PostType type);
+
+    long countByIsPrivateTrue();
+
     List<Post> findByTypeOrderByCreatedAtDesc(PostType type);
 
     List<Post> findAllByOrderByCreatedAtDesc();
