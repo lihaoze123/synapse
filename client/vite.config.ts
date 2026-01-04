@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: env.VITE_PROXY_TARGET || 'http://localhost:8080',
           changeOrigin: true,
+          ws: true,
         },
         '^/uploads/.*\\.(jpg|jpeg|png|gif|webp)$': {
           target: env.VITE_PROXY_TARGET || 'http://localhost:8080',

@@ -11,9 +11,8 @@ export function NotificationBell() {
 	const navigate = useNavigate();
 	const [open, setOpen] = useState(false);
 
-	const { data: unreadCount = 0 } = useUnreadCount({
-		refetchInterval: 30000,
-	});
+	// Fallback polling to cover cases where WS is blocked or proxying WS fails in dev
+	const { data: unreadCount = 0 } = useUnreadCount({ refetchInterval: 10_000 });
 
 	const bellIcon = (
 		<div className="relative">
