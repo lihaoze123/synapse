@@ -23,7 +23,10 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     int incrementPostLikeCount(@Param("postId") Long postId);
 
     @Modifying
-    @Query("UPDATE Post p SET p.likeCount = CASE WHEN p.likeCount > 0 THEN p.likeCount - 1 ELSE 0 END WHERE p.id = :postId")
+    @Query(value =
+            "UPDATE Post p SET p.likeCount = "
+                    + "CASE WHEN p.likeCount > 0 THEN p.likeCount - 1 ELSE 0 END "
+                    + "WHERE p.id = :postId")
     int decrementPostLikeCount(@Param("postId") Long postId);
 }
 

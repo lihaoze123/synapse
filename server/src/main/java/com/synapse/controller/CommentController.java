@@ -44,10 +44,14 @@ public class CommentController {
 		Pageable pageable = PageRequest.of(page, safeSize);
 		try {
 			Long userId = (Long) request.getAttribute("userId");
-			Page<CommentDto> comments = commentService.getPostComments(postId, pageable)
+			Page<CommentDto> comments = commentService
+					.getPostComments(postId, pageable)
 					.map(dto -> {
 						if (userId != null && dto.getUserState() != null) {
-							dto.getUserState().setLiked(commentLikeService.hasLikedComment(userId, dto.getId()));
+							boolean liked = commentLikeService.hasLikedComment(
+									userId,
+									dto.getId());
+							dto.getUserState().setLiked(liked);
 						}
 						return dto;
 					});
@@ -63,7 +67,11 @@ public class CommentController {
 			CommentDto comment = commentService.getComment(id);
 			Long userId = (Long) request.getAttribute("userId");
 			if (userId != null && comment.getUserState() != null) {
-				comment.getUserState().setLiked(commentLikeService.hasLikedComment(userId, comment.getId()));
+				comment.getUserState()
+						.setLiked(
+								commentLikeService.hasLikedComment(
+										userId,
+										comment.getId()));
 			}
 			return ResponseEntity.ok(ApiResponse.success(comment));
 		} catch (IllegalArgumentException e) {

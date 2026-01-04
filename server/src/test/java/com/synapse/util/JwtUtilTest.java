@@ -1,7 +1,6 @@
 package com.synapse.util;
 
 import io.jsonwebtoken.Claims;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +129,9 @@ class JwtUtilTest {
     @Test
     @DisplayName("parseToken should throw exception for expired token")
     void parseToken_shouldThrowForExpiredToken() {
-        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0IiwidXNlcklkIjoxLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MTYwMDAwMDAwMX0.abc";
+        String token =
+                "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0IiwidXNlcklkIjoxLCJpYXQiOjE2MDAw"
+                        + "MDAwMDAsImV4cCI6MTYwMDAwMDAwMX0.abc";
 
         assertFalse(jwtUtil.validateToken(token));
     }

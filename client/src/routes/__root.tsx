@@ -3,8 +3,8 @@ import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { useNotificationRealtime } from "@/hooks/useNotificationRealtime";
 import { useAuth } from "@/hooks";
+import { useNotificationRealtime } from "@/hooks/useNotificationRealtime";
 import Devtools from "@/integrations/devtools";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 

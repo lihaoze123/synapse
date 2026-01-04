@@ -1,7 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import useWebSocket from "react-use-websocket";
+import useWebSocket, { type Options } from "react-use-websocket";
 import { notificationsKeys } from "@/query-keys";
+
+type WebSocketMessage =
+	| { type: "unreadCount"; count: number }
+	| { type: "notification"; data: unknown }
+	| { type: string; data?: unknown };
 
 function buildWebSocketUrl(): string | null {
 	const apiBase =
@@ -27,26 +32,28 @@ export function useNotificationRealtime() {
 
 	const token = localStorage.getItem("token");
 	const wsUrl = token ? buildWebSocketUrl() : null;
-	const url = wsUrl ? `${wsUrl}?token=${encodeURIComponent(token)}` : null;
+	const url =
+		wsUrl && token ? `${wsUrl}?token=${encodeURIComponent(token)}` : null;
 
-	const { lastJsonMessage } = useWebSocket(url, {
+	const socketOptions: Options = {
 		reconnectAttempts: 10,
 		reconnectInterval: 1000,
-		maxReconnectInterval: 15000,
-		shouldReconnect: () => {
-			return true;
-		},
-	});
+		shouldReconnect: () => true,
+	};
+
+	const { lastJsonMessage } = useWebSocket(url, socketOptions);
 
 	useEffect(() => {
 		if (!lastJsonMessage || typeof lastJsonMessage !== "object") return;
 
-		if (lastJsonMessage.type === "unreadCount") {
-			const count = Number((lastJsonMessage as { count: unknown }).count);
+		const message = lastJsonMessage as WebSocketMessage;
+
+		if (message.type === "unreadCount") {
+			const count = Number((message as { count: unknown }).count);
 			if (!Number.isNaN(count)) {
 				queryClient.setQueryData(notificationsKeys.unreadCount, count);
 			}
-		} else if (lastJsonMessage.type === "notification") {
+		} else if (message.type === "notification") {
 			queryClient.invalidateQueries({
 				queryKey: ["notifications", "list"],
 			});

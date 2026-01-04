@@ -230,7 +230,8 @@ class CommentServiceTest {
 
         commentService.createComment(2L, 1L, request);
 
-        verify(notificationService).createNotification(mentionedUser, commenter, NotificationType.MENTION, post, comment);
+        verify(notificationService)
+                .createNotification(mentionedUser, commenter, NotificationType.MENTION, post, comment);
     }
 
     @Test

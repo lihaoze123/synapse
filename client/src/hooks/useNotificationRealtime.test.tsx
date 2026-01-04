@@ -2,9 +2,18 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+type MockJsonMessage =
+	| { type: "unreadCount"; count: number }
+	| { type: "notification"; data?: unknown }
+	| null
+	| string
+	| number[]
+	| { data: string }
+	| { type: string; count?: number; id?: number; data?: unknown };
+
 // Mock react-use-websocket before importing the hook
 const mockReturnValue = {
-	lastJsonMessage: null,
+	lastJsonMessage: null as MockJsonMessage,
 	readyState: 3,
 	sendMessage: vi.fn(),
 	sendJsonMessage: vi.fn(),
@@ -15,8 +24,8 @@ vi.mock("react-use-websocket", () => ({
 	default: vi.fn(() => mockReturnValue),
 }));
 
-import { useNotificationRealtime } from "./useNotificationRealtime";
 import useWebSocket from "react-use-websocket";
+import { useNotificationRealtime } from "./useNotificationRealtime";
 
 const mockedUseWebSocket = vi.mocked(useWebSocket);
 
@@ -42,7 +51,7 @@ describe("useNotificationRealtime hook", () => {
 			...window.location,
 			protocol: "http:",
 			host: "localhost:3000",
-		} as Location;
+		} as never;
 	});
 
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -62,8 +71,12 @@ describe("useNotificationRealtime hook", () => {
 
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
-			const expectedUrl = "ws://localhost:3000/api/ws/notifications?token=test-token-123";
-			expect(mockedUseWebSocket).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+			const expectedUrl =
+				"ws://localhost:3000/api/ws/notifications?token=test-token-123";
+			expect(mockedUseWebSocket).toHaveBeenCalledWith(
+				expectedUrl,
+				expect.any(Object),
+			);
 		});
 
 		it("should use WSS protocol when on HTTPS", () => {
@@ -73,8 +86,12 @@ describe("useNotificationRealtime hook", () => {
 
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
-			const expectedUrl = "wss://localhost:3000/api/ws/notifications?token=secure-token";
-			expect(mockedUseWebSocket).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+			const expectedUrl =
+				"wss://localhost:3000/api/ws/notifications?token=secure-token";
+			expect(mockedUseWebSocket).toHaveBeenCalledWith(
+				expectedUrl,
+				expect.any(Object),
+			);
 		});
 
 		it("should use custom API base URL from env", () => {
@@ -86,8 +103,12 @@ describe("useNotificationRealtime hook", () => {
 
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
-			const expectedUrl = "wss://api.example.com/ws/notifications?token=custom-token";
-			expect(mockedUseWebSocket).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+			const expectedUrl =
+				"wss://api.example.com/ws/notifications?token=custom-token";
+			expect(mockedUseWebSocket).toHaveBeenCalledWith(
+				expectedUrl,
+				expect.any(Object),
+			);
 
 			import.meta.env.VITE_API_BASE_URL = originalApiBase;
 		});
@@ -98,11 +119,11 @@ describe("useNotificationRealtime hook", () => {
 
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
-			const options = mockedUseWebSocket.mock.calls[0][1];
+			const options = mockedUseWebSocket.mock.calls[0]?.[1];
+			if (!options) throw new Error("Options should be defined");
 			expect(options).toMatchObject({
 				reconnectAttempts: 10,
 				reconnectInterval: 1000,
-				maxReconnectInterval: 15000,
 			});
 			expect(typeof options.shouldReconnect).toBe("function");
 		});
@@ -113,8 +134,11 @@ describe("useNotificationRealtime hook", () => {
 
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
-			const options = mockedUseWebSocket.mock.calls[0][1];
-			expect(options.shouldReconnect()).toBe(true);
+			const options = mockedUseWebSocket.mock.calls[0]?.[1];
+			if (!options?.shouldReconnect)
+				throw new Error("Options should be defined");
+			const mockCloseEvent = {} as CloseEvent;
+			expect(options.shouldReconnect(mockCloseEvent)).toBe(true);
 		});
 	});
 
@@ -129,7 +153,10 @@ describe("useNotificationRealtime hook", () => {
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
 			await waitFor(() => {
-				const unreadCount = queryClient.getQueryData(["notifications", "unread-count"]);
+				const unreadCount = queryClient.getQueryData([
+					"notifications",
+					"unread-count",
+				]);
 				expect(unreadCount).toBe(10);
 			});
 		});
@@ -144,7 +171,10 @@ describe("useNotificationRealtime hook", () => {
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
 			await waitFor(() => {
-				const unreadCount = queryClient.getQueryData(["notifications", "unread-count"]);
+				const unreadCount = queryClient.getQueryData([
+					"notifications",
+					"unread-count",
+				]);
 				expect(unreadCount).toBe(0);
 			});
 		});
@@ -158,7 +188,10 @@ describe("useNotificationRealtime hook", () => {
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
 			await waitFor(() => {
-				const unreadCount = queryClient.getQueryData(["notifications", "unread-count"]);
+				const unreadCount = queryClient.getQueryData([
+					"notifications",
+					"unread-count",
+				]);
 				expect(unreadCount).toBe(3);
 			});
 		});
@@ -168,12 +201,18 @@ describe("useNotificationRealtime hook", () => {
 			localStorage.setItem("token", token);
 
 			queryClient.setQueryData(["notifications", "unread-count"], 5);
-			mockReturnValue.lastJsonMessage = { type: "unreadCount", count: "invalid" as never };
+			mockReturnValue.lastJsonMessage = {
+				type: "unreadCount",
+				count: "invalid" as never,
+			};
 
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
 			await waitFor(() => {
-				const unreadCount = queryClient.getQueryData(["notifications", "unread-count"]);
+				const unreadCount = queryClient.getQueryData([
+					"notifications",
+					"unread-count",
+				]);
 				expect(unreadCount).toBe(5);
 			});
 		});
@@ -188,7 +227,10 @@ describe("useNotificationRealtime hook", () => {
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
 			await waitFor(() => {
-				const unreadCount = queryClient.getQueryData(["notifications", "unread-count"]);
+				const unreadCount = queryClient.getQueryData([
+					"notifications",
+					"unread-count",
+				]);
 				expect(unreadCount).toBe(5);
 			});
 		});
@@ -323,15 +365,18 @@ describe("useNotificationRealtime hook", () => {
 
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
-			const expectedUrl = "ws://api.example.com/ws/notifications?token=test-token";
-			expect(mockedUseWebSocket).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+			const expectedUrl =
+				"ws://api.example.com/ws/notifications?token=test-token";
+			expect(mockedUseWebSocket).toHaveBeenCalledWith(
+				expectedUrl,
+				expect.any(Object),
+			);
 
 			import.meta.env.VITE_API_BASE_URL = originalApiBase;
 		});
 
 		it("should use default /api relative path when VITE_API_BASE_URL is not set", () => {
 			const originalApiBase = import.meta.env.VITE_API_BASE_URL;
-			// @ts-expect-error - intentionally setting empty string to test default
 			import.meta.env.VITE_API_BASE_URL = "";
 
 			const token = "test-token";
@@ -339,8 +384,12 @@ describe("useNotificationRealtime hook", () => {
 
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
-			const expectedUrl = "ws://localhost:3000/api/ws/notifications?token=test-token";
-			expect(mockedUseWebSocket).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+			const expectedUrl =
+				"ws://localhost:3000/api/ws/notifications?token=test-token";
+			expect(mockedUseWebSocket).toHaveBeenCalledWith(
+				expectedUrl,
+				expect.any(Object),
+			);
 
 			import.meta.env.VITE_API_BASE_URL = originalApiBase;
 		});
@@ -383,8 +432,12 @@ describe("useNotificationRealtime hook", () => {
 
 			renderHook(() => useNotificationRealtime(), { wrapper });
 
-			const expectedUrl = "wss://api.example.com/ws/notifications?token=test-token";
-			expect(mockedUseWebSocket).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+			const expectedUrl =
+				"wss://api.example.com/ws/notifications?token=test-token";
+			expect(mockedUseWebSocket).toHaveBeenCalledWith(
+				expectedUrl,
+				expect.any(Object),
+			);
 
 			import.meta.env.VITE_API_BASE_URL = originalApiBase;
 		});
@@ -397,10 +450,15 @@ describe("useNotificationRealtime hook", () => {
 
 			mockReturnValue.lastJsonMessage = { type: "unreadCount", count: 5 };
 
-			const { rerender } = renderHook(() => useNotificationRealtime(), { wrapper });
+			const { rerender } = renderHook(() => useNotificationRealtime(), {
+				wrapper,
+			});
 
 			await waitFor(() => {
-				const unreadCount = queryClient.getQueryData(["notifications", "unread-count"]);
+				const unreadCount = queryClient.getQueryData([
+					"notifications",
+					"unread-count",
+				]);
 				expect(unreadCount).toBe(5);
 			});
 
@@ -422,10 +480,15 @@ describe("useNotificationRealtime hook", () => {
 
 			mockReturnValue.lastJsonMessage = { type: "unreadCount", count: 1 };
 
-			const { rerender } = renderHook(() => useNotificationRealtime(), { wrapper });
+			const { rerender } = renderHook(() => useNotificationRealtime(), {
+				wrapper,
+			});
 
 			await waitFor(() => {
-				const unreadCount = queryClient.getQueryData(["notifications", "unread-count"]);
+				const unreadCount = queryClient.getQueryData([
+					"notifications",
+					"unread-count",
+				]);
 				expect(unreadCount).toBe(1);
 			});
 
@@ -434,7 +497,10 @@ describe("useNotificationRealtime hook", () => {
 			rerender();
 
 			await waitFor(() => {
-				const unreadCount = queryClient.getQueryData(["notifications", "unread-count"]);
+				const unreadCount = queryClient.getQueryData([
+					"notifications",
+					"unread-count",
+				]);
 				expect(unreadCount).toBe(7);
 			});
 		});

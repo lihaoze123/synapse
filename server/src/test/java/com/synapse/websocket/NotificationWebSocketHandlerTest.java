@@ -225,7 +225,9 @@ class NotificationWebSocketHandlerTest {
         Long userId = 123L;
         sessionAttributes.put("userId", userId);
 
-        doThrow(new IOException("Send failed")).when(session).sendMessage(org.mockito.ArgumentMatchers.any(TextMessage.class));
+        doThrow(new IOException("Send failed"))
+                .when(session)
+                .sendMessage(org.mockito.ArgumentMatchers.any(TextMessage.class));
 
         handler.afterConnectionEstablished(session);
 

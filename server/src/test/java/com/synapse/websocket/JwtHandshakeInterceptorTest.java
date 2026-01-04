@@ -134,7 +134,11 @@ class JwtHandshakeInterceptorTest {
         String tokenWithSpecialChars = "valid.jwt.token with=equals&and&ampersand";
 
         when(servletRequest.getServletRequest()).thenReturn(httpServletRequest);
-        when(httpServletRequest.getQueryString()).thenReturn("other=value&token=" + java.net.URLEncoder.encode(tokenWithSpecialChars, java.nio.charset.StandardCharsets.UTF_8));
+        when(httpServletRequest.getQueryString()).thenReturn(
+                "other=value&token="
+                        + java.net.URLEncoder.encode(
+                                tokenWithSpecialChars,
+                                java.nio.charset.StandardCharsets.UTF_8));
 
         Claims mockClaims = io.jsonwebtoken.Jwts.claims()
             .add("userId", expectedUserId)

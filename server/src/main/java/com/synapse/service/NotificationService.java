@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -56,7 +55,11 @@ public class NotificationService {
                 notificationBroadcaster.sendNewNotification(recipient.getId(), dto);
             } catch (Exception e) {
                 // Log failures so operators can diagnose WS issues; do not retry here
-                log.warn("Failed to broadcast unread count after create (user={}): {}", recipient.getId(), e.getMessage(), e);
+                log.warn(
+                        "Failed to broadcast unread count after create (user={}): {}",
+                        recipient.getId(),
+                        e.getMessage(),
+                        e);
             }
         });
     }
@@ -95,7 +98,11 @@ public class NotificationService {
             try {
                 notificationBroadcaster.sendUnreadCount(userId, 0L);
             } catch (Exception e) {
-                log.warn("Failed to broadcast unread count after markAllAsRead (user={}): {}", userId, e.getMessage(), e);
+                log.warn(
+                        "Failed to broadcast unread count after markAllAsRead (user={}): {}",
+                        userId,
+                        e.getMessage(),
+                        e);
             }
         });
     }

@@ -22,7 +22,10 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
     int incrementCommentLikeCount(@Param("commentId") Long commentId);
 
     @Modifying
-    @Query("UPDATE Comment c SET c.likeCount = CASE WHEN c.likeCount > 0 THEN c.likeCount - 1 ELSE 0 END WHERE c.id = :commentId")
+    @Query(value =
+            "UPDATE Comment c SET c.likeCount = "
+                    + "CASE WHEN c.likeCount > 0 THEN c.likeCount - 1 ELSE 0 END "
+                    + "WHERE c.id = :commentId")
     int decrementCommentLikeCount(@Param("commentId") Long commentId);
 }
 

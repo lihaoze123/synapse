@@ -1,5 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+	type InfiniteData,
+	useMutation,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { likesService } from "@/services/likes";
+import type { Page, Post } from "@/types";
 
 export function useLikePost(
 	postId: number,
@@ -13,17 +18,20 @@ export function useLikePost(
 		},
 		onSuccess: (res) => {
 			// Update post detail cache immediately
-			queryClient.setQueryData(["post", postId], (existing: any) => {
-				if (!existing) return existing;
-				return {
-					...existing,
-					likeCount: res.count,
-					userState: { ...(existing.userState ?? {}), liked: res.liked },
-				};
-			});
+			queryClient.setQueryData(
+				["post", postId],
+				(existing: Post | undefined) => {
+					if (!existing) return existing;
+					return {
+						...existing,
+						likeCount: res.count,
+						userState: { ...(existing.userState ?? {}), liked: res.liked },
+					};
+				},
+			);
 
 			// Update any cached posts lists where this post appears (infinite queries)
-			const lists = queryClient.getQueriesData<{ pages: Array<{ content: any[] }> }>({
+			const lists = queryClient.getQueriesData<InfiniteData<Page<Post>>>({
 				queryKey: ["posts"],
 			});
 			for (const [key, data] of lists) {
@@ -38,7 +46,7 @@ export function useLikePost(
 										...p,
 										likeCount: res.count,
 										userState: { ...(p.userState ?? {}), liked: res.liked },
-								  }
+									}
 								: p,
 						),
 					})),
