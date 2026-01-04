@@ -51,8 +51,11 @@ describe("useLikes hook", () => {
 
 			const { result } = renderHook(() => useLikePost(1), { wrapper });
 
-			// Set some initial data to verify invalidation
-			queryClient.setQueryData(["posts"], { data: [] });
+			// Set some initial data with proper infinite query structure
+			queryClient.setQueryData(["posts"], {
+				pages: [{ content: [] }],
+				pageParams: [undefined],
+			});
 
 			const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
