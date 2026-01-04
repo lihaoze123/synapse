@@ -31,6 +31,7 @@ Synapse 前端采用现代化技术栈构建，提供极致的开发体验和优
 - 🔐 **私密帖子** - 密码保护内容，会话级解锁
 - 💾 **草稿自动保存** - 防止意外丢失编辑内容
 - 🔔 **消息通知** - 实时通知，支持点赞、评论、关注、提及
+- 🔌 **WebSocket 实时** - 推送式通知，自动重连，JWT 认证
 - 🔐 **JWT 认证** - 自动 Token 管理和刷新
 - 📱 **响应式** - 完美适配桌面和移动端
 
@@ -49,6 +50,7 @@ Synapse 前端采用现代化技术栈构建，提供极致的开发体验和优
 | **HTTP** | ![Axios](https://img.shields.io/badge/Axios-1.7-5a29e4?style=flat) | 1.7+ | HTTP 客户端 |
 | **代码** | ![CodeMirror](https://img.shields.io/badge/CodeMirror-6.0-000000?style=flat) | 6.x | 代码编辑器 |
 | **Markdown** | ![react-markdown](https://img.shields.io/badge/react--markdown-9.0-083fa1?style=flat) | 9.x | Markdown 渲染 |
+| **WebSocket** | ![react-use-websocket](https://img.shields.io/badge/react--use--websocket-latest-010101?style=flat) | latest | WebSocket 客户端 |
 | **图标** | ![Lucide](https://img.shields.io/badge/Lucide-latest-000000?style=flat) | latest | 图标库 |
 | **工具** | ![Biome](https://img.shields.io/badge/Biome-1.8-60a5fa?style=flat) | 1.8 | 代码规范 |
 | **测试** | ![Vitest](https://img.shields.io/badge/Vitest-2.0-6e9f18?style=flat) | 2.x | 单元测试 |
@@ -117,6 +119,7 @@ src/
 │   ├── useCreatePost.ts        # ✍️ 创建帖子
 │   ├── useTags.ts              # 🏷️ 标签列表
 │   ├── useNotifications.ts     # 🔔 通知
+│   ├── useNotificationRealtime.ts  # 🔌 WebSocket 实时通知
 │   └── useTheme.ts             # 🌗 主题切换
 │
 ├── 📂 services/                # 🌐 API 服务
@@ -364,6 +367,39 @@ createPost.mutate(newPostData)
 - 解锁状态存储在 sessionStorage（会话级）
 - 帖子作者始终可访问自己的私密内容
 - 锁图标标识私密内容
+
+## 🔌 WebSocket 实时通知
+
+前端使用 `react-use-websocket` 实现实时通知推送：
+
+### useNotificationRealtime Hook
+
+```tsx
+import { useNotificationRealtime } from '@/hooks/useNotificationRealtime';
+
+function App() {
+  useNotificationRealtime(); // 自动连接并处理通知
+  // ...
+}
+```
+
+### 消息类型
+
+| 类型 | 数据 | 处理方式 |
+|:-----|:-----|:--------|
+| `unreadCount` | `{ count: number }` | 更新未读计数缓存 |
+| `notification` | `NotificationDto` | 失效通知列表查询 |
+
+### 连接参数
+
+- **URL**: `ws://host/api/ws/notifications?token=xxx`
+- **重连次数**: 10 次
+- **重连间隔**: 1 秒
+- **协议自动切换**: HTTP → WS, HTTPS → WSS
+
+### JWT 认证
+
+Token 通过 query parameter 传递，与服务端 `JwtHandshakeInterceptor` 配合完成握手认证。
 
 ## 💡 开发建议
 

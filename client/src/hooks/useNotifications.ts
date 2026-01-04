@@ -4,17 +4,15 @@ import {
 	useQuery,
 	useQueryClient,
 } from "@tanstack/react-query";
+import { notificationsKeys } from "@/query-keys";
 import {
 	type GetNotificationsParams,
 	notificationsService,
 } from "../services/notifications";
 
-const unreadCountKey = ["notifications", "unread-count"];
-const listKey = (params: Omit<GetNotificationsParams, "page"> = {}) => [
-	"notifications",
-	"list",
-	params,
-];
+const unreadCountKey = notificationsKeys.unreadCount;
+const listKey = (params: Omit<GetNotificationsParams, "page"> = {}) =>
+	notificationsKeys.list(params);
 
 export function useUnreadCount(options?: { refetchInterval?: number }) {
 	return useQuery({

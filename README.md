@@ -14,6 +14,9 @@
 [![Docker](https://img.shields.io/badge/docker-supported-2496ED?style=flat-square&logo=docker)]()
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql)]()
 [![Redis](https://img.shields.io/badge/Redis-cache-DC382D?style=flat-square&logo=redis)]()
+[![WebSocket](https://img.shields.io/badge/WebSocket-realtime-010101?style=flat-square)]()
+[![Prometheus](https://img.shields.io/badge/Prometheus-monitoring-E6522C?style=flat-square&logo=prometheus)]()
+[![Grafana](https://img.shields.io/badge/Grafana-dashboards-F46800?style=flat-square&logo=grafana)]()
 [![JWT](https://img.shields.io/badge/JWT-auth-FF6B6B?style=flat-square)]()
 
 </div>
@@ -55,6 +58,12 @@ docker compose --profile demo up --build
 ```
 
 访问 **http://localhost:8080**
+
+| 服务 | 端口 | 说明 |
+|:-----|:-----|:-----|
+| Synapse | 8080 | 主应用 |
+| Prometheus | 9090 | 指标收集 |
+| Grafana | 3001 | 可视化面板 (admin/admin) |
 
 <details>
 <summary><b>更多 Docker 选项</b></summary>
@@ -131,6 +140,7 @@ bun run dev
 | **关注网络** | 关注用户，查看粉丝/关注列表 |
 | **用户主页** | 公开资料，个人作品展示 |
 | **消息通知** | 实时通知，支持点赞、评论、关注、提及 |
+| **WebSocket** | 推送式实时通知，自动重连 |
 
 ### 内容增强
 
@@ -143,6 +153,7 @@ bun run dev
 | **暗色模式** | 支持亮色/暗色/跟随系统三种主题 |
 | **私密帖子** | 支持密码保护的私密内容 |
 | **Redis 缓存** | 可选缓存层，提升响应速度（Demo 模式） |
+| **监控观测** | Prometheus + Grafana 指标可视化（Demo 模式） |
 
 ---
 

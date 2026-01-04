@@ -3,7 +3,6 @@ package com.synapse.dto;
 import com.synapse.entity.Comment;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
-import lombok.Builder.Default;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;

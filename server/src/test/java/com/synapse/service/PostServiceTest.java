@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.dto.CreatePostRequest;
 import com.synapse.dto.PostDto;
 import com.synapse.dto.UpdatePostRequest;
-import com.synapse.entity.Attachment;
 import com.synapse.entity.Post;
 import com.synapse.entity.PostType;
 import com.synapse.entity.Tag;
@@ -206,7 +205,10 @@ class PostServiceTest {
         CreatePostRequest request = new CreatePostRequest();
         request.setType(PostType.ARTICLE);
         request.setTitle("Java Tutorial");
-        request.setContent("This is a very long content that exceeds two hundred characters and should be truncated when creating the summary field for the article post type in the system.");
+        request.setContent(
+                "This is a very long content that exceeds two hundred characters "
+                        + "and should be truncated when creating the summary field "
+                        + "for the article post type in the system.");
         request.setLanguage("java");
         request.setTags(List.of("java"));
 

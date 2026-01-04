@@ -67,8 +67,12 @@ public class PostController {
         int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, safeSize);
         java.util.LinkedHashSet<String> merged = new java.util.LinkedHashSet<>();
-        if (tags != null) merged.addAll(tags);
-        if (tag != null && !tag.trim().isEmpty()) merged.add(tag.trim());
+        if (tags != null) {
+            merged.addAll(tags);
+        }
+        if (tag != null && !tag.trim().isEmpty()) {
+            merged.add(tag.trim());
+        }
         java.util.List<String> finalTags = merged.isEmpty() ? null : new java.util.ArrayList<>(merged);
 
         Long userId = (Long) request.getAttribute("userId");

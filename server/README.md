@@ -21,6 +21,7 @@ Synapse 后端基于 **Spring Boot** 构建，提供完整的 RESTful API 支持
 
 ### ✨ 核心特性
 
+- 🔔 **WebSocket 实时通知** - 推送式通知，JWT 握手认证
 - 🔐 **JWT 认证** - 无状态 Token 认证机制
 - 📝 **多态内容** - 支持 SNIPPET / ARTICLE / MOMENT 三种帖子类型
 - 🏷️ **标签系统** - 灵活的话题分类和聚合
@@ -46,6 +47,8 @@ Synapse 后端基于 **Spring Boot** 构建，提供完整的 RESTful API 支持
 | ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=flat) | 8.0+ | 生产数据库 |
 | ![H2](https://img.shields.io/badge/H2-2.2.224-blue?style=flat) | 2.2.224 | 开发数据库 |
 | ![JWT](https://img.shields.io/badge/JJWT-0.12.3-red?style=flat) | 0.12.3 | JWT 库 |
+| ![WebSocket](https://img.shields.io/badge/WebSocket-1.5-010101?style=flat) | 1.5+ | WebSocket 支持 |
+| ![Prometheus](https://img.shields.io/badge/Micrometer-1.12-E6522C?style=flat) | 1.12+ | 指标暴露 |
 | ![Lombok](https://img.shields.io/badge/Lombok-1.18.30-red?style=flat) | 1.18.30 | 简化代码 |
 | ![Maven](https://img.shields.io/badge/Maven-3.9-red?style=flat) | 3.9+ | 构建工具 |
 | ![Checkstyle](https://img.shields.io/badge/Checkstyle-3.3.1-green?style=flat) | 3.3.1 | 代码规范 |
@@ -59,6 +62,7 @@ com.synapse/
 ├── 📂 config/                 # ⚙️ 配置类
 │   ├── CorsConfig.java       # 🌐 CORS 跨域配置
 │   ├── JwtConfig.java        # 🔑 JWT 配置
+│   ├── WebSocketConfig.java  # 🔌 WebSocket 配置
 │   └── StaticResourceConfig.java  # 📁 静态资源配置
 │
 ├── 📂 controller/             # 🎮 控制器层
@@ -104,7 +108,13 @@ com.synapse/
 │   ├── NotificationService.java
 │   ├── CommentService.java
 │   ├── FollowService.java
-│   └── LikeService.java
+│   ├── LikeService.java
+│   └── MetricsService.java   # 📊 Prometheus 指标
+│
+├── 📂 websocket/              # 🔌 WebSocket 处理
+│   ├── NotificationWebSocketHandler.java  # 通知处理器
+│   ├── JwtHandshakeInterceptor.java       # JWT 握手拦截器
+│   └── NotificationBroadcaster.java       # 通知广播器
 │
 └── 📂 util/                   # 🔧 工具类
     ├── FileUtil.java         # 📤 文件上传工具
@@ -432,6 +442,31 @@ GET /api/posts/search?keyword=Spring&type=ARTICLE
 
 </details>
 
+<details>
+<summary><b>🔌 WebSocket /api/ws/notifications</b></summary>
+
+| 方法 | 路径 | 说明 | 认证 |
+|:-----|:-----|:-----|:-----|
+| WS | `/api/ws/notifications?token=xxx` | 实时通知推送 | ✅ (JWT) |
+
+**连接方式：**
+```javascript
+const ws = new WebSocket(`ws://localhost:8080/api/ws/notifications?token=${jwtToken}`);
+```
+
+**消息格式：**
+```json
+// 未读计数更新
+{ "type": "unreadCount", "count": 5 }
+
+// 新通知推送
+{ "type": "notification", "data": { "id": 123, "type": "LIKE", ... } }
+```
+
+**认证方式：** JWT Token 通过 query parameter 传递，由 `JwtHandshakeInterceptor` 验证。
+
+</details>
+
 ---
 
 ## 🚀 快速开始
@@ -565,6 +600,38 @@ java -jar target/synapse-0.0.1-SNAPSHOT.jar \
 | 允许的方法 | `*` (所有) |
 | 允许的 Headers | `*` (所有) |
 | 凭据支持 | ✅ |
+
+### 监控配置 (Demo Profile)
+
+| 服务 | 端口 | 说明 |
+|:-----|:-----|:-----|
+| **Prometheus** | 9090 | 指标收集与存储 |
+| **Grafana** | 3001 | 可视化面板 (admin/admin) |
+| **MySQL Exporter** | 9104 | MySQL 指标暴露 |
+| **Redis Exporter** | 9121 | Redis 指标暴露 |
+
+**自定义业务指标：**
+
+| 指标名称 | 类型 | 说明 |
+|:--------|:-----|:-----|
+| `synapse.users.total` | Gauge | 注册用户总数 |
+| `synapse.posts.total` | Gauge | 帖子总数 |
+| `synapse.posts.by_type` | Gauge | 按类型统计帖子 (tag: type) |
+| `synapse.posts.private` | Gauge | 私密帖子数量 |
+| `synapse.comments.total` | Gauge | 评论总数 |
+| `synapse.likes.total` | Gauge | 帖子点赞总数 |
+| `synapse.comment_likes.total` | Gauge | 评论点赞总数 |
+| `synapse.bookmarks.total` | Gauge | 书签总数 |
+| `synapse.follows.total` | Gauge | 关注关系总数 |
+| `synapse.notifications.total` | Gauge | 通知总数 |
+| `synapse.notifications.unread` | Gauge | 未读通知数 |
+| `synapse.notifications.by_type` | Gauge | 按类型统计通知 (tag: type) |
+| `synapse.tags.total` | Gauge | 标签总数 |
+
+**启动监控栈：**
+```bash
+docker compose --profile demo up --build
+```
 
 ---
 

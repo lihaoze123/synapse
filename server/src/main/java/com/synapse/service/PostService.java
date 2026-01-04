@@ -45,6 +45,24 @@ public class PostService {
         }
     }
 
+    private Set<Tag> processTags(List<String> tagNames) {
+        Set<Tag> tags = new HashSet<>();
+        if (tagNames == null) {
+            return tags;
+        }
+        for (String tagName : tagNames) {
+            String normalizedName = tagName.trim();
+            if (normalizedName.isEmpty()) {
+                continue;
+            }
+            Tag tag = tagRepository.findByName(normalizedName)
+                    .orElseGet(() -> tagRepository.save(
+                            Tag.builder().name(normalizedName).build()));
+            tags.add(tag);
+        }
+        return tags;
+    }
+
     @Transactional(readOnly = true)
     public Page<PostDto> getPosts(String tag, PostType type, Pageable pageable) {
         Page<Post> posts;
@@ -72,7 +90,10 @@ public class PostService {
         return dto;
     }
 
-    @Cacheable(value = "posts", key = "#id + ':' + (#requesterId ?: 'null')", unless = "#result == null || #result.content == null")
+    @Cacheable(
+            value = "posts",
+            key = "#id + ':' + (#requesterId ?: 'null')",
+            unless = "#result == null || #result.content == null")
     @Transactional(readOnly = true)
     public PostDto getPost(Long id, Long requesterId) {
         Post post = postRepository.findWithDetailsById(id)
@@ -152,18 +173,7 @@ public class PostService {
         }
 
         if (request.getTags() != null && !request.getTags().isEmpty()) {
-            Set<Tag> tags = new HashSet<>();
-            for (String tagName : request.getTags()) {
-                String normalizedName = tagName.trim();
-                if (normalizedName.isEmpty()) {
-                    continue;
-                }
-                Tag tag = tagRepository.findByName(normalizedName)
-                        .orElseGet(() -> tagRepository.save(
-                                Tag.builder().name(normalizedName).build()));
-                tags.add(tag);
-            }
-            post.setTags(tags);
+            post.setTags(processTags(request.getTags()));
         }
 
         Post saved = postRepository.save(post);
@@ -243,18 +253,7 @@ public class PostService {
         }
 
         if (request.getTags() != null) {
-            Set<Tag> tags = new HashSet<>();
-            for (String tagName : request.getTags()) {
-                String normalizedName = tagName.trim();
-                if (normalizedName.isEmpty()) {
-                    continue;
-                }
-                Tag tag = tagRepository.findByName(normalizedName)
-                        .orElseGet(() -> tagRepository.save(
-                                Tag.builder().name(normalizedName).build()));
-                tags.add(tag);
-            }
-            post.setTags(tags);
+            post.setTags(processTags(request.getTags()));
         }
 
         if (request.getAttachments() != null) {
@@ -303,7 +302,9 @@ public class PostService {
             for (String t : tags) {
                 if (t != null) {
                     String nt = t.trim();
-                    if (!nt.isEmpty()) set.add(nt);
+                    if (!nt.isEmpty()) {
+                        set.add(nt);
+                    }
                 }
             }
             if (!set.isEmpty()) {
