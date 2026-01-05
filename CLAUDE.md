@@ -25,8 +25,9 @@ This is a course project (课程设计). Implementation is in progress - basic C
 | Database | MySQL (production) / H2 (demo) |
 | Cache | Redis (optional, for demo profile) |
 | Monitoring | Prometheus + Grafana (demo profile) |
-| Auth | JWT (jjwt library) |
-| File Storage | Local `uploads/` folder with UUID naming |
+| Auth | JWT (jjwt library), BCrypt password hashing |
+| File Storage | MinIO S3-compatible object storage |
+| API Docs | Swagger/OpenAPI 3.0 (springdoc-openapi) |
 | Theme | Custom dark mode with system preference detection |
 | State | localStorage (drafts, theme), sessionStorage (unlocked posts) |
 
@@ -121,13 +122,35 @@ java -jar target/synapse-0.0.1-SNAPSHOT.jar
 ### Backend Package Structure
 ```
 com.synapse/
-├── config/           # CORS, StaticResourceConfig, JwtConfig, RedisConfig, WebSocketConfig
-├── controller/       # AuthController, PostController, TagController, CommentController, CommentLikeController, BookmarkController, FollowController, LikeController, UserController, FileController, NotificationController
+├── config/           # Configuration classes
+│   ├── CorsConfig.java
+│   ├── FilterConfig.java
+│   ├── JwtAuthenticationFilter.java
+│   ├── MinioConfig.java           # MinIO S3-compatible storage
+│   ├── OpenApiConfig.java        # Swagger/OpenAPI documentation
+│   ├── RedisConfig.java
+│   ├── SpaFallbackController.java
+│   ├── StaticResourceConfig.java
+│   ├── WebSocketConfig.java
+│   └── JwtConfig.java (legacy)
+├── controller/       # REST API endpoints
+│   ├── AuthController.java
+│   ├── PostController.java
+│   ├── CommentController.java
+│   ├── UserController.java
+│   ├── LikeController.java
+│   ├── CommentLikeController.java
+│   ├── BookmarkController.java
+│   ├── FollowController.java
+│   ├── NotificationController.java
+│   ├── FileController.java
+│   └── TagController.java
 ├── dto/              # Request/Response DTOs (ApiResponse, PostDto, CommentDto, NotificationDto, VerifyPasswordRequest, etc.)
-├── entity/           # User, Post, Tag, Comment, CommentLike, Bookmark, Follow, Like, Notification (JPA Entities)
+├── entity/           # JPA Entities (11 total)
 ├── repository/       # JPA Repository interfaces
-├── service/          # Business logic (AuthService, PostService, NotificationService, MetricsService, etc.)
-├── utils/            # JWTUtil, FileUtil
+├── service/          # Business logic layer
+├── util/             # Utility classes (JwtUtil, FileUtil)
+├── utils/            # Additional utilities
 └── websocket/        # WebSocket handlers (NotificationWebSocketHandler, JwtHandshakeInterceptor, NotificationBroadcaster)
 ```
 
@@ -152,18 +175,19 @@ src/
 └── utils/            # draftStorage, privatePost
 ```
 
-### Database Schema (10 tables)
+### Database Schema (11 tables)
 
-- **Users**: id, username, password (encrypted), avatar_url
+- **Users**: id, username, password (BCrypt encrypted), avatar_url, display_name, bio
 - **Posts**: id, type (SNIPPET/ARTICLE/MOMENT), title, content, language, summary, cover_image, is_private, password, user_id, created_at
 - **Tags**: id, name, icon
 - **Post_Tags**: post_id, tag_id (junction table)
-- **Comments**: id, post_id, user_id, content, created_at, updated_at
+- **Comments**: id, post_id, user_id, content, floor (comment number), created_at, updated_at
 - **CommentLikes**: id, user_id, comment_id, created_at
 - **Bookmarks**: id, user_id, post_id, created_at
 - **Follows**: follower_id, following_id, created_at
 - **Likes**: id, user_id, post_id, created_at
 - **Notifications**: id, user_id (recipient), actor_id (who performed action), type (LIKE/COMMENT/FOLLOW/MENTION), post_id, comment_id, is_read, created_at
+- **Attachments**: id, post_id, file_name, file_url, file_size, mime_type, created_at
 
 ### Core API Endpoints
 ```
@@ -222,7 +246,10 @@ PUT  /api/users/profile            # Update current user profile
 GET  /api/tags                     # Popular topics for sidebar
 
 # File Upload
-POST /api/upload                   # Image upload → /static/uploads/{uuid}.png
+POST /api/upload                   # Image upload → MinIO object storage
+
+# Swagger UI
+GET  /swagger-ui.html             # Interactive API documentation (dev profile)
 
 # WebSocket
 WS   /api/ws/notifications?token=xxx  # Real-time notifications (JWT in query param)
@@ -276,12 +303,23 @@ Frontend dynamically renders cards based on `post.type`:
 - Optional type filter (Snippet/Article/Moment)
 - URL-synced search state
 
-### File Upload (MVP approach)
-Configure in `application.properties`:
-```properties
-spring.web.resources.static-locations=file:./uploads/,classpath:/static/
+### File Upload (MinIO S3-compatible Storage)
+Files are stored in MinIO object storage with the following features:
+- **S3-compatible API**: Uses minio-java SDK for storage operations
+- **Public read policy**: Uploaded files are publicly accessible via MinIO
+- **UUID naming**: Files are renamed with UUID to prevent conflicts
+- **Multiple file support**: Posts can have multiple file attachments
+- **Environment-based configuration**: Supports external MinIO for production
+
+Configure via environment variables:
+```bash
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET_NAME=synapse-uploads
 ```
-Files saved to project root `uploads/` folder, accessible at `localhost:8080/filename.png`.
+
+For development/demo with Docker, MinIO is included in the demo profile.
 
 ### Caching
 - **Spring Cache + Redis**: Optional caching layer for improved performance
@@ -329,6 +367,6 @@ Files saved to project root `uploads/` folder, accessible at `localhost:8080/fil
 
 ## Important Constraints
 
-- This is an MVP demo - avoid production-level complexity (no message queues, MinIO/OSS)
-- Keep the implementation simple and focused on demonstrating the multi-type content model
+- This is a course project demonstrating multi-type content aggregation
+- Keep the implementation simple and focused on core functionality
 - **Never** comment, unless it's useful

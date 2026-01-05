@@ -261,6 +261,8 @@ bun run preview
 
 ## 🌐 API 配置
 
+> **API 文档**: 后端提供 Swagger/OpenAPI 交互式文档，访问 `http://localhost:8080/swagger-ui.html`（开发模式）
+
 API 客户端配置在 `src/services/api.ts`:
 
 ```typescript

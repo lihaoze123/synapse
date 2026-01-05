@@ -7,6 +7,8 @@
 [![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=openjdk)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.1-brightgreen?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=flat-square&logo=mysql)](https://www.mysql.com/)
+[![MinIO](https://img.shields.io/badge/MinIO-storage-C72E49?style=flat-square&logo=minio)]()
+[![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=flat-square&logo=swagger)]()
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
 **Synapse (突触)** - 一个基于话题的内容聚合平台后端服务
@@ -23,17 +25,20 @@ Synapse 后端基于 **Spring Boot** 构建，提供完整的 RESTful API 支持
 
 - 🔔 **WebSocket 实时通知** - 推送式通知，JWT 握手认证
 - 🔐 **JWT 认证** - 无状态 Token 认证机制
+- 🔒 **BCrypt 密码加密** - 安全的密码哈希存储
 - 📝 **多态内容** - 支持 SNIPPET / ARTICLE / MOMENT 三种帖子类型
 - 🏷️ **标签系统** - 灵活的话题分类和聚合
 - 👍 **点赞功能** - 帖子和评论点赞
-- 💬 **评论系统** - 帖子评论，支持编辑/删除
+- 💬 **评论系统** - 帖子评论，支持编辑/删除，楼层编号
 - 🔖 **书签收藏** - 收藏帖子功能
 - 👥 **关注系统** - 用户关注/粉丝
 - 🔔 **消息通知** - 点赞、评论、关注、提及通知
 - 🔐 **私密帖子** - 支持密码保护的私密内容
-- 📤 **文件上传** - 本地存储，UUID 命名
+- 📤 **文件上传** - MinIO S3-compatible 对象存储
+- 📎 **多文件附件** - 帖子支持多个文件附件
 - 🔍 **全文搜索** - 支持关键词搜索和类型筛选
 - 📄 **分页查询** - 高效的数据分页加载
+- 📚 **API 文档** - Swagger/OpenAPI 交互式文档
 
 ---
 
@@ -47,6 +52,9 @@ Synapse 后端基于 **Spring Boot** 构建，提供完整的 RESTful API 支持
 | ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=flat) | 8.0+ | 生产数据库 |
 | ![H2](https://img.shields.io/badge/H2-2.2.224-blue?style=flat) | 2.2.224 | 开发数据库 |
 | ![JWT](https://img.shields.io/badge/JJWT-0.12.3-red?style=flat) | 0.12.3 | JWT 库 |
+| ![BCrypt](https://img.shields.io/badge/BCrypt-Spring%20Security-orange?style=flat) | - | 密码加密 |
+| ![MinIO](https://img.shields.io/badge/MinIO-8.5-C72E49?style=flat) | 8.5+ | 对象存储 |
+| ![Springdoc](https://img.shields.io/badge/Springdoc-2.3-85EA2D?style=flat) | 2.3+ | API 文档 |
 | ![WebSocket](https://img.shields.io/badge/WebSocket-1.5-010101?style=flat) | 1.5+ | WebSocket 支持 |
 | ![Prometheus](https://img.shields.io/badge/Micrometer-1.12-E6522C?style=flat) | 1.12+ | 指标暴露 |
 | ![Lombok](https://img.shields.io/badge/Lombok-1.18.30-red?style=flat) | 1.18.30 | 简化代码 |
@@ -61,9 +69,14 @@ Synapse 后端基于 **Spring Boot** 构建，提供完整的 RESTful API 支持
 com.synapse/
 ├── 📂 config/                 # ⚙️ 配置类
 │   ├── CorsConfig.java       # 🌐 CORS 跨域配置
-│   ├── JwtConfig.java        # 🔑 JWT 配置
-│   ├── WebSocketConfig.java  # 🔌 WebSocket 配置
-│   └── StaticResourceConfig.java  # 📁 静态资源配置
+│   ├── FilterConfig.java     # 🔧 过滤器配置
+│   ├── JwtAuthenticationFilter.java  # 🔑 JWT 认证过滤器
+│   ├── MinioConfig.java      # 📦 MinIO 对象存储配置
+│   ├── OpenApiConfig.java    # 📚 Swagger/OpenAPI 配置
+│   ├── RedisConfig.java      # 🚀 Redis 缓存配置
+│   ├── SpaFallbackController.java  # 📄 SPA 路由回退
+│   ├── StaticResourceConfig.java  # 📁 静态资源配置
+│   └── WebSocketConfig.java  # 🔌 WebSocket 配置
 │
 ├── 📂 controller/             # 🎮 控制器层
 │   ├── AuthController.java   # 🔐 认证接口
@@ -92,6 +105,7 @@ com.synapse/
 │   ├── Follow.java           # 👥 关注实体
 │   ├── Tag.java              # 🏷️ 标签实体
 │   ├── Notification.java     # 🔔 通知实体
+│   ├── Attachment.java       # 📎 文件附件实体
 │   ├── NotificationType.java # 📋 通知类型枚举
 │   └── PostType.java         # 📋 帖子类型枚举
 │
@@ -150,8 +164,10 @@ com.synapse/
 |:-----|:-----|:-----|:-----|
 | id | BIGINT | PK | 主键（自增） |
 | username | VARCHAR(50) | UNIQUE | 用户名 |
-| password | VARCHAR(255) | NOT NULL | 密码 |
+| password | VARCHAR(255) | NOT NULL | 密码（BCrypt 加密） |
 | avatar_url | VARCHAR(500) | | 头像 URL |
+| display_name | VARCHAR(100) | | 显示名称 |
+| bio | VARCHAR(500) | | 个人简介 |
 
 </details>
 
@@ -204,6 +220,7 @@ com.synapse/
 | post_id | BIGINT | FK | 帖子 ID |
 | user_id | BIGINT | FK | 评论者 ID |
 | content | TEXT | NOT NULL | 评论内容 |
+| floor | INT | NOT NULL | 楼层编号（从 1 开始） |
 | created_at | DATETIME | | 创建时间 |
 | updated_at | DATETIME | | 更新时间 |
 
@@ -276,6 +293,21 @@ com.synapse/
 | post_id | BIGINT | FK | 关联帖子 ID |
 | comment_id | BIGINT | FK | 关联评论 ID |
 | is_read | BOOLEAN | DEFAULT false | 是否已读 |
+| created_at | DATETIME | | 创建时间 |
+
+</details>
+
+<details>
+<summary><b>📎 attachments - 附件表</b></summary>
+
+| 字段 | 类型 | 约束 | 说明 |
+|:-----|:-----|:-----|:-----|
+| id | BIGINT | PK | 主键（自增） |
+| post_id | BIGINT | FK | 帖子 ID |
+| file_name | VARCHAR(255) | NOT NULL | 原始文件名 |
+| file_url | VARCHAR(500) | NOT NULL | 文件访问 URL |
+| file_size | BIGINT | | 文件大小（字节） |
+| mime_type | VARCHAR(100) | | MIME 类型 |
 | created_at | DATETIME | | 创建时间 |
 
 </details>
@@ -431,14 +463,26 @@ GET /api/posts/search?keyword=Spring&type=ARTICLE
 
 | 方法 | 路径 | 说明 | 认证 |
 |:-----|:-----|:-----|:-----|
-| POST | `/api/upload` | 上传图片（最大 10MB） | ✅ |
+| POST | `/api/upload` | 上传文件到 MinIO（最大 10MB） | ✅ |
 
 **响应示例：**
 ```json
 {
-  "url": "/uploads/550e8400-e29b-41d4-a716-446655440000.png"
+  "url": "http://localhost:9000/synapse-uploads/550e8400-e29b-41d4-a716-446655440000.png"
 }
 ```
+
+</details>
+
+<details>
+<summary><b>📚 API 文档 /swagger-ui.html</b></summary>
+
+| 路径 | 说明 |
+|:-----|:-----|
+| `/swagger-ui.html` | Swagger UI 交互式 API 文档（仅开发模式） |
+| `/v3/api-docs` | OpenAPI 3.0 JSON 规范 |
+
+**认证方式：** 点击页面右上角 "Authorize" 按钮，输入 `Bearer <JWT_TOKEN>`。
 
 </details>
 
@@ -587,10 +631,20 @@ java -jar target/synapse-0.0.1-SNAPSHOT.jar \
 
 | 配置项 | 值 |
 |:-------|:-----|
-| 存储位置 | `./uploads/` (项目根目录) |
-| 访问路径 | `http://localhost:8080/uploads/{uuid}.png` |
+| 存储方式 | MinIO S3-compatible 对象存储 |
+| 默认端点 | `http://localhost:9000` (Demo) |
+| Bucket 名称 | `synapse-uploads` |
 | 文件命名 | UUID 自动生成 |
 | 大小限制 | 10MB |
+| 访问策略 | 公共读取 |
+
+**环境变量配置：**
+```bash
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET_NAME=synapse-uploads
+```
 
 ### CORS 配置
 
@@ -609,6 +663,8 @@ java -jar target/synapse-0.0.1-SNAPSHOT.jar \
 | **Grafana** | 3001 | 可视化面板 (admin/admin) |
 | **MySQL Exporter** | 9104 | MySQL 指标暴露 |
 | **Redis Exporter** | 9121 | Redis 指标暴露 |
+| **MinIO** | 9000 | 对象存储 (minioadmin/minioadmin) |
+| **MinIO Console** | 9001 | MinIO 管理控制台 |
 
 **自定义业务指标：**
 
@@ -648,9 +704,8 @@ docker compose --profile demo up --build
 ## ⚠️ 开发注意事项
 
 > [!WARNING]
-> 1. **密码安全**: 当前密码为明文存储（MVP 演示），生产环境应使用 BCrypt 加密
-> 2. **密钥配置**: JWT 密钥应使用环境变量配置，不应硬编码
-> 3. **文件存储**: 当前为本地存储，生产环境建议使用 OSS（如阿里云 OSS、MinIO）
+> 1. **密钥配置**: JWT 密钥应使用环境变量配置，不应硬编码
+> 2. **MinIO 配置**: 生产环境建议使用云托管的对象存储服务（如 AWS S3、阿里云 OSS）
 
 ---
 
