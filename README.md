@@ -14,9 +14,11 @@
 [![Docker](https://img.shields.io/badge/docker-supported-2496ED?style=flat-square&logo=docker)]()
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql)]()
 [![Redis](https://img.shields.io/badge/Redis-cache-DC382D?style=flat-square&logo=redis)]()
+[![MinIO](https://img.shields.io/badge/MinIO-storage-C72E49?style=flat-square&logo=minio)]()
 [![WebSocket](https://img.shields.io/badge/WebSocket-realtime-010101?style=flat-square)]()
 [![Prometheus](https://img.shields.io/badge/Prometheus-monitoring-E6522C?style=flat-square&logo=prometheus)]()
 [![Grafana](https://img.shields.io/badge/Grafana-dashboards-F46800?style=flat-square&logo=grafana)]()
+[![Swagger](https://img.shields.io/badge/Swagger-API_doc-85EA2D?style=flat-square&logo=swagger)]()
 [![JWT](https://img.shields.io/badge/JWT-auth-FF6B6B?style=flat-square)]()
 
 </div>
@@ -64,6 +66,7 @@ docker compose --profile demo up --build
 | Synapse | 8080 | 主应用 |
 | Prometheus | 9090 | 指标收集 |
 | Grafana | 3001 | 可视化面板 (admin/admin) |
+| MinIO | 9000 | 对象存储控制台 (minioadmin/minioadmin) |
 
 <details>
 <summary><b>更多 Docker 选项</b></summary>
@@ -146,6 +149,7 @@ bun run dev
 
 | 功能 | 描述 |
 |:----|:-----|
+| **对象存储** | MinIO S3-compatible 存储，支持多文件附件 |
 | **图片上传** | 头像和封面图，UUID 命名防冲突 |
 | **代码高亮** | 基于 CodeMirror 的语法高亮，支持 20+ 语言 |
 | **响应式设计** | 移动端优先，自适应布局 |
@@ -154,6 +158,7 @@ bun run dev
 | **私密帖子** | 支持密码保护的私密内容 |
 | **Redis 缓存** | 可选缓存层，提升响应速度（Demo 模式） |
 | **监控观测** | Prometheus + Grafana 指标可视化（Demo 模式） |
+| **API 文档** | Swagger/OpenAPI 交互式文档（开发模式） |
 
 ---
 
