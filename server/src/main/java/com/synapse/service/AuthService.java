@@ -7,6 +7,7 @@ import com.synapse.dto.UserDto;
 import com.synapse.entity.User;
 import com.synapse.repository.UserRepository;
 import com.synapse.util.JwtUtil;
+import com.synapse.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ public class AuthService {
 
         User user = User.builder()
             .username(request.getUsername())
-            .password(request.getPassword())
+            .password(PasswordUtil.encode(request.getPassword()))
             .avatarUrl(request.getAvatarUrl())
             .build();
 
@@ -40,11 +41,29 @@ public class AuthService {
             .build();
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
             .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        String storedPassword = user.getPassword();
+        String rawPassword = request.getPassword();
+
+        boolean passwordMatches;
+        if (needsMigration(storedPassword)) {
+            if (storedPassword.equals(rawPassword)) {
+                String hashedPassword = PasswordUtil.encode(rawPassword);
+                user.setPassword(hashedPassword);
+                userRepository.save(user);
+                passwordMatches = true;
+            } else {
+                passwordMatches = false;
+            }
+        } else {
+            passwordMatches = PasswordUtil.matches(rawPassword, storedPassword);
+        }
+
+        if (!passwordMatches) {
             throw new IllegalArgumentException("Invalid username or password");
         }
 
@@ -54,6 +73,11 @@ public class AuthService {
             .token(token)
             .user(UserDto.fromEntity(user))
             .build();
+    }
+
+    private boolean needsMigration(String password) {
+        return !password.startsWith("$2a$") && !password.startsWith("$2b$")
+            && !password.startsWith("$2y$");
     }
 
     public UserDto getCurrentUser(Long userId) {

@@ -7,6 +7,7 @@ import com.synapse.dto.UserDto;
 import com.synapse.entity.User;
 import com.synapse.repository.UserRepository;
 import com.synapse.util.JwtUtil;
+import com.synapse.util.PasswordUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,11 +41,13 @@ class AuthServiceTest {
     @Test
     @DisplayName("register should create new user and return auth response")
     void register_shouldCreateNewUser() {
-        RegisterRequest request = new RegisterRequest("testuser", "password123", null);
+        String rawPassword = "password123";
+        String hashedPassword = PasswordUtil.encode(rawPassword);
+        RegisterRequest request = new RegisterRequest("testuser", rawPassword, null);
         User savedUser = User.builder()
                 .id(1L)
                 .username("testuser")
-                .password("password123")
+                .password(hashedPassword)
                 .build();
 
         when(userRepository.existsByUsername("testuser")).thenReturn(false);
@@ -76,11 +79,13 @@ class AuthServiceTest {
     @Test
     @DisplayName("login should return auth response for valid credentials")
     void login_shouldReturnAuthResponseForValidCredentials() {
-        LoginRequest request = new LoginRequest("testuser", "password123");
+        String rawPassword = "password123";
+        String hashedPassword = PasswordUtil.encode(rawPassword);
+        LoginRequest request = new LoginRequest("testuser", rawPassword);
         User user = User.builder()
                 .id(1L)
                 .username("testuser")
-                .password("password123")
+                .password(hashedPassword)
                 .build();
 
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
@@ -108,11 +113,13 @@ class AuthServiceTest {
     @Test
     @DisplayName("login should throw exception for incorrect password")
     void login_shouldThrowForIncorrectPassword() {
+        String correctPassword = "correctpassword";
+        String hashedPassword = PasswordUtil.encode(correctPassword);
         LoginRequest request = new LoginRequest("testuser", "wrongpassword");
         User user = User.builder()
                 .id(1L)
                 .username("testuser")
-                .password("correctpassword")
+                .password(hashedPassword)
                 .build();
 
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
@@ -156,11 +163,13 @@ class AuthServiceTest {
     @Test
     @DisplayName("register should handle avatar url in request")
     void register_shouldHandleAvatarUrl() {
-        RegisterRequest request = new RegisterRequest("testuser", "password123", "custom-avatar.jpg");
+        String rawPassword = "password123";
+        String hashedPassword = PasswordUtil.encode(rawPassword);
+        RegisterRequest request = new RegisterRequest("testuser", rawPassword, "custom-avatar.jpg");
         User savedUser = User.builder()
                 .id(1L)
                 .username("testuser")
-                .password("password123")
+                .password(hashedPassword)
                 .avatarUrl("custom-avatar.jpg")
                 .build();
 
@@ -172,5 +181,45 @@ class AuthServiceTest {
 
         assertNotNull(response);
         assertEquals("custom-avatar.jpg", response.getUser().getAvatarUrl());
+    }
+
+    @Test
+    @DisplayName("login should migrate plaintext password and allow login")
+    void login_shouldMigratePlaintextPassword() {
+        String rawPassword = "password123";
+        LoginRequest request = new LoginRequest("testuser", rawPassword);
+        User userWithPlaintextPwd = User.builder()
+                .id(1L)
+                .username("testuser")
+                .password(rawPassword)
+                .build();
+
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(userWithPlaintextPwd));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jwtUtil.generateToken(1L, "testuser")).thenReturn("test-jwt-token");
+
+        AuthResponse response = authService.login(request);
+
+        assertNotNull(response);
+        assertEquals("test-jwt-token", response.getToken());
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("login should reject wrong password even with plaintext user")
+    void login_shouldRejectWrongPasswordForPlaintextUser() {
+        String storedPassword = "correctpassword";
+        LoginRequest request = new LoginRequest("testuser", "wrongpassword");
+        User userWithPlaintextPwd = User.builder()
+                .id(1L)
+                .username("testuser")
+                .password(storedPassword)
+                .build();
+
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(userWithPlaintextPwd));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> authService.login(request));
+        assertEquals("Invalid username or password", ex.getMessage());
     }
 }

@@ -14,16 +14,16 @@ MERGE INTO tags (name, icon) KEY (name) VALUES ('前端', '🎨');
 
 -- Users (测试用户) - 使用 DiceBear API 生成 Notion 风格头像 - Use MERGE for username uniqueness
 MERGE INTO users (username, password, avatar_url, display_name, bio) KEY (username) VALUES
-('admin', 'admin123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Admin', '管理员', '全栈开发者，热爱开源。专注于 Java 和 React 技术栈。');
+('admin', '$2a$10$A3bHkjAoE91EYKaeSymzCeA/GH2SCFBYOzXtzmaOU52VVFWQjkdSK', 'https://api.dicebear.com/7.x/notionists/svg?seed=Admin', '管理员', '全栈开发者，热爱开源。专注于 Java 和 React 技术栈。');
 
 MERGE INTO users (username, password, avatar_url, display_name, bio) KEY (username) VALUES
-('alice', 'alice123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Alice', '爱丽丝', 'Python 爱好者，数据科学工程师。喜欢分享编程技巧和最佳实践。');
+('alice', '$2a$10$YVFOLZCffY8Q5zqFbq.KU.y5himz4d7NjOpglx2pI9ZlglID/a50.', 'https://api.dicebear.com/7.x/notionists/svg?seed=Alice', '爱丽丝', 'Python 爱好者，数据科学工程师。喜欢分享编程技巧和最佳实践。');
 
 MERGE INTO users (username, password, avatar_url, display_name, bio) KEY (username) VALUES
-('bob', 'bob123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Bob', '鲍勃', '前端开发者，React 和 TypeScript 粉丝。致力于构建优雅的用户界面。');
+('bob', '$2a$10$kU7/rB7MRf5Wpg5Fv9NFZO3AlkQ.kD8fMd5mWsVcbRHwNyAkiDt1i', 'https://api.dicebear.com/7.x/notionists/svg?seed=Bob', '鲍勃', '前端开发者，React 和 TypeScript 粉丝。致力于构建优雅的用户界面。');
 
 MERGE INTO users (username, password, avatar_url, display_name, bio) KEY (username) VALUES
-('charlie', 'charlie123', 'https://api.dicebear.com/7.x/notionists/svg?seed=Charlie', '查理', '后端架构师，专注微服务和分布式系统。Spring Boot 布道师。');
+('charlie', '$2a$10$vElQynQ3WrgQ9jYGOokNMO9C94/FWxSJBdoSYWBSTXuerLdJsogKe', 'https://api.dicebear.com/7.x/notionists/svg?seed=Charlie', '查理', '后端架构师，专注微服务和分布式系统。Spring Boot 布道师。');
 
 -- Posts (文章/代码片段/动态)
 
