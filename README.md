@@ -356,7 +356,7 @@ cd server
 
 **6. 运行**
 ```bash
-java -jar target/synapse-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+java -jar target/synapse-0.1.0.jar --spring.profiles.active=prod
 ```
 
 </details>
