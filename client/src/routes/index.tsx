@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ComposeCard, Feed } from "@/components/feed";
 import { Layout } from "@/components/layout";
 import { type PublishData, PublishModal } from "@/components/publish";
+import { AnimatedPage } from "@/components/ui/animations";
 import { useAuth, useCreatePost, usePosts } from "@/hooks";
 import type { PostType } from "@/types";
 
@@ -100,42 +101,44 @@ function HomePage() {
 
 	return (
 		<Layout>
-			<div className="space-y-4">
-				{(search.tag || search.type) && (
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
-						<span>筛选:</span>
-						{search.tag && (
-							<span className="px-2 py-0.5 bg-secondary rounded-full">
-								#{search.tag}
-							</span>
-						)}
-						{search.type && (
-							<span className="px-2 py-0.5 bg-secondary rounded-full">
-								{search.type === "SNIPPET" && "代码片段"}
-								{search.type === "ARTICLE" && "文章"}
-								{search.type === "MOMENT" && "动态"}
-							</span>
-						)}
-					</div>
-				)}
+			<AnimatedPage transition="fade">
+				<div className="space-y-4">
+					{(search.tag || search.type) && (
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+							<span>筛选:</span>
+							{search.tag && (
+								<span className="px-2 py-0.5 bg-secondary rounded-full">
+									#{search.tag}
+								</span>
+							)}
+							{search.type && (
+								<span className="px-2 py-0.5 bg-secondary rounded-full">
+									{search.type === "SNIPPET" && "代码片段"}
+									{search.type === "ARTICLE" && "文章"}
+									{search.type === "MOMENT" && "动态"}
+								</span>
+							)}
+						</div>
+					)}
 
-				{user && <ComposeCard onCompose={handleCompose} />}
+					{user && <ComposeCard onCompose={handleCompose} />}
 
-				{error && (
-					<div className="p-4 text-center text-red-600 bg-red-50 rounded-lg">
-						加载失败：{error.message}
-					</div>
-				)}
+					{error && (
+						<div className="p-4 text-center text-red-600 bg-red-50 rounded-lg">
+							加载失败：{error.message}
+						</div>
+					)}
 
-				<Feed
-					posts={posts}
-					isLoading={isLoading}
-					isFetchingNextPage={isFetchingNextPage}
-					hasNextPage={hasNextPage}
-					fetchNextPage={fetchNextPage}
-					emptyMessage={getEmptyMessage()}
-				/>
-			</div>
+					<Feed
+						posts={posts}
+						isLoading={isLoading}
+						isFetchingNextPage={isFetchingNextPage}
+						hasNextPage={hasNextPage}
+						fetchNextPage={fetchNextPage}
+						emptyMessage={getEmptyMessage()}
+					/>
+				</div>
+			</AnimatedPage>
 
 			<PublishModal
 				open={publishOpen}

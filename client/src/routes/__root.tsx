@@ -2,6 +2,8 @@ import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
+import { AnimatePresence } from "@/components/ui/animations";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks";
 import { useNotificationRealtime } from "@/hooks/useNotificationRealtime";
@@ -24,13 +26,17 @@ function RealtimeBridge() {
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
 	component: () => (
-		<SidebarProvider>
-			<Outlet />
-			<RealtimeBridge />
-			<Toaster />
-			<Suspense>
-				<Devtools plugins={[TanStackQueryDevtools]} />
-			</Suspense>
-		</SidebarProvider>
+		<ErrorBoundary>
+			<SidebarProvider>
+				<AnimatePresence mode="wait">
+					<Outlet />
+				</AnimatePresence>
+				<RealtimeBridge />
+				<Toaster />
+				<Suspense>
+					<Devtools plugins={[TanStackQueryDevtools]} />
+				</Suspense>
+			</SidebarProvider>
+		</ErrorBoundary>
 	),
 });
