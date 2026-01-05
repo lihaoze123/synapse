@@ -11,46 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Synapse v0.1.0 is the first stable release of the topic-based content aggregation platform.
 
-### Added
-
-#### Core Features
-- User authentication with JWT tokens
-- Multi-type content publishing (Snippet, Article, Moment)
-- Tag/topic system for content categorization
-- Real-time search with debouncing
-- Smart pagination with infinite scroll
-
-#### Social Features
-- Comment system with nested replies
-- Like/unlike for posts and comments
-- Bookmark functionality for personal collection
-- Follow system (follow/unfollow users)
-- User profiles with public pages
-- Real-time notifications via WebSocket
-
-#### Content Enhancement
+### Added (since v0.0.8)
+- Swagger/OpenAPI 3.0 API documentation
 - MinIO S3-compatible object storage
-- Multi-file attachment support
-- Image upload for avatars and covers
-- CodeMirror editor with 20+ language syntax highlighting
-- Responsive mobile-first design
-- Auto-save drafts to localStorage
-- Dark mode (Light/Dark/System preference)
-- Password-protected private posts
-
-#### Infrastructure
-- Redis caching layer (optional, demo profile)
+- BCrypt password hashing with lazy migration
 - Prometheus metrics collection
-- Grafana dashboards (demo profile)
-- Swagger/OpenAPI 3.0 API documentation (dev profile)
-- Docker multi-stage builds
-- Health checks for all services
-
-#### Security
-- BCrypt password hashing
-- Lazy password migration
-- JWT-based stateless authentication
-- Configurable CORS settings
+- Grafana dashboards for monitoring
+- Redis caching layer (optional, demo profile)
 
 ### Technology Stack
 
@@ -63,11 +30,6 @@ Synapse v0.1.0 is the first stable release of the topic-based content aggregatio
 | Storage | MinIO S3-compatible |
 | Monitoring | Prometheus + Grafana |
 
-### Documentation
-- Comprehensive README.md with deployment guides
-- API documentation via Swagger UI
-- Project documentation in CLAUDE.md
-
 ### Testing
 - Backend: 179 unit tests (JUnit 5)
 - Frontend: 446 tests (Vitest + Testing Library)
@@ -77,41 +39,55 @@ Synapse v0.1.0 is the first stable release of the topic-based content aggregatio
 ## [0.0.8] - 2026-01-02
 
 ### Added
-- Swagger API documentation
-- MinIO object storage support
-- BCrypt password hashing with lazy migration
+- Improved editor and post detail display
+- Private post support with password protection
+- Instant dark mode toggle (Light/Dark/System)
+- Draft auto-save for publish modal
+- Notification system with WebSocket
 
 ## [0.0.7] - 2026-01-02
 
 ### Added
-- Frontend UI/UX optimizations
+- Documentation for using prebuilt Docker images from GHCR
 
 ## [0.0.6] - 2026-01-02
 
 ### Added
-- WebSocket support for real-time notifications
+- Enhanced markdown editor with LaTeX support and toolbar
+- Enhanced comment system with markdown, preview, and mentions
+- User profiles with displayName and bio
+- File attachment support for posts
 
-## [0.0.5] - 2026-01-01
+## [0.0.5] - 2026-01-02
 
 ### Added
-- Prometheus and Grafana monitoring stack
+- SPA fallback controller for client-side routing
+- Docker support with multi-stage build
+- Spring Boot production profile with MySQL configuration
 
 ## [0.0.4] - 2026-01-01
 
 ### Added
-- Redis caching for improved performance
+- GitHub Actions release workflow
+- Fix for timezone issues using Instant instead of LocalDateTime
 
 ## [0.0.3] - 2025-12-31
 
 ### Added
-- Unit tests for service and util layers
+- Bookmarks UI feature
+- Like feature for posts and comments
+- Mobile-optimized navigation and action bars
+- Tag filtering to search
+- Migrated frontend from npm to Bun
+- Biome auto-format applied to client code
+- GitHub Actions workflows for CI
 
 ## [0.0.2] - 2025-12-31
 
 ### Added
-- Initial project structure
+- Enhanced UI with Linear-style design and improved navigation
 
 ## [0.0.1] - 2025-12-31
 
 ### Added
-- Project initialization
+- Initial project release
