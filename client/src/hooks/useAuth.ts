@@ -67,6 +67,18 @@ export function useAuth() {
 		navigate({ to: "/login", replace: true });
 	}, [queryClient, navigate]);
 
+	const loginWithGitHub = useCallback(() => {
+		const state = authService.generateOAuthState();
+		authService.saveOAuthState(state);
+		window.location.href = authService.getOAuthAuthorizationUrl("github");
+	}, []);
+
+	const loginWithGoogle = useCallback(() => {
+		const state = authService.generateOAuthState();
+		authService.saveOAuthState(state);
+		window.location.href = authService.getOAuthAuthorizationUrl("google");
+	}, []);
+
 	return {
 		user,
 		isAuthenticated,
@@ -74,6 +86,8 @@ export function useAuth() {
 		login: loginMutation.mutateAsync,
 		register: registerMutation.mutateAsync,
 		logout,
+		loginWithGitHub,
+		loginWithGoogle,
 		isLoggingIn: loginMutation.isPending,
 		isRegistering: registerMutation.isPending,
 		loginError: loginMutation.error,
