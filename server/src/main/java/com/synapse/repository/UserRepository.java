@@ -1,5 +1,6 @@
 package com.synapse.repository;
 
+import com.synapse.entity.AuthProvider;
 import com.synapse.entity.User;
 import java.util.Collection;
 import java.util.List;
@@ -15,4 +16,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     List<User> findByUsernameIn(Collection<String> usernames);
+
+    Optional<User> findByEmail(String email);
+
+    Optional<User> findByProviderAndProviderId(AuthProvider provider, String providerId);
+
+    boolean existsByEmail(String email);
 }
