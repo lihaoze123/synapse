@@ -72,4 +72,25 @@ export const authService = {
 	isAuthenticated(): boolean {
 		return !!this.getToken();
 	},
+
+	getOAuthAuthorizationUrl(provider: "github" | "google"): string {
+		return `/oauth2/authorization/${provider}`;
+	},
+
+	saveOAuthState(state: string): void {
+		localStorage.setItem("oauth_state", state);
+	},
+
+	consumeOAuthState(): string | null {
+		const state = localStorage.getItem("oauth_state");
+		localStorage.removeItem("oauth_state");
+		return state;
+	},
+
+	generateOAuthState(): string {
+		return (
+			Math.random().toString(36).substring(2, 15) +
+			Math.random().toString(36).substring(2, 15)
+		);
+	},
 };
