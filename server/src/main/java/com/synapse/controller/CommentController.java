@@ -6,6 +6,10 @@ import com.synapse.dto.CreateCommentRequest;
 import com.synapse.dto.UpdateCommentRequest;
 import com.synapse.service.CommentService;
 import com.synapse.service.CommentLikeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Tag(name = "Comments", description = "Post comment management")
 public class CommentController {
 
 	private static final int MAX_PAGE_SIZE = 100;
@@ -35,10 +40,15 @@ public class CommentController {
 	private final CommentLikeService commentLikeService;
 
 	@GetMapping("/posts/{postId}/comments")
+	@Operation(summary = "Get post comments", description = "Returns paginated comments for a post")
+	@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Comments retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request")
+    })
 	public ResponseEntity<ApiResponse<Page<CommentDto>>> getPostComments(
-			@PathVariable Long postId,
-			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "20") int size,
+			@Parameter(description = "Post ID", required = true) @PathVariable Long postId,
+			@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+			@Parameter(description = "Page size (max 100)") @RequestParam(defaultValue = "20") int size,
 			HttpServletRequest request) {
 		int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
 		Pageable pageable = PageRequest.of(page, safeSize);
@@ -62,6 +72,11 @@ public class CommentController {
 	}
 
 	@GetMapping("/comments/{id}")
+	@Operation(summary = "Get comment by ID", description = "Returns a single comment")
+	@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Comment retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Comment not found")
+    })
 	public ResponseEntity<ApiResponse<CommentDto>> getComment(HttpServletRequest request, @PathVariable Long id) {
 		try {
 			CommentDto comment = commentService.getComment(id);
@@ -80,9 +95,15 @@ public class CommentController {
 	}
 
 	@PostMapping("/posts/{postId}/comments")
+	@Operation(summary = "Create comment", description = "Adds a new comment to a post")
+	@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Comment created successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid input")
+    })
 	public ResponseEntity<ApiResponse<CommentDto>> createComment(
 			HttpServletRequest request,
-			@PathVariable Long postId,
+			@Parameter(description = "Post ID", required = true) @PathVariable Long postId,
 			@Valid @RequestBody CreateCommentRequest createRequest) {
 		Long userId = (Long) request.getAttribute("userId");
 		if (userId == null) {
@@ -97,9 +118,15 @@ public class CommentController {
 	}
 
 	@PutMapping("/comments/{id}")
+	@Operation(summary = "Update comment", description = "Updates an existing comment (owner only)")
+	@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Comment updated successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Not authorized")
+    })
 	public ResponseEntity<ApiResponse<CommentDto>> updateComment(
 			HttpServletRequest request,
-			@PathVariable Long id,
+			@Parameter(description = "Comment ID", required = true) @PathVariable Long id,
 			@Valid @RequestBody UpdateCommentRequest updateRequest) {
 		Long userId = (Long) request.getAttribute("userId");
 		if (userId == null) {
@@ -114,9 +141,15 @@ public class CommentController {
 	}
 
 	@DeleteMapping("/comments/{id}")
+	@Operation(summary = "Delete comment", description = "Deletes a comment (owner only)")
+	@ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Comment deleted successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Not authorized")
+    })
 	public ResponseEntity<ApiResponse<Void>> deleteComment(
 			HttpServletRequest request,
-			@PathVariable Long id) {
+			@Parameter(description = "Comment ID", required = true) @PathVariable Long id) {
 		Long userId = (Long) request.getAttribute("userId");
 		if (userId == null) {
 			return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));

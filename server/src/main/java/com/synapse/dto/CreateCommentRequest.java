@@ -1,5 +1,6 @@
 package com.synapse.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -11,11 +12,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "Request to create a new comment")
 public class CreateCommentRequest {
 
-    @NotBlank(message = "评论内容不能为空")
-    @Size(min = 1, max = 2000, message = "评论内容长度必须在1-2000字符之间")
+    @Schema(description = "Comment content (1-2000 characters)", example = "Great post!", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Comment content is required")
+    @Size(min = 1, max = 2000, message = "Comment content must be between 1 and 2000 characters")
     private String content;
 
+    @Schema(description = "Parent comment ID (for replies)", example = "5")
     private Long parentId;
 }
