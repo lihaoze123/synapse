@@ -8,6 +8,13 @@ import com.synapse.dto.VerifyPasswordRequest;
 import com.synapse.entity.PostType;
 import com.synapse.service.PostService;
 import com.synapse.service.LikeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
+@Tag(name = "Posts", description = "Post CRUD operations (Snippet, Article, Moment)")
 public class PostController {
 
     private static final int MAX_PAGE_SIZE = 50;
@@ -36,11 +44,15 @@ public class PostController {
     private final LikeService likeService;
 
     @GetMapping
+    @Operation(summary = "Get posts", description = "Returns paginated posts, filterable by tag and type")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Posts retrieved successfully")
+    })
     public ResponseEntity<ApiResponse<Page<PostDto>>> getPosts(
-            @RequestParam(required = false) String tag,
-            @RequestParam(required = false) PostType type,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Filter by tag name") @RequestParam(required = false) String tag,
+            @Parameter(description = "Filter by post type") @RequestParam(required = false) PostType type,
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (max 50)") @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
         int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, safeSize);
@@ -56,13 +68,17 @@ public class PostController {
     }
 
     @GetMapping("/search")
+    @Operation(summary = "Search posts", description = "Searches posts by keyword with optional tag and type filters")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Search results returned")
+    })
     public ResponseEntity<ApiResponse<Page<PostDto>>> searchPosts(
-            @RequestParam String keyword,
-            @RequestParam(required = false) String tag,
-            @RequestParam(required = false) java.util.List<String> tags,
-            @RequestParam(required = false) PostType type,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Search keyword", required = true) @RequestParam String keyword,
+            @Parameter(description = "Filter by single tag") @RequestParam(required = false) String tag,
+            @Parameter(description = "Filter by multiple tags") @RequestParam(required = false) java.util.List<String> tags,
+            @Parameter(description = "Filter by post type") @RequestParam(required = false) PostType type,
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (max 50)") @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
         int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable pageable = PageRequest.of(page, safeSize);
@@ -87,6 +103,11 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get post by ID", description = "Returns a single post with full details")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Post retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Post not found")
+    })
     public ResponseEntity<ApiResponse<PostDto>> getPost(HttpServletRequest request, @PathVariable Long id) {
         try {
             Long userId = (Long) request.getAttribute("userId");
@@ -101,6 +122,12 @@ public class PostController {
     }
 
     @PostMapping
+    @Operation(summary = "Create post", description = "Creates a new post (Snippet, Article, or Moment)")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Post created successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid input")
+    })
     public ResponseEntity<ApiResponse<PostDto>> createPost(
             HttpServletRequest request,
             @Valid @RequestBody CreatePostRequest createRequest) {
@@ -117,6 +144,12 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update post", description = "Updates an existing post (owner only)")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Post updated successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Not authorized")
+    })
     public ResponseEntity<ApiResponse<PostDto>> updatePost(
             HttpServletRequest request,
             @PathVariable Long id,
@@ -134,6 +167,12 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete post", description = "Deletes a post (owner only)")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Post deleted successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Not authorized")
+    })
     public ResponseEntity<ApiResponse<Void>> deletePost(
             HttpServletRequest request,
             @PathVariable Long id) {
@@ -150,6 +189,12 @@ public class PostController {
     }
 
     @PostMapping("/{id}/verify-password")
+    @Operation(summary = "Verify post password", description = "Verifies password for private posts")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Password verified"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Incorrect password"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Post not found")
+    })
     public ResponseEntity<ApiResponse<PostDto>> verifyPassword(
             HttpServletRequest request,
             @PathVariable Long id,

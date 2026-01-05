@@ -4,6 +4,11 @@ import com.synapse.dto.ApiResponse;
 import com.synapse.util.FileUtil;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +33,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Tag(name = "Files", description = "File upload and download")
 public class FileController {
 
     private final FileUtil fileUtil;
@@ -37,7 +43,14 @@ public class FileController {
     private String bucket;
 
     @PostMapping("/upload")
+    @Operation(summary = "Upload image", description = "Uploads an image file to MinIO storage")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File uploaded successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or upload failed")
+    })
     public ResponseEntity<ApiResponse<Map<String, String>>> uploadFile(
+            @Parameter(description = "Image file to upload", required = true)
             @RequestParam("file") MultipartFile file,
             HttpServletRequest request) {
 
@@ -65,7 +78,14 @@ public class FileController {
     }
 
     @PostMapping("/upload/attachment")
+    @Operation(summary = "Upload attachment", description = "Uploads an attachment file with metadata")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Attachment uploaded successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file or upload failed")
+    })
     public ResponseEntity<ApiResponse<Map<String, Object>>> uploadAttachment(
+            @Parameter(description = "Attachment file to upload", required = true)
             @RequestParam("file") MultipartFile file,
             HttpServletRequest request) {
 
@@ -96,9 +116,14 @@ public class FileController {
     }
 
     @GetMapping("/download/{storedName}")
+    @Operation(summary = "Download file", description = "Downloads a file from MinIO storage")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File downloaded successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "File not found")
+    })
     public ResponseEntity<Resource> downloadFile(
-            @PathVariable String storedName,
-            @RequestParam(required = false) String filename) {
+            @Parameter(description = "Stored file name in MinIO", required = true) @PathVariable String storedName,
+            @Parameter(description = "Optional filename for download") @RequestParam(required = false) String filename) {
 
         try {
             InputStream stream = minioClient.getObject(
