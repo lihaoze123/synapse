@@ -30,18 +30,6 @@ interface IllustratedEmptyStateProps {
 	action?: ReactNode;
 }
 
-const floatAnimation = {
-	initial: { y: 0 },
-	animate: {
-		y: [-5, 5, -5],
-		transition: {
-			duration: 3,
-			repeat: Number.POSITIVE_INFINITY,
-			ease: "easeInOut" as const,
-		},
-	},
-};
-
 const pulseAnimation = {
 	initial: { scale: 1, opacity: 0.5 },
 	animate: {
@@ -155,16 +143,14 @@ export function IllustratedEmptyState({
 							willChange: "transform, opacity",
 						}}
 					/>
-					<motion.div
-						variants={floatAnimation}
+					<div
 						className={cn(
 							"relative flex h-16 w-16 items-center justify-center rounded-full",
 							config.bgColor,
 						)}
-						style={{ willChange: "transform" }}
 					>
 						<Icon className={cn("h-8 w-8", config.color)} />
-					</motion.div>
+					</div>
 				</div>
 
 				<motion.div
