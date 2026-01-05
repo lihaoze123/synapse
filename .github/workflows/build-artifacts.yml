@@ -70,5 +70,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: synapse-jar
-          path: server/target/synapse-0.0.1-SNAPSHOT.jar
+          path: server/target/synapse-0.1.0.jar
           if-no-files-found: error
