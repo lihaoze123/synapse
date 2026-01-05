@@ -2,10 +2,13 @@ package com.synapse.controller;
 
 import com.synapse.dto.ApiResponse;
 import com.synapse.util.FileUtil;
+import io.minio.GetObjectArgs;
+import io.minio.MinioClient;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 @RestController
@@ -31,6 +31,10 @@ import java.util.Map;
 public class FileController {
 
     private final FileUtil fileUtil;
+    private final MinioClient minioClient;
+
+    @Value("${minio.bucket}")
+    private String bucket;
 
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<Map<String, String>>> uploadFile(
@@ -44,18 +48,17 @@ public class FileController {
         }
 
         try {
-            String filename = fileUtil.saveFile(file);
-            // 返回相对路径，前端再统一补全前缀，避免重复前缀导致 404
-            String url = "/uploads/" + filename;
+            String objectName = fileUtil.saveFile(file);
+            String url = fileUtil.getPublicUrl(objectName);
 
             return ResponseEntity.ok(ApiResponse.success(Map.of(
-                    "filename", filename,
+                    "filename", objectName,
                     "url", url
             )));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error(e.getMessage()));
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("Failed to upload file"));
         }
@@ -73,12 +76,12 @@ public class FileController {
         }
 
         try {
-            String storedName = fileUtil.saveAttachment(file);
-            String url = "/uploads/" + storedName;
+            String objectName = fileUtil.saveAttachment(file);
+            String url = fileUtil.getPublicUrl(objectName);
 
             return ResponseEntity.ok(ApiResponse.success(Map.of(
                     "filename", file.getOriginalFilename(),
-                    "storedName", storedName,
+                    "storedName", objectName,
                     "url", url,
                     "fileSize", file.getSize(),
                     "contentType", file.getContentType()
@@ -86,7 +89,7 @@ public class FileController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error(e.getMessage()));
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("Failed to upload file"));
         }
@@ -98,16 +101,11 @@ public class FileController {
             @RequestParam(required = false) String filename) {
 
         try {
-            Path filePath = Paths.get("uploads", storedName);
-            if (!Files.exists(filePath)) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Resource resource = new UrlResource(filePath.toUri());
-            String contentType = Files.probeContentType(filePath);
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
+            InputStream stream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(storedName)
+                            .build());
 
             String downloadName = (filename != null && !filename.isEmpty())
                     ? filename
@@ -116,12 +114,13 @@ public class FileController {
                     .replace("+", "%20");
 
             return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + encodedFilename + "\"; filename*=UTF-8''" + encodedFilename)
-                    .body(resource);
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
+                            "attachment; filename=\"" + encodedFilename
+                            + "\"; filename*=UTF-8''" + encodedFilename)
+                    .body(new InputStreamResource(stream));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }

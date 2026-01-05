@@ -1,19 +1,31 @@
 package com.synapse.util;
 
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class FileUtil {
 
-    private static final String UPLOAD_DIR = "uploads";
+    private final MinioClient minioClient;
+
+    @Value("${minio.bucket}")
+    private String bucket;
+
+    @Value("${minio.public-url}")
+    private String publicUrl;
+
     private static final Set<String> ALLOWED_TYPES = Set.of(
             "image/jpeg",
             "image/png",
@@ -22,7 +34,6 @@ public class FileUtil {
     );
     private static final long MAX_SIZE = 10 * 1024 * 1024;
     private static final Set<String> ALLOWED_ATTACHMENT_TYPES = Set.of(
-            // Documents
             "application/pdf",
             "application/msword",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -31,19 +42,16 @@ public class FileUtil {
             "application/vnd.ms-powerpoint",
             "application/vnd.openxmlformats-officedocument.presentationml.presentation",
             "text/plain",
-            // Code/Data
             "application/json",
             "application/xml",
             "text/xml",
             "text/yaml",
             "text/x-yaml",
             "application/x-yaml",
-            // Archives
             "application/zip",
             "application/x-zip-compressed",
             "application/x-rar-compressed",
             "application/x-7z-compressed",
-            // Additional MIME types that browsers may send
             "application/octet-stream"
     );
     private static final Set<String> ALLOWED_ATTACHMENT_EXTENSIONS = Set.of(
@@ -53,45 +61,39 @@ public class FileUtil {
     );
     private static final long MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024;
 
-    public FileUtil() {
-        createUploadDirectory();
+    public String saveFile(MultipartFile file) {
+        validateFile(file);
+        return uploadToMinio(file);
     }
 
-    private void createUploadDirectory() {
-        Path uploadPath = Paths.get(UPLOAD_DIR);
-        if (!Files.exists(uploadPath)) {
-            try {
-                Files.createDirectories(uploadPath);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to create upload directory", e);
-            }
+    public String saveAttachment(MultipartFile file) {
+        validateAttachment(file);
+        return uploadToMinio(file);
+    }
+
+    private String uploadToMinio(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        String extension = getExtension(originalFilename);
+        String objectName = UUID.randomUUID().toString() + extension;
+
+        try (InputStream inputStream = file.getInputStream()) {
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectName)
+                            .stream(inputStream, file.getSize(), -1)
+                            .contentType(file.getContentType())
+                            .build());
+            log.debug("Uploaded file to MinIO: {}", objectName);
+            return objectName;
+        } catch (Exception e) {
+            log.error("Failed to upload file to MinIO", e);
+            throw new RuntimeException("Failed to upload file", e);
         }
     }
 
-    public String saveFile(MultipartFile file) throws IOException {
-        validateFile(file);
-
-        String originalFilename = file.getOriginalFilename();
-        String extension = getExtension(originalFilename);
-        String newFilename = UUID.randomUUID().toString() + extension;
-
-        Path filePath = Paths.get(UPLOAD_DIR, newFilename);
-        Files.copy(file.getInputStream(), filePath);
-
-        return newFilename;
-    }
-
-    public String saveAttachment(MultipartFile file) throws IOException {
-        validateAttachment(file);
-
-        String originalFilename = file.getOriginalFilename();
-        String extension = getExtension(originalFilename);
-        String newFilename = UUID.randomUUID().toString() + extension;
-
-        Path filePath = Paths.get(UPLOAD_DIR, newFilename);
-        Files.copy(file.getInputStream(), filePath);
-
-        return newFilename;
+    public String getPublicUrl(String objectName) {
+        return publicUrl + "/" + bucket + "/" + objectName;
     }
 
     private void validateAttachment(MultipartFile file) {
@@ -139,14 +141,19 @@ public class FileUtil {
         return filename.substring(filename.lastIndexOf("."));
     }
 
-    public void deleteFile(String filename) {
-        if (filename == null || filename.isEmpty()) {
+    public void deleteFile(String objectName) {
+        if (objectName == null || objectName.isEmpty()) {
             return;
         }
         try {
-            Path filePath = Paths.get(UPLOAD_DIR, filename);
-            Files.deleteIfExists(filePath);
-        } catch (IOException e) {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectName)
+                            .build());
+            log.debug("Deleted file from MinIO: {}", objectName);
+        } catch (Exception e) {
+            log.warn("Failed to delete file from MinIO: {}", objectName, e);
         }
     }
 }

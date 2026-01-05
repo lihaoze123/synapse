@@ -2,6 +2,7 @@ package com.synapse.websocket;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.synapse.config.TestMinioConfig;
 import com.synapse.util.JwtUtil;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -22,6 +24,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
+@Import(TestMinioConfig.class)
 @DisplayName("WebSocket Integration Tests")
 class WebSocketIntegrationTest {
 
