@@ -4,9 +4,6 @@ import com.synapse.entity.AuthProvider;
 import com.synapse.entity.User;
 import com.synapse.repository.UserRepository;
 import com.synapse.util.JwtUtil;
-import com.synapse.dto.AuthResponse;
-import com.synapse.dto.UserDto;
-import com.synapse.service.OAuth2CodeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,7 +24,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final OAuth2CodeService codeService;
 
     @Value("${app.oauth2.redirect-uri:/oauth/callback}")
     private String redirectUri;
@@ -149,16 +145,5 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             default -> "unknown";
         };
         return (provider.name().toLowerCase() + "_" + candidate + "@oauth.local").toLowerCase();
-    }
-
-    private String escapeJson(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.replace("\\", "\\\\")
-                   .replace("\"", "\\\"")
-                   .replace("\n", "\\n")
-                   .replace("\r", "\\r")
-                   .replace("\t", "\\t");
     }
 }

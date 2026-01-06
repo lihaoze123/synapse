@@ -37,7 +37,10 @@ public class StatePropagatingAuthorizationRequestResolver implements OAuth2Autho
         return maybeOverrideState(request, resolved);
     }
 
-    private OAuth2AuthorizationRequest maybeOverrideState(HttpServletRequest request, OAuth2AuthorizationRequest resolved) {
+    private OAuth2AuthorizationRequest maybeOverrideState(
+            HttpServletRequest request,
+            OAuth2AuthorizationRequest resolved
+    ) {
         if (resolved == null) {
             return null;
         }

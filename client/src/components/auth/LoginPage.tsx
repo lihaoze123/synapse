@@ -1,6 +1,7 @@
-import { Github, Loader2, Mail } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useId, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { OAuthButton } from "./OAuthButton";
 
 function AuthInput({
 	id,
@@ -37,38 +38,6 @@ function AuthInput({
 			/>
 			{error && <p className="text-sm text-red-500">{error}</p>}
 		</div>
-	);
-}
-
-function OAuthButton({
-	provider,
-	onClick,
-	disabled,
-}: {
-	provider: "github" | "google";
-	onClick: () => void;
-	disabled?: boolean;
-}) {
-	const icons = {
-		github: Github,
-		google: Mail,
-	};
-	const labels = {
-		github: "Continue with GitHub",
-		google: "Continue with Google",
-	};
-	const Icon = icons[provider];
-
-	return (
-		<button
-			type="button"
-			onClick={onClick}
-			disabled={disabled}
-			className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded-xl text-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-		>
-			<Icon className="w-5 h-5" />
-			<span className="font-medium">{labels[provider]}</span>
-		</button>
 	);
 }
 
@@ -180,12 +149,12 @@ export function LoginPage() {
 						<OAuthButton
 							provider="github"
 							onClick={auth.loginWithGitHub}
-							disabled={isLoading}
+							isLoading={isLoading}
 						/>
 						<OAuthButton
 							provider="google"
 							onClick={auth.loginWithGoogle}
-							disabled={isLoading}
+							isLoading={isLoading}
 						/>
 					</div>
 

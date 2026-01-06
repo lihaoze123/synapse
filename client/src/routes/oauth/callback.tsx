@@ -17,7 +17,6 @@ function OAuthCallbackPage() {
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
-		const code = params.get("code");
 		const state = params.get("state");
 		const error = params.get("error");
 
@@ -37,35 +36,18 @@ function OAuthCallbackPage() {
 		// State is single-use
 		localStorage.removeItem("oauth_state");
 
+		// JWT is delivered via HttpOnly cookie; fetch current user to complete login
 		(async () => {
 			try {
-				if (code) {
-					// Legacy path: exchange server-issued code for token + user
-					const res = await fetch("/api/auth/oauth2/exchange", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ code }),
-					});
-					if (!res.ok) throw new Error("Code exchange failed");
-					const payload = await res.json();
-					if (!payload?.success || !payload?.data) {
-						throw new Error(payload?.message || "Code exchange failed");
-					}
-					const { token, user } = payload.data;
-					localStorage.setItem("token", token);
-					localStorage.setItem("user", JSON.stringify(user));
-				} else {
-					// Cookie-based path: JWT delivered via HttpOnly cookie; just fetch current user
-					const res = await fetch("/api/auth/me", {
-						credentials: "same-origin",
-					});
-					if (!res.ok) throw new Error("Failed to finalize login");
-					const payload = await res.json();
-					if (!payload?.success || !payload?.data) {
-						throw new Error(payload?.message || "Failed to finalize login");
-					}
-					localStorage.setItem("user", JSON.stringify(payload.data));
+				const res = await fetch("/api/auth/me", {
+					credentials: "same-origin",
+				});
+				if (!res.ok) throw new Error("Failed to finalize login");
+				const payload = await res.json();
+				if (!payload?.success || !payload?.data) {
+					throw new Error(payload?.message || "Failed to finalize login");
 				}
+				localStorage.setItem("user", JSON.stringify(payload.data));
 				setStatus("success");
 				queryClient.invalidateQueries({ queryKey: ["auth"] });
 				queryClient.invalidateQueries({ queryKey: ["user"] });

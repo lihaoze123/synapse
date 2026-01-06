@@ -87,12 +87,6 @@ export const authService = {
 		localStorage.setItem("oauth_state", state);
 	},
 
-	consumeOAuthState(): string | null {
-		const state = localStorage.getItem("oauth_state");
-		localStorage.removeItem("oauth_state");
-		return state;
-	},
-
 	generateOAuthState(): string {
 		return (
 			Math.random().toString(36).substring(2, 15) +
