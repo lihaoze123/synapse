@@ -81,11 +81,26 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private String extractEmail(OAuth2User oauth2User, AuthProvider provider) {
-        return switch (provider) {
-            case GITHUB -> oauth2User.getAttribute("email");
-            case GOOGLE -> oauth2User.getAttribute("email");
-            default -> throw new IllegalArgumentException("Unknown provider: " + provider);
+        // Some providers (e.g., GitHub) may not return email by default.
+        String email = oauth2User.getAttribute("email");
+        if (email != null && !email.isBlank()) {
+            return email;
+        }
+        // Fallback to a synthetic, stable email to satisfy NOT NULL/UNIQUE constraints.
+        // Use provider + providerId (or login/name) to ensure uniqueness.
+        String providerId = extractProviderId(oauth2User, provider);
+        String candidate = switch (provider) {
+            case GITHUB -> {
+                String login = oauth2User.getAttribute("login");
+                yield login != null ? login : (providerId != null ? providerId : "unknown");
+            }
+            case GOOGLE -> {
+                String name = oauth2User.getAttribute("name");
+                yield name != null ? name : (providerId != null ? providerId : "unknown");
+            }
+            default -> "unknown";
         };
+        return (provider.name().toLowerCase() + "_" + candidate + "@oauth.local").toLowerCase();
     }
 
     private String extractProviderId(OAuth2User oauth2User, AuthProvider provider) {
@@ -98,14 +113,23 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private String extractUsername(OAuth2User oauth2User, AuthProvider provider) {
+        // Prefer provider-specific display names; avoid splitting null emails.
         return switch (provider) {
             case GITHUB -> {
                 String login = oauth2User.getAttribute("login");
-                yield login != null ? login : extractEmail(oauth2User, provider).split("@")[0];
+                if (login != null && !login.isBlank()) {
+                    yield login;
+                }
+                String providerId = extractProviderId(oauth2User, provider);
+                yield "github_user_" + (providerId != null ? providerId : "unknown");
             }
             case GOOGLE -> {
                 String name = oauth2User.getAttribute("name");
-                yield name != null ? name : extractEmail(oauth2User, provider).split("@")[0];
+                if (name != null && !name.isBlank()) {
+                    yield name;
+                }
+                String providerId = extractProviderId(oauth2User, provider);
+                yield "google_user_" + (providerId != null ? providerId : "unknown");
             }
             default -> throw new IllegalArgumentException("Unknown provider: " + provider);
         };

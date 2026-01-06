@@ -77,7 +77,34 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     }
 
     private String extractEmail(OAuth2User oauth2User, AuthProvider provider) {
-        return oauth2User.getAttribute("email");
+        String email = oauth2User.getAttribute("email");
+        if (email != null && !email.isBlank()) {
+            return email;
+        }
+        // Mirror fallback used in OAuth2UserService to keep flows consistent
+        String providerId = switch (provider) {
+            case GITHUB -> {
+                Object id = oauth2User.getAttribute("id");
+                yield id != null ? id.toString() : null;
+            }
+            case GOOGLE -> {
+                Object id = oauth2User.getAttribute("sub");
+                yield id != null ? id.toString() : null;
+            }
+            default -> null;
+        };
+        String candidate = switch (provider) {
+            case GITHUB -> {
+                String login = oauth2User.getAttribute("login");
+                yield login != null ? login : (providerId != null ? providerId : "unknown");
+            }
+            case GOOGLE -> {
+                String name = oauth2User.getAttribute("name");
+                yield name != null ? name : (providerId != null ? providerId : "unknown");
+            }
+            default -> "unknown";
+        };
+        return (provider.name().toLowerCase() + "_" + candidate + "@oauth.local").toLowerCase();
     }
 
     private String escapeJson(String value) {
