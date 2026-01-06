@@ -53,7 +53,8 @@ public class AuthService {
 
         // Block username/password login for accounts provisioned via OAuth providers
         if (user.getProvider() != null && user.getProvider() != AuthProvider.LOCAL) {
-            throw new IllegalArgumentException("This account uses " + user.getProvider() + " login. Use OAuth instead.");
+            throw new IllegalArgumentException(
+                "This account uses " + user.getProvider() + " login. Use OAuth instead.");
         }
 
         String storedPassword = user.getPassword();

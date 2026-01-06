@@ -1,7 +1,19 @@
 import { Loader2 } from "lucide-react";
 import { useId, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { emailValidationError, isValidEmail } from "@/utils/validation";
 import { OAuthButton } from "./OAuthButton";
+
+interface AuthInputConfig {
+	id: string;
+	label: string;
+	type: string;
+	placeholder: string;
+	value: string;
+	onChange: (value: string) => void;
+	error?: string;
+	disabled?: boolean;
+}
 
 function AuthInput({
 	id,
@@ -12,16 +24,7 @@ function AuthInput({
 	onChange,
 	error,
 	disabled,
-}: {
-	id: string;
-	label: string;
-	type: string;
-	placeholder: string;
-	value: string;
-	onChange: (value: string) => void;
-	error?: string;
-	disabled?: boolean;
-}) {
+}: AuthInputConfig) {
 	return (
 		<div className="space-y-2">
 			<label htmlFor={id} className="block text-sm font-medium text-gray-700">
@@ -93,8 +96,8 @@ export function LoginPage() {
 
 		if (!registerData.username.trim()) errors.username = "Username is required";
 		if (!registerData.email.trim()) errors.email = "Email is required";
-		else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerData.email))
-			errors.email = "Invalid email address";
+		else if (!isValidEmail(registerData.email))
+			errors.email = emailValidationError;
 		if (!registerData.password) errors.password = "Password is required";
 		else if (registerData.password.length < 6)
 			errors.password = "Password must be at least 6 characters";

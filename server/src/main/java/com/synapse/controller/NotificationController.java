@@ -31,10 +31,15 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    @Operation(summary = "Get notifications", description = "Returns paginated notifications for current user")
+    @Operation(summary = "Get notifications",
+            description = "Returns paginated notifications for current user")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Notifications retrieved successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Notifications retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated")
     })
     public ResponseEntity<ApiResponse<Page<NotificationDto>>> getNotifications(
             HttpServletRequest request,
@@ -52,10 +57,15 @@ public class NotificationController {
     }
 
     @GetMapping("/unread-count")
-    @Operation(summary = "Get unread count", description = "Returns unread notification count for current user")
+    @Operation(summary = "Get unread count",
+            description = "Returns unread notification count for current user")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Count retrieved successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Count retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated")
     })
     public ResponseEntity<ApiResponse<Long>> getUnreadCount(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
@@ -70,8 +80,12 @@ public class NotificationController {
     @PostMapping("/read/{id}")
     @Operation(summary = "Mark as read", description = "Marks a notification as read")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Marked as read successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Marked as read successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated")
     })
     public ResponseEntity<ApiResponse<Void>> markAsRead(
             HttpServletRequest request,
@@ -86,10 +100,15 @@ public class NotificationController {
     }
 
     @PostMapping("/read-all")
-    @Operation(summary = "Mark all as read", description = "Marks all notifications as read for current user")
+    @Operation(summary = "Mark all as read",
+            description = "Marks all notifications as read for current user")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "All marked as read successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "All marked as read successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated")
     })
     public ResponseEntity<ApiResponse<Void>> markAllAsRead(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");

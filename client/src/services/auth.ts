@@ -88,9 +88,13 @@ export const authService = {
 	},
 
 	generateOAuthState(): string {
-		return (
-			Math.random().toString(36).substring(2, 15) +
-			Math.random().toString(36).substring(2, 15)
-		);
+		// Use crypto.getRandomValues() for cryptographically secure random values
+		// 32 bytes = 256 bits of entropy, base64url encoded = 43 chars
+		const bytes = new Uint8Array(32);
+		self.crypto.getRandomValues(bytes);
+		return btoa(String.fromCharCode(...bytes))
+			.replace(/\+/g, "-")
+			.replace(/\//g, "_")
+			.replace(/=/g, "");
 	},
 };

@@ -172,4 +172,25 @@ describe("authService", () => {
 			expect(authService.isAuthenticated()).toBe(false);
 		});
 	});
+
+	describe("OAuth state generation", () => {
+		it("should generate unique states", () => {
+			const states = new Set<string>();
+			for (let i = 0; i < 1000; i++) {
+				states.add(authService.generateOAuthState());
+			}
+			// 1000 calls should produce 1000 unique values (cryptographically secure)
+			expect(states.size).toBe(1000);
+		});
+
+		it("should generate states with sufficient entropy (32+ chars)", () => {
+			const state = authService.generateOAuthState();
+			expect(state.length).toBeGreaterThanOrEqual(32);
+		});
+
+		it("should use URL-safe characters only", () => {
+			const state = authService.generateOAuthState();
+			expect(state).toMatch(/^[A-Za-z0-9_-]+$/);
+		});
+	});
 });

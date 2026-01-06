@@ -25,7 +25,9 @@ public class CreatePostRequest {
     @Size(max = 200, message = "Title must be at most 200 characters")
     private String title;
 
-    @Schema(description = "Post content", example = "This is my post content", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Post content",
+            example = "This is my post content",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Content is required")
     private String content;
 

@@ -25,7 +25,9 @@ public class TagController {
     @GetMapping
     @Operation(summary = "Get popular tags", description = "Returns popular tags by post count")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tags retrieved successfully")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Tags retrieved successfully")
     })
     public ResponseEntity<ApiResponse<List<TagDto>>> getTags(
             @Parameter(description = "Maximum number of tags to return") @RequestParam(defaultValue = "10") int limit) {
@@ -36,7 +38,9 @@ public class TagController {
     @GetMapping("/all")
     @Operation(summary = "Get all tags", description = "Returns all available tags")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tags retrieved successfully")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Tags retrieved successfully")
     })
     public ResponseEntity<ApiResponse<List<TagDto>>> getAllTags() {
         List<TagDto> tags = tagService.getAllTags();

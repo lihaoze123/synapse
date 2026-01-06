@@ -37,10 +37,15 @@ public class UserController {
     @GetMapping("/{id}")
     @Operation(summary = "Get user by ID", description = "Returns user profile by ID")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User retrieved successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "User retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "User not found")
     })
-    public ResponseEntity<ApiResponse<UserDto>> getUser(@Parameter(description = "User ID", required = true) @PathVariable Long id) {
+    public ResponseEntity<ApiResponse<UserDto>> getUser(
+            @Parameter(description = "User ID", required = true) @PathVariable Long id) {
         try {
             UserDto user = userService.getUser(id);
             return ResponseEntity.ok(ApiResponse.success(user));
@@ -52,10 +57,15 @@ public class UserController {
     @GetMapping("/username/{username}")
     @Operation(summary = "Get user by username", description = "Returns user profile by username")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User retrieved successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "User retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "User not found")
     })
-    public ResponseEntity<ApiResponse<UserDto>> getUserByUsername(@Parameter(description = "Username", required = true) @PathVariable String username) {
+    public ResponseEntity<ApiResponse<UserDto>> getUserByUsername(
+            @Parameter(description = "Username", required = true) @PathVariable String username) {
         try {
             UserDto user = userService.getUserByUsername(username);
             return ResponseEntity.ok(ApiResponse.success(user));
@@ -67,8 +77,12 @@ public class UserController {
     @GetMapping("/{id}/posts")
     @Operation(summary = "Get user posts", description = "Returns paginated posts by a user")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Posts retrieved successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Posts retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "User not found")
     })
     public ResponseEntity<ApiResponse<Page<PostDto>>> getUserPosts(
             @Parameter(description = "User ID", required = true) @PathVariable Long id,
@@ -87,9 +101,15 @@ public class UserController {
     @PutMapping("/profile")
     @Operation(summary = "Update profile", description = "Updates current user's profile")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile updated successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid input")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Profile updated successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "Invalid input")
     })
     public ResponseEntity<ApiResponse<UserDto>> updateProfile(
             HttpServletRequest request,

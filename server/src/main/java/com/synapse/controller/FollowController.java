@@ -105,7 +105,8 @@ public class FollowController {
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Counts retrieved successfully")
     })
-    public ResponseEntity<ApiResponse<FollowCounts>> getFollowCounts(@Parameter(description = "User ID", required = true) @PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<FollowCounts>> getFollowCounts(
+            @Parameter(description = "User ID", required = true) @PathVariable Long userId) {
         long followingCount = followService.getFollowingCount(userId);
         long followerCount = followService.getFollowerCount(userId);
         FollowCounts counts = new FollowCounts(followingCount, followerCount);
@@ -115,9 +116,15 @@ public class FollowController {
     @PostMapping("/{userId}")
     @Operation(summary = "Follow user", description = "Follows a user")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User followed successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "User followed successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "Invalid request")
     })
     public ResponseEntity<ApiResponse<FollowDto>> followUser(
             HttpServletRequest request,
@@ -138,9 +145,15 @@ public class FollowController {
     @DeleteMapping("/{userId}")
     @Operation(summary = "Unfollow user", description = "Unfollows a user")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User unfollowed successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "User unfollowed successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "Invalid request")
     })
     public ResponseEntity<ApiResponse<Void>> unfollowUser(
             HttpServletRequest request,

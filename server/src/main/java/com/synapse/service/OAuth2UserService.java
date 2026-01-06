@@ -52,38 +52,72 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user == null) {
-            // Assign a strong random password so username/password login cannot be used for OAuth accounts.
-            // We do not store or disclose the raw value; it's only to avoid empty/guessable passwords.
-            String randomPassword = generateRandomPassword();
-            user = User.builder()
-                .username(username)
-                .email(email)
-                .password(PasswordUtil.encode(randomPassword))
-                .provider(provider)
-                .providerId(providerId)
-                .avatarUrl(avatarUrl)
-                .displayName(username)
-                .build();
-            user = userRepository.save(user);
-        } else if (user.getProvider() == AuthProvider.LOCAL) {
-            user.setProvider(provider);
-            user.setProviderId(providerId);
-            if (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty()) {
-                user.setAvatarUrl(avatarUrl);
-            }
-            user = userRepository.save(user);
-        } else if (user.getProvider() != provider) {
+            return createNewOAuthUser(email, username, providerId, avatarUrl, provider);
+        }
+
+        if (user.getProvider() == AuthProvider.LOCAL) {
+            return linkProviderToUser(user, providerId, avatarUrl, provider);
+        }
+
+        if (user.getProvider() != provider) {
             throw new IllegalArgumentException(
                 "Email already registered with " + user.getProvider() + ". Please login using " + user.getProvider()
             );
         }
 
         String token = jwtUtil.generateToken(user.getId(), user.getUsername());
-
         return AuthResponse.builder()
             .token(token)
             .user(UserDto.fromEntity(user))
             .build();
+    }
+
+    private AuthResponse createNewOAuthUser(
+        String email,
+        String username,
+        String providerId,
+        String avatarUrl,
+        AuthProvider provider
+    ) {
+        String randomPassword = generateRandomPassword();
+        User user = User.builder()
+            .username(username)
+            .email(email)
+            .password(PasswordUtil.encode(randomPassword))
+            .provider(provider)
+            .providerId(providerId)
+            .avatarUrl(avatarUrl)
+            .displayName(username)
+            .build();
+        user = userRepository.save(user);
+        String token = jwtUtil.generateToken(user.getId(), user.getUsername());
+        return AuthResponse.builder()
+            .token(token)
+            .user(UserDto.fromEntity(user))
+            .build();
+    }
+
+    private AuthResponse linkProviderToUser(
+        User user,
+        String providerId,
+        String avatarUrl,
+        AuthProvider provider
+    ) {
+        user.setProvider(provider);
+        user.setProviderId(providerId);
+        if (shouldUpdateAvatar(user)) {
+            user.setAvatarUrl(avatarUrl);
+        }
+        user = userRepository.save(user);
+        String token = jwtUtil.generateToken(user.getId(), user.getUsername());
+        return AuthResponse.builder()
+            .token(token)
+            .user(UserDto.fromEntity(user))
+            .build();
+    }
+
+    private boolean shouldUpdateAvatar(User user) {
+        return user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty();
     }
 
     private String generateRandomPassword() {
@@ -94,30 +128,29 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private String extractEmail(OAuth2User oauth2User, AuthProvider provider) {
-        // Some providers (e.g., GitHub) may not return email by default.
         String email = oauth2User.getAttribute("email");
         if (email != null && !email.isBlank()) {
             return email;
         }
-        // Fallback to a synthetic, unique email to satisfy NOT NULL/UNIQUE constraints.
-        // Prefer providerId; if absent, use a UUID to avoid collisions.
         String providerId = extractProviderId(oauth2User, provider);
         if (providerId == null || providerId.isBlank()) {
-            String uuid = java.util.UUID.randomUUID().toString().replace("-", "");
-            return (provider.name().toLowerCase() + "_user_" + uuid + "@oauth.local").toLowerCase();
+            return generateFallbackEmail(provider, null);
         }
-        String candidate = switch (provider) {
-            case GITHUB -> {
-                String login = oauth2User.getAttribute("login");
-                yield login != null ? login : (providerId != null ? providerId : "unknown");
-            }
-            case GOOGLE -> {
-                String name = oauth2User.getAttribute("name");
-                yield name != null ? name : (providerId != null ? providerId : "unknown");
-            }
-            default -> "unknown";
+        String displayName = extractDisplayName(oauth2User, provider);
+        return generateFallbackEmail(provider, displayName != null ? displayName : providerId);
+    }
+
+    private String extractDisplayName(OAuth2User oauth2User, AuthProvider provider) {
+        return switch (provider) {
+            case GITHUB -> oauth2User.getAttribute("login");
+            case GOOGLE -> oauth2User.getAttribute("name");
+            default -> null;
         };
-        return (provider.name().toLowerCase() + "_" + candidate + "@oauth.local").toLowerCase();
+    }
+
+    private String generateFallbackEmail(AuthProvider provider, String identifier) {
+        String suffix = identifier != null ? identifier : java.util.UUID.randomUUID().toString().replace("-", "");
+        return (provider.name().toLowerCase() + "_" + suffix + "@oauth.local").toLowerCase();
     }
 
     private String extractProviderId(OAuth2User oauth2User, AuthProvider provider) {
@@ -130,26 +163,13 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private String extractUsername(OAuth2User oauth2User, AuthProvider provider) {
-        // Prefer provider-specific display names; avoid splitting null emails.
-        return switch (provider) {
-            case GITHUB -> {
-                String login = oauth2User.getAttribute("login");
-                if (login != null && !login.isBlank()) {
-                    yield login;
-                }
-                String providerId = extractProviderId(oauth2User, provider);
-                yield "github_user_" + (providerId != null ? providerId : "unknown");
-            }
-            case GOOGLE -> {
-                String name = oauth2User.getAttribute("name");
-                if (name != null && !name.isBlank()) {
-                    yield name;
-                }
-                String providerId = extractProviderId(oauth2User, provider);
-                yield "google_user_" + (providerId != null ? providerId : "unknown");
-            }
-            default -> throw new IllegalArgumentException("Unknown provider: " + provider);
-        };
+        String displayName = extractDisplayName(oauth2User, provider);
+        if (displayName != null && !displayName.isBlank()) {
+            return displayName;
+        }
+        String providerId = extractProviderId(oauth2User, provider);
+        String fallbackId = providerId != null ? providerId : "unknown";
+        return provider.name().toLowerCase() + "_user_" + fallbackId;
     }
 
     private String extractAvatarUrl(OAuth2User oauth2User, AuthProvider provider) {

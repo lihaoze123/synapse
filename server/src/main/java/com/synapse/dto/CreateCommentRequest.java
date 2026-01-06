@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Request to create a new comment")
 public class CreateCommentRequest {
 
-    @Schema(description = "Comment content (1-2000 characters)", example = "Great post!", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Comment content (1-2000 characters)",
+            example = "Great post!", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Comment content is required")
     @Size(min = 1, max = 2000, message = "Comment content must be between 1 and 2000 characters")
     private String content;
