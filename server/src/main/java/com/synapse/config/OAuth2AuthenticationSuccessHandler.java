@@ -14,6 +14,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -29,6 +31,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     @Value("${app.oauth2.redirect-uri:/oauth/callback}")
     private String redirectUri;
+
+    @Value("${jwt.expiration:86400000}") // default 24h if not configured
+    private long jwtExpirationMs;
 
     @Override
     public void onAuthenticationSuccess(
@@ -60,15 +65,21 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return;
         }
 
-        // Build AuthResponse and hand it off with a one-time code to avoid exposing JWT in URL
-        AuthResponse payload = AuthResponse.builder()
-            .token(jwtUtil.generateToken(user.getId(), user.getUsername()))
-            .user(UserDto.fromEntity(user))
+        // Generate JWT and send via secure, HttpOnly cookie to avoid leaking it to frontend JS or URLs
+        String jwt = jwtUtil.generateToken(user.getId(), user.getUsername());
+        boolean secure = request.isSecure();
+        ResponseCookie cookie = ResponseCookie.from("access_token", jwt)
+            .httpOnly(true)
+            .secure(secure)
+            .sameSite("Lax")
+            .path("/")
+            .maxAge(Math.max(1, jwtExpirationMs / 1000)) // seconds
             .build();
-        String code = codeService.issueCode(payload);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        String targetUrl = redirectUri + "?code=" + URLEncoder.encode(code, StandardCharsets.UTF_8)
-            + (stateFromRequest != null ? "&state=" + URLEncoder.encode(stateFromRequest, StandardCharsets.UTF_8) : "");
+        // Redirect without placing any sensitive data in the URL. Keep `state` for client-side continuity.
+        String targetUrl = redirectUri
+            + (stateFromRequest != null ? "?state=" + URLEncoder.encode(stateFromRequest, StandardCharsets.UTF_8) : "");
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 

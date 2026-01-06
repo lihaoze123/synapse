@@ -27,6 +27,10 @@ describe("useAuth hook", () => {
 		vi.clearAllMocks();
 		localStorage.clear();
 		mockNavigate.mockReset();
+		// Default: unauthenticated fetch to /auth/me fails when no token/cookie
+		mockAuthService.fetchCurrentUser.mockRejectedValue(
+			new Error("Unauthorized"),
+		);
 	});
 
 	const wrapper = ({ children }: { children: React.ReactNode }) => (

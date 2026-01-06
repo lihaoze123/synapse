@@ -38,26 +38,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+        String token = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-
-            if (jwtUtil.validateToken(token)) {
-                Long userId = jwtUtil.getUserIdFromToken(token);
-                String username = jwtUtil.getUsernameFromToken(token);
-                request.setAttribute("userId", userId);
-                request.setAttribute("username", username);
-                // Populate SecurityContext so downstream `authenticated()` rules work.
-                if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            // If roles are not encoded in JWT, use empty authorities.
-                            Collections.emptyList()
-                        );
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+            token = authHeader.substring(7);
+        } else {
+            // Also support JWT delivered via secure HttpOnly cookie to avoid exposing tokens to JS.
+            // Cookie name: access_token
+            if (request.getCookies() != null) {
+                for (var cookie : request.getCookies()) {
+                    if ("access_token".equals(cookie.getName())) {
+                        token = cookie.getValue();
+                        break;
+                    }
                 }
+            }
+        }
+
+        if (token != null && jwtUtil.validateToken(token)) {
+            Long userId = jwtUtil.getUserIdFromToken(token);
+            String username = jwtUtil.getUsernameFromToken(token);
+            request.setAttribute("userId", userId);
+            request.setAttribute("username", username);
+            // Populate SecurityContext so downstream `authenticated()` rules work.
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                        username,
+                        null,
+                        // If roles are not encoded in JWT, use empty authorities.
+                        Collections.emptyList()
+                    );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
 

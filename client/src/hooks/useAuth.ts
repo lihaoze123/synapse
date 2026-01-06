@@ -12,10 +12,6 @@ export function useAuth() {
 	const { data: validatedUser, isLoading: isValidating } = useQuery({
 		queryKey: ["auth", "validate"],
 		queryFn: async () => {
-			const token = authService.getToken();
-			if (!token) {
-				return null;
-			}
 			try {
 				return await authService.fetchCurrentUser();
 			} catch {

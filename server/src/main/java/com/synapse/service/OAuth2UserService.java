@@ -6,6 +6,7 @@ import com.synapse.entity.AuthProvider;
 import com.synapse.entity.User;
 import com.synapse.repository.UserRepository;
 import com.synapse.util.JwtUtil;
+import com.synapse.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -19,6 +20,8 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    // Secure random for generating non-guessable placeholder passwords for OAuth-provisioned users
+    private static final java.security.SecureRandom SECURE_RANDOM = new java.security.SecureRandom();
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -49,10 +52,13 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user == null) {
+            // Assign a strong random password so username/password login cannot be used for OAuth accounts.
+            // We do not store or disclose the raw value; it's only to avoid empty/guessable passwords.
+            String randomPassword = generateRandomPassword();
             user = User.builder()
                 .username(username)
                 .email(email)
-                .password("")
+                .password(PasswordUtil.encode(randomPassword))
                 .provider(provider)
                 .providerId(providerId)
                 .avatarUrl(avatarUrl)
@@ -78,6 +84,13 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             .token(token)
             .user(UserDto.fromEntity(user))
             .build();
+    }
+
+    private String generateRandomPassword() {
+        // 32 bytes => 256-bit random, Base64-url without padding to keep it cookie/URL safe if ever logged
+        byte[] bytes = new byte[32];
+        SECURE_RANDOM.nextBytes(bytes);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
     private String extractEmail(OAuth2User oauth2User, AuthProvider provider) {

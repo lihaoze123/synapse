@@ -37,36 +37,41 @@ function OAuthCallbackPage() {
 		// State is single-use
 		localStorage.removeItem("oauth_state");
 
-		if (!code) {
-			setStatus("error");
-			setErrorMessage("Missing authentication code");
-			return;
-		}
-
-		// Exchange one-time code for JWT + user via API (JSON, not URL params)
 		(async () => {
 			try {
-				const res = await fetch("/api/auth/oauth2/exchange", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ code }),
-				});
-				if (!res.ok) {
-					throw new Error("Code exchange failed");
+				if (code) {
+					// Legacy path: exchange server-issued code for token + user
+					const res = await fetch("/api/auth/oauth2/exchange", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ code }),
+					});
+					if (!res.ok) throw new Error("Code exchange failed");
+					const payload = await res.json();
+					if (!payload?.success || !payload?.data) {
+						throw new Error(payload?.message || "Code exchange failed");
+					}
+					const { token, user } = payload.data;
+					localStorage.setItem("token", token);
+					localStorage.setItem("user", JSON.stringify(user));
+				} else {
+					// Cookie-based path: JWT delivered via HttpOnly cookie; just fetch current user
+					const res = await fetch("/api/auth/me", {
+						credentials: "same-origin",
+					});
+					if (!res.ok) throw new Error("Failed to finalize login");
+					const payload = await res.json();
+					if (!payload?.success || !payload?.data) {
+						throw new Error(payload?.message || "Failed to finalize login");
+					}
+					localStorage.setItem("user", JSON.stringify(payload.data));
 				}
-				const payload = await res.json();
-				if (!payload?.success || !payload?.data) {
-					throw new Error(payload?.message || "Code exchange failed");
-				}
-				const { token, user } = payload.data;
-				localStorage.setItem("token", token);
-				localStorage.setItem("user", JSON.stringify(user));
 				setStatus("success");
 				queryClient.invalidateQueries({ queryKey: ["auth"] });
 				queryClient.invalidateQueries({ queryKey: ["user"] });
 				setTimeout(() => {
 					navigate({ to: "/", replace: true });
-				}, 1200);
+				}, 800);
 			} catch (e: unknown) {
 				const message =
 					e && typeof e === "object" && "message" in e
