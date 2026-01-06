@@ -81,13 +81,11 @@ function LoginPage() {
 cd server
 ./mvnw test -Dtest=OAuth2UserServiceTest
 ./mvnw test -Dtest=SecurityConfigTest
-./mvnw test -Dtest=OAuth2ControllerTest
 ```
 
 ### Frontend Tests
 ```bash
 cd client
-bun run test auth.oauth.test.ts
 bun run test useAuth.test.tsx
 bun run test OAuthButton.test.tsx
 bun run test LoginForm.test.tsx
