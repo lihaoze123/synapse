@@ -1,6 +1,7 @@
 package com.synapse.service;
 
 import com.synapse.dto.AuthResponse;
+import com.synapse.dto.OAuth2UserProfile;
 import com.synapse.dto.UserDto;
 import com.synapse.entity.AuthProvider;
 import com.synapse.entity.User;
@@ -44,19 +45,15 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     public AuthResponse processOAuth2User(OAuth2User oauth2User, AuthProvider provider) {
-        String email = extractEmail(oauth2User, provider);
-        String providerId = extractProviderId(oauth2User, provider);
-        String username = extractUsername(oauth2User, provider);
-        String avatarUrl = extractAvatarUrl(oauth2User, provider);
-
-        User user = userRepository.findByEmail(email).orElse(null);
+        OAuth2UserProfile profile = extractUserProfile(oauth2User, provider);
+        User user = userRepository.findByEmail(profile.email()).orElse(null);
 
         if (user == null) {
-            return createNewOAuthUser(email, username, providerId, avatarUrl, provider);
+            return createNewOAuthUser(profile);
         }
 
         if (user.getProvider() == AuthProvider.LOCAL) {
-            return linkProviderToUser(user, providerId, avatarUrl, provider);
+            return linkProviderToUser(user, profile);
         }
 
         if (user.getProvider() != provider) {
@@ -72,22 +69,26 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             .build();
     }
 
-    private AuthResponse createNewOAuthUser(
-        String email,
-        String username,
-        String providerId,
-        String avatarUrl,
-        AuthProvider provider
-    ) {
+    private OAuth2UserProfile extractUserProfile(OAuth2User oauth2User, AuthProvider provider) {
+        return new OAuth2UserProfile(
+            extractEmail(oauth2User, provider),
+            extractUsername(oauth2User, provider),
+            extractProviderId(oauth2User, provider),
+            extractAvatarUrl(oauth2User, provider),
+            provider
+        );
+    }
+
+    private AuthResponse createNewOAuthUser(OAuth2UserProfile profile) {
         String randomPassword = generateRandomPassword();
         User user = User.builder()
-            .username(username)
-            .email(email)
+            .username(profile.username())
+            .email(profile.email())
             .password(PasswordUtil.encode(randomPassword))
-            .provider(provider)
-            .providerId(providerId)
-            .avatarUrl(avatarUrl)
-            .displayName(username)
+            .provider(profile.provider())
+            .providerId(profile.providerId())
+            .avatarUrl(profile.avatarUrl())
+            .displayName(profile.username())
             .build();
         user = userRepository.save(user);
         String token = jwtUtil.generateToken(user.getId(), user.getUsername());
@@ -97,16 +98,11 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             .build();
     }
 
-    private AuthResponse linkProviderToUser(
-        User user,
-        String providerId,
-        String avatarUrl,
-        AuthProvider provider
-    ) {
-        user.setProvider(provider);
-        user.setProviderId(providerId);
+    private AuthResponse linkProviderToUser(User user, OAuth2UserProfile profile) {
+        user.setProvider(profile.provider());
+        user.setProviderId(profile.providerId());
         if (shouldUpdateAvatar(user)) {
-            user.setAvatarUrl(avatarUrl);
+            user.setAvatarUrl(profile.avatarUrl());
         }
         user = userRepository.save(user);
         String token = jwtUtil.generateToken(user.getId(), user.getUsername());
