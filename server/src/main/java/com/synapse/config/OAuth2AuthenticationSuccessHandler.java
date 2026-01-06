@@ -4,6 +4,9 @@ import com.synapse.entity.AuthProvider;
 import com.synapse.entity.User;
 import com.synapse.repository.UserRepository;
 import com.synapse.util.JwtUtil;
+import com.synapse.dto.AuthResponse;
+import com.synapse.dto.UserDto;
+import com.synapse.service.OAuth2CodeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -22,6 +25,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final OAuth2CodeService codeService;
 
     @Value("${app.oauth2.redirect-uri:/oauth/callback}")
     private String redirectUri;
@@ -31,6 +35,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException {
+
+        // Validate client-provided state to mitigate CSRF/login CSRF
+        String stateFromRequest = request.getParameter("state");
+        String stateFromCookie = getCookieValue(request, "oauth_state");
+        if (stateFromCookie == null || !stateFromCookie.equals(stateFromRequest)) {
+            response.sendRedirect(redirectUri + "?error=" +
+                URLEncoder.encode("Invalid OAuth state", StandardCharsets.UTF_8));
+            return;
+        }
+        // Clear the cookie after validation
+        clearCookie(response, "oauth_state");
 
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         String registrationId = determineRegistrationId(request);
@@ -45,17 +60,35 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return;
         }
 
-        String token = jwtUtil.generateToken(user.getId(), user.getUsername());
-        String userJson = URLEncoder.encode(
-            String.format("{\"id\":%d,\"username\":\"%s\",\"displayName\":\"%s\",\"avatarUrl\":\"%s\"}",
-                user.getId(),
-                escapeJson(user.getUsername()),
-                escapeJson(user.getDisplayName() != null ? user.getDisplayName() : user.getUsername()),
-                escapeJson(user.getAvatarUrl() != null ? user.getAvatarUrl() : "")),
-            StandardCharsets.UTF_8);
+        // Build AuthResponse and hand it off with a one-time code to avoid exposing JWT in URL
+        AuthResponse payload = AuthResponse.builder()
+            .token(jwtUtil.generateToken(user.getId(), user.getUsername()))
+            .user(UserDto.fromEntity(user))
+            .build();
+        String code = codeService.issueCode(payload);
 
-        String targetUrl = redirectUri + "?token=" + token + "&user=" + userJson;
+        String targetUrl = redirectUri + "?code=" + URLEncoder.encode(code, StandardCharsets.UTF_8)
+            + (stateFromRequest != null ? "&state=" + URLEncoder.encode(stateFromRequest, StandardCharsets.UTF_8) : "");
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    private String getCookieValue(HttpServletRequest request, String name) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+        for (var cookie : request.getCookies()) {
+            if (cookie.getName().equals(name)) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private void clearCookie(HttpServletResponse response, String name) {
+        var cookie = new jakarta.servlet.http.Cookie(name, "");
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
     }
 
     private String determineRegistrationId(HttpServletRequest request) {

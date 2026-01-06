@@ -10,7 +10,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @ActiveProfiles("dev")
 @Import(TestMinioConfig.class)
 @DisplayName("WebSocket Integration Tests")
-@Disabled("Flaky integration test - timing dependent, unrelated to OAuth2 feature")
 class WebSocketIntegrationTest {
 
     @LocalServerPort
@@ -74,7 +72,7 @@ class WebSocketIntegrationTest {
 
         CompletableFuture<WebSocketSession> future = webSocketClient.execute(handler, null, URI.create(url));
 
-        boolean connectedSuccessfully = connectionLatch.await(5, TimeUnit.SECONDS);
+        boolean connectedSuccessfully = connectionLatch.await(10, TimeUnit.SECONDS);
 
         assertTrue(connectedSuccessfully, "Connection should complete within timeout");
         assertTrue(connected.get(), "WebSocket connection should succeed with valid token");
@@ -110,7 +108,7 @@ class WebSocketIntegrationTest {
             return null;
         });
 
-        boolean failureDetected = failureLatch.await(5, TimeUnit.SECONDS);
+        boolean failureDetected = failureLatch.await(10, TimeUnit.SECONDS);
 
         assertTrue(failureDetected, "Connection failure should be detected within timeout");
         assertTrue(connectionFailed.get(), "WebSocket connection should fail with invalid token");

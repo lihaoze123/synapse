@@ -11,6 +11,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 
 @Configuration
 @EnableWebSecurity
@@ -20,6 +22,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -29,13 +32,33 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-                // All requests are permitted - we use JWT for API auth
+                // Public endpoints
+                .requestMatchers(
+                    "/",
+                    "/index.html",
+                    "/assets/**",
+                    "/uploads/**",
+                    "/api/uploads/**",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/api/auth/login",
+                    "/api/auth/register",
+                    "/api/auth/oauth2/**",
+                    "/oauth2/**",
+                    "/login/oauth2/**",
+                    "/api/ws/notifications**"
+                ).permitAll()
+                // Everything else under /api requires authentication
+                .requestMatchers("/api/**").authenticated()
+                // Allow the SPA and other resources
                 .anyRequest().permitAll()
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/api/oauth2/login-redirect")
                 .authorizationEndpoint(auth -> auth
                     .baseUri("/oauth2/authorization")
+                    // Use a resolver that honors the client-provided `state` for CSRF protection
+                    .authorizationRequestResolver(oAuth2AuthorizationRequestResolver())
                 )
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(oAuth2UserService)
@@ -47,6 +70,12 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver() {
+        // Delegate to Spring's default resolver and override the `state` if the client supplied one.
+        return new StatePropagatingAuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
     }
 
     @Bean

@@ -86,9 +86,13 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         if (email != null && !email.isBlank()) {
             return email;
         }
-        // Fallback to a synthetic, stable email to satisfy NOT NULL/UNIQUE constraints.
-        // Use provider + providerId (or login/name) to ensure uniqueness.
+        // Fallback to a synthetic, unique email to satisfy NOT NULL/UNIQUE constraints.
+        // Prefer providerId; if absent, use a UUID to avoid collisions.
         String providerId = extractProviderId(oauth2User, provider);
+        if (providerId == null || providerId.isBlank()) {
+            String uuid = java.util.UUID.randomUUID().toString().replace("-", "");
+            return (provider.name().toLowerCase() + "_user_" + uuid + "@oauth.local").toLowerCase();
+        }
         String candidate = switch (provider) {
             case GITHUB -> {
                 String login = oauth2User.getAttribute("login");

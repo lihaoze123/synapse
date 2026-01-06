@@ -9,6 +9,9 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
@@ -44,6 +47,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String username = jwtUtil.getUsernameFromToken(token);
                 request.setAttribute("userId", userId);
                 request.setAttribute("username", username);
+                // Populate SecurityContext so downstream `authenticated()` rules work.
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            // If roles are not encoded in JWT, use empty authorities.
+                            Collections.emptyList()
+                        );
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         }
 

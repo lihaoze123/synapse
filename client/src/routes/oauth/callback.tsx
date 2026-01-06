@@ -17,8 +17,8 @@ function OAuthCallbackPage() {
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
-		const token = params.get("token");
-		const userParam = params.get("user");
+		const code = params.get("code");
+		const state = params.get("state");
 		const error = params.get("error");
 
 		if (error) {
@@ -27,27 +27,55 @@ function OAuthCallbackPage() {
 			return;
 		}
 
-		if (token && userParam) {
+		// Validate state to mitigate CSRF
+		const expectedState = localStorage.getItem("oauth_state");
+		if (!state || !expectedState || state !== expectedState) {
+			setStatus("error");
+			setErrorMessage("Invalid or missing OAuth state");
+			return;
+		}
+		// State is single-use
+		localStorage.removeItem("oauth_state");
+
+		if (!code) {
+			setStatus("error");
+			setErrorMessage("Missing authentication code");
+			return;
+		}
+
+		// Exchange one-time code for JWT + user via API (JSON, not URL params)
+		(async () => {
 			try {
-				const user = JSON.parse(decodeURIComponent(userParam));
+				const res = await fetch("/api/auth/oauth2/exchange", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ code }),
+				});
+				if (!res.ok) {
+					throw new Error("Code exchange failed");
+				}
+				const payload = await res.json();
+				if (!payload?.success || !payload?.data) {
+					throw new Error(payload?.message || "Code exchange failed");
+				}
+				const { token, user } = payload.data;
 				localStorage.setItem("token", token);
 				localStorage.setItem("user", JSON.stringify(user));
 				setStatus("success");
-
 				queryClient.invalidateQueries({ queryKey: ["auth"] });
 				queryClient.invalidateQueries({ queryKey: ["user"] });
-
 				setTimeout(() => {
 					navigate({ to: "/", replace: true });
-				}, 1500);
-			} catch {
+				}, 1200);
+			} catch (e: unknown) {
+				const message =
+					e && typeof e === "object" && "message" in e
+						? String((e as { message?: unknown }).message)
+						: "Authentication failed";
 				setStatus("error");
-				setErrorMessage("Failed to parse authentication response");
+				setErrorMessage(message);
 			}
-		} else {
-			setStatus("error");
-			setErrorMessage("Missing authentication data");
-		}
+		})();
 	}, [navigate, queryClient]);
 
 	const statusConfig = {

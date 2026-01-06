@@ -9,13 +9,13 @@ describe("authService - OAuth", () => {
 	});
 
 	it("should return GitHub OAuth authorization URL", () => {
-		const url = authService.getOAuthAuthorizationUrl("github");
-		expect(url).toBe("/oauth2/authorization/github");
+		const url = authService.getOAuthAuthorizationUrl("github", "STATE");
+		expect(url).toBe("/oauth2/authorization/github?state=STATE");
 	});
 
 	it("should return Google OAuth authorization URL", () => {
-		const url = authService.getOAuthAuthorizationUrl("google");
-		expect(url).toBe("/oauth2/authorization/google");
+		const url = authService.getOAuthAuthorizationUrl("google", "ABC");
+		expect(url).toBe("/oauth2/authorization/google?state=ABC");
 	});
 
 	it("should store OAuth state before redirect", () => {

@@ -67,17 +67,52 @@ export function useAuth() {
 		navigate({ to: "/login", replace: true });
 	}, [queryClient, navigate]);
 
+	const setOAuthStateCookie = useCallback((state: string) => {
+		// Prefer Cookie Store API if available to avoid direct document.cookie assignment.
+		type CookieStoreType = {
+			set: (init: {
+				name: string;
+				value: string;
+				expires: number;
+				path?: string;
+			}) => Promise<void>;
+		};
+		const nav = navigator as unknown as { cookieStore?: CookieStoreType };
+		if (nav.cookieStore && typeof nav.cookieStore.set === "function") {
+			// fire-and-forget
+			void nav.cookieStore.set({
+				name: "oauth_state",
+				value: state,
+				expires: Date.now() + 300 * 1000,
+				path: "/",
+			});
+		} else {
+			// Fall back to document.cookie for broad compatibility.
+			// biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
+			document.cookie = `oauth_state=${state}; path=/; max-age=300; samesite=Lax`;
+		}
+	}, []);
+
 	const loginWithGitHub = useCallback(() => {
 		const state = authService.generateOAuthState();
 		authService.saveOAuthState(state);
-		window.location.href = authService.getOAuthAuthorizationUrl("github");
-	}, []);
+		// Also persist state in a short-lived cookie so backend can validate it
+		setOAuthStateCookie(state);
+		window.location.href = authService.getOAuthAuthorizationUrl(
+			"github",
+			state,
+		);
+	}, [setOAuthStateCookie]);
 
 	const loginWithGoogle = useCallback(() => {
 		const state = authService.generateOAuthState();
 		authService.saveOAuthState(state);
-		window.location.href = authService.getOAuthAuthorizationUrl("google");
-	}, []);
+		setOAuthStateCookie(state);
+		window.location.href = authService.getOAuthAuthorizationUrl(
+			"google",
+			state,
+		);
+	}, [setOAuthStateCookie]);
 
 	return {
 		user,

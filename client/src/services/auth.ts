@@ -74,8 +74,13 @@ export const authService = {
 		return !!this.getToken();
 	},
 
-	getOAuthAuthorizationUrl(provider: "github" | "google"): string {
-		return `/oauth2/authorization/${provider}`;
+	getOAuthAuthorizationUrl(
+		provider: "github" | "google",
+		state: string,
+	): string {
+		// Forward client-generated state to the backend resolver; Spring will include it in the provider request.
+		const encoded = encodeURIComponent(state);
+		return `/oauth2/authorization/${provider}?state=${encoded}`;
 	},
 
 	saveOAuthState(state: string): void {
