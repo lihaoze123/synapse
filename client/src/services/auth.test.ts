@@ -58,6 +58,7 @@ describe("authService", () => {
 
 			const result = await authService.register({
 				username: "newuser",
+				email: "newuser@test.com",
 				password: "pass",
 			});
 
@@ -80,12 +81,14 @@ describe("authService", () => {
 
 			await authService.register({
 				username: "user",
+				email: "user@test.com",
 				password: "pass",
 				avatarUrl: "avatar.png",
 			});
 
 			expect(mockApi.post).toHaveBeenCalledWith("/auth/register", {
 				username: "user",
+				email: "user@test.com",
 				password: "pass",
 				avatarUrl: "avatar.png",
 			});

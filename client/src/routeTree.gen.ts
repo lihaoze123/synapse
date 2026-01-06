@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsersUserIdRouteImport } from './routes/users/$userId'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as PostsIdRouteImport } from './routes/posts/$id'
+import { Route as OauthCallbackRouteImport } from './routes/oauth/callback'
 import { Route as UsersUserIdIndexRouteImport } from './routes/users/$userId.index'
 import { Route as UsersUserIdFollowingRouteImport } from './routes/users/$userId.following'
 import { Route as UsersUserIdFollowersRouteImport } from './routes/users/$userId.followers'
@@ -73,6 +74,11 @@ const PostsIdRoute = PostsIdRouteImport.update({
   path: '/posts/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OauthCallbackRoute = OauthCallbackRouteImport.update({
+  id: '/oauth/callback',
+  path: '/oauth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UsersUserIdIndexRoute = UsersUserIdIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/oauth/callback': typeof OauthCallbackRoute
   '/posts/$id': typeof PostsIdRoute
   '/u/$username': typeof UUsernameRoute
   '/users/$userId': typeof UsersUserIdRouteWithChildren
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/oauth/callback': typeof OauthCallbackRoute
   '/posts/$id': typeof PostsIdRoute
   '/u/$username': typeof UUsernameRoute
   '/users/$userId/followers': typeof UsersUserIdFollowersRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/oauth/callback': typeof OauthCallbackRoute
   '/posts/$id': typeof PostsIdRoute
   '/u/$username': typeof UUsernameRoute
   '/users/$userId': typeof UsersUserIdRouteWithChildren
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/search'
     | '/settings'
+    | '/oauth/callback'
     | '/posts/$id'
     | '/u/$username'
     | '/users/$userId'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/search'
     | '/settings'
+    | '/oauth/callback'
     | '/posts/$id'
     | '/u/$username'
     | '/users/$userId/followers'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/search'
     | '/settings'
+    | '/oauth/callback'
     | '/posts/$id'
     | '/u/$username'
     | '/users/$userId'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
+  OauthCallbackRoute: typeof OauthCallbackRoute
   PostsIdRoute: typeof PostsIdRoute
   UUsernameRoute: typeof UUsernameRoute
   UsersUserIdRoute: typeof UsersUserIdRouteWithChildren
@@ -266,6 +279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/oauth/callback': {
+      id: '/oauth/callback'
+      path: '/oauth/callback'
+      fullPath: '/oauth/callback'
+      preLoaderRoute: typeof OauthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/users/$userId/': {
       id: '/users/$userId/'
       path: '/'
@@ -314,6 +334,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
+  OauthCallbackRoute: OauthCallbackRoute,
   PostsIdRoute: PostsIdRoute,
   UUsernameRoute: UUsernameRoute,
   UsersUserIdRoute: UsersUserIdRouteWithChildren,

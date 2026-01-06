@@ -1,0 +1,93 @@
+package com.synapse.config;
+
+import com.synapse.entity.AuthProvider;
+import com.synapse.entity.User;
+import com.synapse.repository.UserRepository;
+import com.synapse.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
+
+    @Value("${app.oauth2.redirect-uri:/oauth/callback}")
+    private String redirectUri;
+
+    @Override
+    public void onAuthenticationSuccess(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication) throws IOException {
+
+        OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+        String registrationId = determineRegistrationId(request);
+        AuthProvider provider = determineProvider(registrationId);
+
+        String email = extractEmail(oauth2User, provider);
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null) {
+            response.sendRedirect(redirectUri + "?error=" +
+                URLEncoder.encode("User not found", StandardCharsets.UTF_8));
+            return;
+        }
+
+        String token = jwtUtil.generateToken(user.getId(), user.getUsername());
+        String userJson = URLEncoder.encode(
+            String.format("{\"id\":%d,\"username\":\"%s\",\"displayName\":\"%s\",\"avatarUrl\":\"%s\"}",
+                user.getId(),
+                escapeJson(user.getUsername()),
+                escapeJson(user.getDisplayName() != null ? user.getDisplayName() : user.getUsername()),
+                escapeJson(user.getAvatarUrl() != null ? user.getAvatarUrl() : "")),
+            StandardCharsets.UTF_8);
+
+        String targetUrl = redirectUri + "?token=" + token + "&user=" + userJson;
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    private String determineRegistrationId(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        if (requestUri.contains("github")) {
+            return "github";
+        } else if (requestUri.contains("google")) {
+            return "google";
+        }
+        return "unknown";
+    }
+
+    private AuthProvider determineProvider(String registrationId) {
+        return switch (registrationId.toLowerCase()) {
+            case "github" -> AuthProvider.GITHUB;
+            case "google" -> AuthProvider.GOOGLE;
+            default -> AuthProvider.LOCAL;
+        };
+    }
+
+    private String extractEmail(OAuth2User oauth2User, AuthProvider provider) {
+        return oauth2User.getAttribute("email");
+    }
+
+    private String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("\\", "\\\\")
+                   .replace("\"", "\\\"")
+                   .replace("\n", "\\n")
+                   .replace("\r", "\\r")
+                   .replace("\t", "\\t");
+    }
+}

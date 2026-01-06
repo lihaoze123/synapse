@@ -164,10 +164,14 @@ describe("useAuth hook", () => {
 
 			const { result } = renderHook(() => useAuth(), { wrapper });
 
-			await result.current.register({ username: "newuser", password: "pass" });
+			await result.current.register({
+				username: "newuser",
+				email: "newuser@test.com",
+				password: "pass",
+			});
 
 			expect(mockAuthService.register).toHaveBeenCalledWith(
-				{ username: "newuser", password: "pass" },
+				{ username: "newuser", email: "newuser@test.com", password: "pass" },
 				expect.any(Object),
 			);
 		});
@@ -180,7 +184,11 @@ describe("useAuth hook", () => {
 			const { result } = renderHook(() => useAuth(), { wrapper });
 
 			await expect(
-				result.current.register({ username: "existing", password: "pass" }),
+				result.current.register({
+					username: "existing",
+					email: "existing@test.com",
+					password: "pass",
+				}),
 			).rejects.toThrow("Username taken");
 
 			expect(result.current.registerError).toBeDefined();
@@ -203,6 +211,7 @@ describe("useAuth hook", () => {
 
 			result.current.register({
 				username: "newuser",
+				email: "newuser@test.com",
 				password: "pass",
 			});
 
