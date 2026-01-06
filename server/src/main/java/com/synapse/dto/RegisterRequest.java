@@ -38,6 +38,7 @@ public class RegisterRequest {
     // Backward-compatible constructor used by older tests:
     // (username, password, avatarUrl). Email should be provided via the API path;
     // tests bypass validation so this is safe.
+    @Deprecated // Do not use in new code; email is now required.
     public RegisterRequest(String username, String password, String avatarUrl) {
         this.username = username;
         this.password = password;

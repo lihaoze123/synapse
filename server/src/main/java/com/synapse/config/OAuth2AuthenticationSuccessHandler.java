@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -38,7 +39,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String stateFromRequest = request.getParameter("state");
         String stateFromCookie = getCookieValue(request, "oauth_state");
-        if (stateFromCookie == null || !stateFromCookie.equals(stateFromRequest)) {
+        if (stateFromCookie == null || !constantTimeEquals(stateFromCookie, stateFromRequest)) {
             response.sendRedirect(redirectUri + "?error=" +
                 URLEncoder.encode("Invalid OAuth state", StandardCharsets.UTF_8));
             return;
@@ -61,7 +62,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return;
         }
 
-        boolean secure = request.isSecure();
+        boolean secure = isSecure(request);
         ResponseCookie cookie = ResponseCookie.from("access_token", authResponse.getToken())
             .httpOnly(true)
             .secure(secure)
@@ -74,6 +75,25 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String targetUrl = redirectUri
             + (stateFromRequest != null ? "?state=" + URLEncoder.encode(stateFromRequest, StandardCharsets.UTF_8) : "");
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    private boolean isSecure(HttpServletRequest request) {
+        boolean forwardedHttps = "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
+        String fwd = request.getHeader("Forwarded");
+        boolean forwardedHeaderHttps = fwd != null && fwd.toLowerCase().contains("proto=https");
+        return request.isSecure() || forwardedHttps || forwardedHeaderHttps;
+    }
+
+    private boolean constantTimeEquals(String a, String b) {
+        if (a == null || b == null) {
+            return a == b;
+        }
+        if (a.length() != b.length()) {
+            return false;
+        }
+        byte[] aBytes = a.getBytes(StandardCharsets.UTF_8);
+        byte[] bBytes = b.getBytes(StandardCharsets.UTF_8);
+        return MessageDigest.isEqual(aBytes, bBytes);
     }
 
     private String getCookieValue(HttpServletRequest request, String name) {

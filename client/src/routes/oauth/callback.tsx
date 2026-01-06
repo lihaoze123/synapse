@@ -26,17 +26,14 @@ function OAuthCallbackPage() {
 			return;
 		}
 
-		// Validate state to mitigate CSRF
 		const expectedState = localStorage.getItem("oauth_state");
 		if (!state || !expectedState || state !== expectedState) {
 			setStatus("error");
 			setErrorMessage("Invalid or missing OAuth state");
 			return;
 		}
-		// State is single-use
 		localStorage.removeItem("oauth_state");
 
-		// JWT is delivered via HttpOnly cookie; fetch current user to complete login
 		(async () => {
 			try {
 				const res = await fetch("/api/auth/me", {
@@ -87,19 +84,15 @@ function OAuthCallbackPage() {
 
 	return (
 		<div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 px-4">
-			{/* Content Card */}
 			<div className="w-full max-w-sm">
 				<div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-xl text-center">
-					{/* Icon */}
 					<div className="mb-6 flex justify-center">{config.icon}</div>
 
-					{/* Status text */}
 					<h1 className="text-xl font-semibold text-gray-900 mb-2">
 						{config.title}
 					</h1>
 					<p className="text-gray-500 text-sm">{config.subtitle}</p>
 
-					{/* Error action */}
 					{status === "error" && (
 						<button
 							type="button"
@@ -110,7 +103,6 @@ function OAuthCallbackPage() {
 						</button>
 					)}
 
-					{/* Progress indicator for loading/success */}
 					{status !== "error" && (
 						<div className="mt-6 w-full h-1 bg-gray-200 rounded-full overflow-hidden">
 							<div

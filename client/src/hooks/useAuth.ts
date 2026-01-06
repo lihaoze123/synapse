@@ -64,7 +64,6 @@ export function useAuth() {
 	}, [queryClient, navigate]);
 
 	const setOAuthStateCookie = useCallback((state: string) => {
-		// Prefer Cookie Store API if available to avoid direct document.cookie assignment.
 		type CookieStoreType = {
 			set: (init: {
 				name: string;
@@ -75,7 +74,6 @@ export function useAuth() {
 		};
 		const nav = navigator as unknown as { cookieStore?: CookieStoreType };
 		if (nav.cookieStore && typeof nav.cookieStore.set === "function") {
-			// fire-and-forget
 			void nav.cookieStore.set({
 				name: "oauth_state",
 				value: state,
@@ -83,7 +81,6 @@ export function useAuth() {
 				path: "/",
 			});
 		} else {
-			// Fall back to document.cookie for broad compatibility.
 			// biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
 			document.cookie = `oauth_state=${state}; path=/; max-age=300; samesite=Lax`;
 		}
@@ -92,7 +89,6 @@ export function useAuth() {
 	const loginWithGitHub = useCallback(() => {
 		const state = authService.generateOAuthState();
 		authService.saveOAuthState(state);
-		// Also persist state in a short-lived cookie so backend can validate it
 		setOAuthStateCookie(state);
 		window.location.href = authService.getOAuthAuthorizationUrl(
 			"github",
