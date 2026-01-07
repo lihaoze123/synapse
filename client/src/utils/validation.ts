@@ -4,4 +4,4 @@ export function isValidEmail(email: string): boolean {
 	return EMAIL_REGEX.test(email);
 }
 
-export const emailValidationError = "Invalid email address";
+export const emailValidationError = "邮箱格式不正确";

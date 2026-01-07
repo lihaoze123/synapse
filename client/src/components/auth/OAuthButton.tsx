@@ -53,7 +53,7 @@ export function OAuthButton({
 					/>
 				</svg>
 			)}
-			Continue with {isGitHub ? "GitHub" : "Google"}
+			使用 {isGitHub ? "GitHub" : "Google"} 登录
 		</Button>
 	);
 }

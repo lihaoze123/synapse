@@ -73,8 +73,8 @@ export function LoginPage() {
 		setApiError(null);
 		const errors: Record<string, string> = {};
 
-		if (!loginData.username.trim()) errors.username = "Username is required";
-		if (!loginData.password) errors.password = "Password is required";
+		if (!loginData.username.trim()) errors.username = "请输入用户名";
+		if (!loginData.password) errors.password = "请输入密码";
 
 		if (Object.keys(errors).length > 0) {
 			setLoginErrors(errors);
@@ -85,7 +85,7 @@ export function LoginPage() {
 		try {
 			await auth.login(loginData);
 		} catch (err) {
-			setApiError(err instanceof Error ? err.message : "Login failed");
+			setApiError(err instanceof Error ? err.message : "登录失败");
 		}
 	};
 
@@ -94,15 +94,15 @@ export function LoginPage() {
 		setApiError(null);
 		const errors: Record<string, string> = {};
 
-		if (!registerData.username.trim()) errors.username = "Username is required";
-		if (!registerData.email.trim()) errors.email = "Email is required";
+		if (!registerData.username.trim()) errors.username = "请输入用户名";
+		if (!registerData.email.trim()) errors.email = "请输入邮箱";
 		else if (!isValidEmail(registerData.email))
 			errors.email = emailValidationError;
-		if (!registerData.password) errors.password = "Password is required";
+		if (!registerData.password) errors.password = "请输入密码";
 		else if (registerData.password.length < 6)
-			errors.password = "Password must be at least 6 characters";
+			errors.password = "密码长度至少 6 位";
 		if (registerData.password !== registerData.confirmPassword)
-			errors.confirmPassword = "Passwords do not match";
+			errors.confirmPassword = "两次密码不一致";
 
 		if (Object.keys(errors).length > 0) {
 			setRegisterErrors(errors);
@@ -117,7 +117,7 @@ export function LoginPage() {
 				password: registerData.password,
 			});
 		} catch (err) {
-			setApiError(err instanceof Error ? err.message : "Registration failed");
+			setApiError(err instanceof Error ? err.message : "注册失败");
 		}
 	};
 
@@ -131,12 +131,10 @@ export function LoginPage() {
 					{/* Header */}
 					<div className="text-center mb-8">
 						<h1 className="text-2xl font-semibold text-gray-900 mb-2">
-							{mode === "login" ? "Welcome back" : "Create account"}
+							{mode === "login" ? "欢迎回来" : "创建账户"}
 						</h1>
 						<p className="text-gray-500 text-sm">
-							{mode === "login"
-								? "Sign in to continue to Synapse"
-								: "Join the community today"}
+							{mode === "login" ? "登录 Synapse 继续探索" : "加入我们的社区"}
 						</p>
 					</div>
 
@@ -168,7 +166,7 @@ export function LoginPage() {
 						</div>
 						<div className="relative flex justify-center">
 							<span className="px-4 bg-white text-sm text-gray-500">
-								or continue with email
+								或使用邮箱继续
 							</span>
 						</div>
 					</div>
@@ -178,9 +176,9 @@ export function LoginPage() {
 						<form onSubmit={handleLogin} className="space-y-4">
 							<AuthInput
 								id={loginUsernameId}
-								label="Username"
+								label="用户名"
 								type="text"
-								placeholder="Enter your username"
+								placeholder="请输入用户名"
 								value={loginData.username}
 								onChange={(v) => setLoginData({ ...loginData, username: v })}
 								error={loginErrors.username}
@@ -188,9 +186,9 @@ export function LoginPage() {
 							/>
 							<AuthInput
 								id={loginPasswordId}
-								label="Password"
+								label="密码"
 								type="password"
-								placeholder="Enter your password"
+								placeholder="请输入密码"
 								value={loginData.password}
 								onChange={(v) => setLoginData({ ...loginData, password: v })}
 								error={loginErrors.password}
@@ -204,16 +202,16 @@ export function LoginPage() {
 								{auth.isLoggingIn && (
 									<Loader2 className="w-4 h-4 animate-spin" />
 								)}
-								Sign In
+								登录
 							</button>
 						</form>
 					) : (
 						<form onSubmit={handleRegister} className="space-y-4">
 							<AuthInput
 								id={regUsernameId}
-								label="Username"
+								label="用户名"
 								type="text"
-								placeholder="Choose a username"
+								placeholder="请输入用户名"
 								value={registerData.username}
 								onChange={(v) =>
 									setRegisterData({ ...registerData, username: v })
@@ -223,9 +221,9 @@ export function LoginPage() {
 							/>
 							<AuthInput
 								id={regEmailId}
-								label="Email"
+								label="邮箱"
 								type="email"
-								placeholder="Enter your email"
+								placeholder="请输入邮箱"
 								value={registerData.email}
 								onChange={(v) => setRegisterData({ ...registerData, email: v })}
 								error={registerErrors.email}
@@ -233,9 +231,9 @@ export function LoginPage() {
 							/>
 							<AuthInput
 								id={regPasswordId}
-								label="Password"
+								label="密码"
 								type="password"
-								placeholder="Create a password"
+								placeholder="请设置密码"
 								value={registerData.password}
 								onChange={(v) =>
 									setRegisterData({ ...registerData, password: v })
@@ -245,9 +243,9 @@ export function LoginPage() {
 							/>
 							<AuthInput
 								id={regConfirmId}
-								label="Confirm Password"
+								label="确认密码"
 								type="password"
-								placeholder="Confirm your password"
+								placeholder="请再次输入密码"
 								value={registerData.confirmPassword}
 								onChange={(v) =>
 									setRegisterData({ ...registerData, confirmPassword: v })
@@ -263,16 +261,14 @@ export function LoginPage() {
 								{auth.isRegistering && (
 									<Loader2 className="w-4 h-4 animate-spin" />
 								)}
-								Create Account
+								注册账户
 							</button>
 						</form>
 					)}
 
 					{/* Toggle Mode */}
 					<p className="mt-6 text-center text-gray-500 text-sm">
-						{mode === "login"
-							? "Don't have an account?"
-							: "Already have an account?"}{" "}
+						{mode === "login" ? "还没有账户？" : "已有账户？"}{" "}
 						<button
 							type="button"
 							onClick={() => {
@@ -283,7 +279,7 @@ export function LoginPage() {
 							}}
 							className="text-amber-600 hover:text-amber-700 font-medium transition-colors"
 						>
-							{mode === "login" ? "Sign up" : "Sign in"}
+							{mode === "login" ? "立即注册" : "去登录"}
 						</button>
 					</p>
 				</div>
