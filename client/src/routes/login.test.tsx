@@ -24,34 +24,26 @@ describe("LoginPage", () => {
 
 	it("should render login form by default", () => {
 		render(<LoginPage />);
-		expect(screen.getByText("Welcome back")).toBeInTheDocument();
-		expect(
-			screen.getByText("Sign in to continue to Synapse"),
-		).toBeInTheDocument();
-		expect(
-			screen.getByPlaceholderText("Enter your username"),
-		).toBeInTheDocument();
-		expect(
-			screen.getByPlaceholderText("Enter your password"),
-		).toBeInTheDocument();
+		expect(screen.getByText("欢迎回来")).toBeInTheDocument();
+		expect(screen.getByText("登录 Synapse 继续探索")).toBeInTheDocument();
+		expect(screen.getByPlaceholderText("请输入用户名")).toBeInTheDocument();
+		expect(screen.getByPlaceholderText("请输入密码")).toBeInTheDocument();
 	});
 
 	it("should switch to register form when clicking toggle", async () => {
 		const user = userEvent.setup();
 		render(<LoginPage />);
 
-		await user.click(screen.getByText("Sign up"));
-		expect(screen.getByText("Create account")).toBeInTheDocument();
-		expect(screen.getByText("Join the community today")).toBeInTheDocument();
-		expect(
-			screen.getByPlaceholderText("Choose a username"),
-		).toBeInTheDocument();
-		expect(screen.getByPlaceholderText("Enter your email")).toBeInTheDocument();
+		await user.click(screen.getByText("立即注册"));
+		expect(screen.getByText("创建账户")).toBeInTheDocument();
+		expect(screen.getByText("加入我们的社区")).toBeInTheDocument();
+		expect(screen.getByPlaceholderText("请输入用户名")).toBeInTheDocument();
+		expect(screen.getByPlaceholderText("请输入邮箱")).toBeInTheDocument();
 	});
 
 	it("should display both GitHub and Google OAuth options", () => {
 		render(<LoginPage />);
-		expect(screen.getByText("Continue with GitHub")).toBeInTheDocument();
-		expect(screen.getByText("Continue with Google")).toBeInTheDocument();
+		expect(screen.getByText(/github/i)).toBeInTheDocument();
+		expect(screen.getByText(/google/i)).toBeInTheDocument();
 	});
 });

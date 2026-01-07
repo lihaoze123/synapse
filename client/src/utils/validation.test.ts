@@ -19,6 +19,6 @@ describe("validation", () => {
 	});
 
 	it("should have correct error message", () => {
-		expect(emailValidationError).toBe("Invalid email address");
+		expect(emailValidationError).toBe("邮箱格式不正确");
 	});
 });

@@ -6,12 +6,12 @@ import { OAuthButton } from "./OAuthButton";
 describe("OAuthButton", () => {
 	it("should render GitHub button with icon", () => {
 		render(<OAuthButton provider="github" onClick={() => {}} />);
-		expect(screen.getByText(/continue with github/i)).toBeInTheDocument();
+		expect(screen.getByText(/github/i)).toBeInTheDocument();
 	});
 
 	it("should render Google button with icon", () => {
 		render(<OAuthButton provider="google" onClick={() => {}} />);
-		expect(screen.getByText(/continue with google/i)).toBeInTheDocument();
+		expect(screen.getByText(/google/i)).toBeInTheDocument();
 	});
 
 	it("should call onClick handler when clicked", async () => {
