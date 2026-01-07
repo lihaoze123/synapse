@@ -8,6 +8,7 @@ interface LoginRequest {
 
 interface RegisterRequest {
 	username: string;
+	email: string;
 	password: string;
 	avatarUrl?: string;
 }
@@ -71,5 +72,29 @@ export const authService = {
 
 	isAuthenticated(): boolean {
 		return !!this.getToken();
+	},
+
+	getOAuthAuthorizationUrl(
+		provider: "github" | "google",
+		state: string,
+	): string {
+		// Forward client-generated state to the backend resolver; Spring will include it in the provider request.
+		const encoded = encodeURIComponent(state);
+		return `/oauth2/authorization/${provider}?state=${encoded}`;
+	},
+
+	saveOAuthState(state: string): void {
+		localStorage.setItem("oauth_state", state);
+	},
+
+	generateOAuthState(): string {
+		// Use crypto.getRandomValues() for cryptographically secure random values
+		// 32 bytes = 256 bits of entropy, base64url encoded = 43 chars
+		const bytes = new Uint8Array(32);
+		self.crypto.getRandomValues(bytes);
+		return btoa(String.fromCharCode(...bytes))
+			.replace(/\+/g, "-")
+			.replace(/\//g, "_")
+			.replace(/=/g, "");
 	},
 };

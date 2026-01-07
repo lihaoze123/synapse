@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { authService } from "../services/auth";
 import { useAuth } from "./useAuth";
@@ -27,6 +27,10 @@ describe("useAuth hook", () => {
 		vi.clearAllMocks();
 		localStorage.clear();
 		mockNavigate.mockReset();
+		// Default: unauthenticated fetch to /auth/me fails when no token/cookie
+		mockAuthService.fetchCurrentUser.mockRejectedValue(
+			new Error("Unauthorized"),
+		);
 	});
 
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -164,10 +168,14 @@ describe("useAuth hook", () => {
 
 			const { result } = renderHook(() => useAuth(), { wrapper });
 
-			await result.current.register({ username: "newuser", password: "pass" });
+			await result.current.register({
+				username: "newuser",
+				email: "newuser@test.com",
+				password: "pass",
+			});
 
 			expect(mockAuthService.register).toHaveBeenCalledWith(
-				{ username: "newuser", password: "pass" },
+				{ username: "newuser", email: "newuser@test.com", password: "pass" },
 				expect.any(Object),
 			);
 		});
@@ -180,7 +188,11 @@ describe("useAuth hook", () => {
 			const { result } = renderHook(() => useAuth(), { wrapper });
 
 			await expect(
-				result.current.register({ username: "existing", password: "pass" }),
+				result.current.register({
+					username: "existing",
+					email: "existing@test.com",
+					password: "pass",
+				}),
 			).rejects.toThrow("Username taken");
 
 			expect(result.current.registerError).toBeDefined();
@@ -203,6 +215,7 @@ describe("useAuth hook", () => {
 
 			result.current.register({
 				username: "newuser",
+				email: "newuser@test.com",
 				password: "pass",
 			});
 
@@ -236,6 +249,56 @@ describe("useAuth hook", () => {
 				to: "/login",
 				replace: true,
 			});
+		});
+	});
+
+	describe("useAuth - OAuth", () => {
+		beforeEach(() => {
+			// Mock window.location
+			delete (window as any).location;
+			(window as any).location = { href: "" };
+			// Mock OAuth methods
+			mockAuthService.generateOAuthState.mockReturnValue("test-state");
+			mockAuthService.saveOAuthState.mockReturnValue(undefined);
+			mockAuthService.getOAuthAuthorizationUrl.mockImplementation(
+				(provider: string) => `/oauth2/authorization/${provider}`,
+			);
+		});
+
+		it("should have loginWithGitHub method", () => {
+			const { result } = renderHook(() => useAuth(), { wrapper });
+			expect(result.current.loginWithGitHub).toBeDefined();
+			expect(typeof result.current.loginWithGitHub).toBe("function");
+		});
+
+		it("should have loginWithGoogle method", () => {
+			const { result } = renderHook(() => useAuth(), { wrapper });
+			expect(result.current.loginWithGoogle).toBeDefined();
+			expect(typeof result.current.loginWithGoogle).toBe("function");
+		});
+
+		it("should redirect to GitHub OAuth authorization URL", () => {
+			const { result } = renderHook(() => useAuth(), { wrapper });
+
+			act(() => {
+				result.current.loginWithGitHub();
+			});
+
+			expect(mockAuthService.generateOAuthState).toHaveBeenCalled();
+			expect(mockAuthService.saveOAuthState).toHaveBeenCalledWith("test-state");
+			expect(window.location.href).toContain("/oauth2/authorization/github");
+		});
+
+		it("should redirect to Google OAuth authorization URL", () => {
+			const { result } = renderHook(() => useAuth(), { wrapper });
+
+			act(() => {
+				result.current.loginWithGoogle();
+			});
+
+			expect(mockAuthService.generateOAuthState).toHaveBeenCalled();
+			expect(mockAuthService.saveOAuthState).toHaveBeenCalledWith("test-state");
+			expect(window.location.href).toContain("/oauth2/authorization/google");
 		});
 	});
 });

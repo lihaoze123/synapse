@@ -28,9 +28,15 @@ public class LikeController {
     @PostMapping("/posts/{postId}")
     @Operation(summary = "Toggle post like", description = "Likes or unlikes a post")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Like toggled successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Like toggled successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "Invalid request")
     })
     public ResponseEntity<ApiResponse<Map<String, Object>>> togglePostLike(
             HttpServletRequest request,

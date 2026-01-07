@@ -43,14 +43,19 @@ class AuthServiceTest {
     void register_shouldCreateNewUser() {
         String rawPassword = "password123";
         String hashedPassword = PasswordUtil.encode(rawPassword);
-        RegisterRequest request = new RegisterRequest("testuser", rawPassword, null);
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("testuser");
+        request.setEmail("testuser@example.com");
+        request.setPassword(rawPassword);
         User savedUser = User.builder()
                 .id(1L)
                 .username("testuser")
+                .email("testuser@example.com")
                 .password(hashedPassword)
                 .build();
 
         when(userRepository.existsByUsername("testuser")).thenReturn(false);
+        when(userRepository.existsByEmail("testuser@example.com")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(jwtUtil.generateToken(1L, "testuser")).thenReturn("test-jwt-token");
 
@@ -165,15 +170,21 @@ class AuthServiceTest {
     void register_shouldHandleAvatarUrl() {
         String rawPassword = "password123";
         String hashedPassword = PasswordUtil.encode(rawPassword);
-        RegisterRequest request = new RegisterRequest("testuser", rawPassword, "custom-avatar.jpg");
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("testuser");
+        request.setEmail("testuser@example.com");
+        request.setPassword(rawPassword);
+        request.setAvatarUrl("custom-avatar.jpg");
         User savedUser = User.builder()
                 .id(1L)
                 .username("testuser")
+                .email("testuser@example.com")
                 .password(hashedPassword)
                 .avatarUrl("custom-avatar.jpg")
                 .build();
 
         when(userRepository.existsByUsername("testuser")).thenReturn(false);
+        when(userRepository.existsByEmail("testuser@example.com")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(jwtUtil.generateToken(1L, "testuser")).thenReturn("test-jwt-token");
 

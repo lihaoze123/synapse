@@ -58,6 +58,7 @@ describe("authService", () => {
 
 			const result = await authService.register({
 				username: "newuser",
+				email: "newuser@test.com",
 				password: "pass",
 			});
 
@@ -80,12 +81,14 @@ describe("authService", () => {
 
 			await authService.register({
 				username: "user",
+				email: "user@test.com",
 				password: "pass",
 				avatarUrl: "avatar.png",
 			});
 
 			expect(mockApi.post).toHaveBeenCalledWith("/auth/register", {
 				username: "user",
+				email: "user@test.com",
 				password: "pass",
 				avatarUrl: "avatar.png",
 			});
@@ -167,6 +170,27 @@ describe("authService", () => {
 
 		it("should return false when no token", () => {
 			expect(authService.isAuthenticated()).toBe(false);
+		});
+	});
+
+	describe("OAuth state generation", () => {
+		it("should generate unique states", () => {
+			const states = new Set<string>();
+			for (let i = 0; i < 1000; i++) {
+				states.add(authService.generateOAuthState());
+			}
+			// 1000 calls should produce 1000 unique values (cryptographically secure)
+			expect(states.size).toBe(1000);
+		});
+
+		it("should generate states with sufficient entropy (32+ chars)", () => {
+			const state = authService.generateOAuthState();
+			expect(state.length).toBeGreaterThanOrEqual(32);
+		});
+
+		it("should use URL-safe characters only", () => {
+			const state = authService.generateOAuthState();
+			expect(state).toMatch(/^[A-Za-z0-9_-]+$/);
 		});
 	});
 });

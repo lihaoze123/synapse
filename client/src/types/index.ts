@@ -1,9 +1,19 @@
 export interface User {
 	id: number;
 	username: string;
+	email?: string;
 	avatarUrl: string | null;
 	displayName?: string | null;
 	bio?: string | null;
+	provider?: "LOCAL" | "GITHUB" | "GOOGLE";
+	providerId?: string;
+	createdAt?: string;
+}
+
+export interface RegisterRequest {
+	username: string;
+	email: string;
+	password: string;
 }
 
 export interface AuthResponse {

@@ -21,8 +21,10 @@ public class SpaFallbackController implements ErrorController {
         "/settings/**",
         "/profile/**",
         "/bookmarks/**",
+        "/notifications/**",
         "/login",
-        "/register"
+        "/register",
+        "/oauth/**"
     })
     public String forward() {
         return "forward:/index.html";

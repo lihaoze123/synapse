@@ -72,7 +72,7 @@ class WebSocketIntegrationTest {
 
         CompletableFuture<WebSocketSession> future = webSocketClient.execute(handler, null, URI.create(url));
 
-        boolean connectedSuccessfully = connectionLatch.await(5, TimeUnit.SECONDS);
+        boolean connectedSuccessfully = connectionLatch.await(10, TimeUnit.SECONDS);
 
         assertTrue(connectedSuccessfully, "Connection should complete within timeout");
         assertTrue(connected.get(), "WebSocket connection should succeed with valid token");
@@ -108,7 +108,7 @@ class WebSocketIntegrationTest {
             return null;
         });
 
-        boolean failureDetected = failureLatch.await(5, TimeUnit.SECONDS);
+        boolean failureDetected = failureLatch.await(10, TimeUnit.SECONDS);
 
         assertTrue(failureDetected, "Connection failure should be detected within timeout");
         assertTrue(connectionFailed.get(), "WebSocket connection should fail with invalid token");

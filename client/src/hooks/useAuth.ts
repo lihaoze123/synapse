@@ -12,10 +12,6 @@ export function useAuth() {
 	const { data: validatedUser, isLoading: isValidating } = useQuery({
 		queryKey: ["auth", "validate"],
 		queryFn: async () => {
-			const token = authService.getToken();
-			if (!token) {
-				return null;
-			}
 			try {
 				return await authService.fetchCurrentUser();
 			} catch {
@@ -67,6 +63,49 @@ export function useAuth() {
 		navigate({ to: "/login", replace: true });
 	}, [queryClient, navigate]);
 
+	const setOAuthStateCookie = useCallback((state: string) => {
+		type CookieStoreType = {
+			set: (init: {
+				name: string;
+				value: string;
+				expires: number;
+				path?: string;
+			}) => Promise<void>;
+		};
+		const nav = navigator as unknown as { cookieStore?: CookieStoreType };
+		if (nav.cookieStore && typeof nav.cookieStore.set === "function") {
+			void nav.cookieStore.set({
+				name: "oauth_state",
+				value: state,
+				expires: Date.now() + 300 * 1000,
+				path: "/",
+			});
+		} else {
+			// biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
+			document.cookie = `oauth_state=${state}; path=/; max-age=300; samesite=Lax`;
+		}
+	}, []);
+
+	const loginWithGitHub = useCallback(() => {
+		const state = authService.generateOAuthState();
+		authService.saveOAuthState(state);
+		setOAuthStateCookie(state);
+		window.location.href = authService.getOAuthAuthorizationUrl(
+			"github",
+			state,
+		);
+	}, [setOAuthStateCookie]);
+
+	const loginWithGoogle = useCallback(() => {
+		const state = authService.generateOAuthState();
+		authService.saveOAuthState(state);
+		setOAuthStateCookie(state);
+		window.location.href = authService.getOAuthAuthorizationUrl(
+			"google",
+			state,
+		);
+	}, [setOAuthStateCookie]);
+
 	return {
 		user,
 		isAuthenticated,
@@ -74,6 +113,8 @@ export function useAuth() {
 		login: loginMutation.mutateAsync,
 		register: registerMutation.mutateAsync,
 		logout,
+		loginWithGitHub,
+		loginWithGoogle,
 		isLoggingIn: loginMutation.isPending,
 		isRegistering: registerMutation.isPending,
 		loginError: loginMutation.error,

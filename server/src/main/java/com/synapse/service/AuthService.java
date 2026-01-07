@@ -5,6 +5,7 @@ import com.synapse.dto.LoginRequest;
 import com.synapse.dto.RegisterRequest;
 import com.synapse.dto.UserDto;
 import com.synapse.entity.User;
+import com.synapse.entity.AuthProvider;
 import com.synapse.repository.UserRepository;
 import com.synapse.util.JwtUtil;
 import com.synapse.util.PasswordUtil;
@@ -24,9 +25,17 @@ public class AuthService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
+        // Guard against legacy call sites that might not populate email via DTO validation
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
 
         User user = User.builder()
             .username(request.getUsername())
+            .email(request.getEmail())
             .password(PasswordUtil.encode(request.getPassword()))
             .avatarUrl(request.getAvatarUrl())
             .build();
@@ -45,6 +54,12 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
             .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+
+        // Block username/password login for accounts provisioned via OAuth providers
+        if (user.getProvider() != null && user.getProvider() != AuthProvider.LOCAL) {
+            throw new IllegalArgumentException(
+                "This account uses " + user.getProvider() + " login. Use OAuth instead.");
+        }
 
         String storedPassword = user.getPassword();
         String rawPassword = request.getPassword();

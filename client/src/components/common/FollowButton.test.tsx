@@ -55,6 +55,8 @@ describe("FollowButton", () => {
 		login: vi.fn().mockResolvedValue({}),
 		register: vi.fn().mockResolvedValue({}),
 		logout: vi.fn(),
+		loginWithGitHub: vi.fn(),
+		loginWithGoogle: vi.fn(),
 		isLoggingIn: false,
 		isRegistering: false,
 		loginError: null,

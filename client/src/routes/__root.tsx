@@ -1,5 +1,9 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import {
+	createRootRouteWithContext,
+	Outlet,
+	useRouterState,
+} from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { AnimatePresence } from "@/components/ui/animations";
@@ -15,28 +19,54 @@ interface MyRouterContext {
 }
 
 function RealtimeBridge() {
-	// Keep WS alive across pages; tie to auth so it reconnects after login/logout.
-	// We don't use the value directly; we just want re-renders on auth changes.
 	const { isAuthenticated } = useAuth();
 	void isAuthenticated;
-	// Mount notification realtime listener
 	useNotificationRealtime();
 	return null;
 }
 
-export const Route = createRootRouteWithContext<MyRouterContext>()({
-	component: () => (
+const AUTH_ROUTES = ["/login", "/register", "/oauth/callback"];
+
+function RootLayout() {
+	const routerState = useRouterState();
+	const currentPath = routerState.location?.pathname ?? "";
+	const isAuthRoute = AUTH_ROUTES.some(
+		(route) => currentPath === route || currentPath.startsWith(`${route}/`),
+	);
+
+	return (
 		<ErrorBoundary>
+			{/*
+        Keep SidebarProvider mounted for all routes so components using useSidebar
+        don't lose context during route transitions (e.g. navigating to /login).
+        Previously, auth routes were not wrapped which could throw:
+        "useSidebar must be used within a SidebarProvider." until a hard refresh.
+      */}
 			<SidebarProvider>
-				<AnimatePresence mode="wait">
-					<Outlet />
-				</AnimatePresence>
-				<RealtimeBridge />
-				<Toaster />
-				<Suspense>
-					<Devtools plugins={[TanStackQueryDevtools]} />
-				</Suspense>
+				{isAuthRoute ? (
+					<>
+						<AnimatePresence mode="wait">
+							<Outlet />
+						</AnimatePresence>
+						<Toaster />
+					</>
+				) : (
+					<>
+						<AnimatePresence mode="wait">
+							<Outlet />
+						</AnimatePresence>
+						<RealtimeBridge />
+						<Toaster />
+						<Suspense>
+							<Devtools plugins={[TanStackQueryDevtools]} />
+						</Suspense>
+					</>
+				)}
 			</SidebarProvider>
 		</ErrorBoundary>
-	),
+	);
+}
+
+export const Route = createRootRouteWithContext<MyRouterContext>()({
+	component: RootLayout,
 });
