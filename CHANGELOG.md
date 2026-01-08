@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-01-08
+
 ### Added
 - TanStack AI integration for AI-assisted content creation
 - AI Assistant Toolbar (consolidated dropdown) for quick access to AI actions
@@ -35,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AI chat reliability with authentication, timeouts, and thread management
 - Test expectations for AI preview modal
 - Lint and checkstyle violations
+- AiControllerTest mocking for ThreadPoolTaskExecutor
 
 ## [0.1.0] - 2026-01-05
 
