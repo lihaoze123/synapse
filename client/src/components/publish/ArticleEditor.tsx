@@ -298,6 +298,17 @@ export default function ArticleEditor({
 						</DialogPrimitive.Popup>
 					</DialogPrimitive.Portal>
 				</DialogPrimitive.Root>
+				<AIPreviewModal
+					open={aiPreview.isOpen}
+					onOpenChange={aiClose}
+					action={aiPreview.action}
+					originalContent={aiPreview.originalContent}
+					suggestion={aiPreview.suggestion}
+					isLoading={aiPreview.isLoading}
+					error={aiPreview.error}
+					onApply={handleAIApply}
+					onRetry={aiRetry}
+				/>
 			</div>
 		);
 	}

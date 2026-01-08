@@ -12,7 +12,7 @@ import {
 	Wand2,
 } from "lucide-react";
 import type { RefObject } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -22,6 +22,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
 import { cn } from "@/lib/utils";
+import { toast } from "@/components/ui/toast";
 
 interface MarkdownToolbarProps {
 	textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -141,6 +142,7 @@ export default function MarkdownToolbar({
 	aiDisabled = false,
 }: MarkdownToolbarProps) {
 	const [modKey, setModKey] = useState("⌘");
+	const lastSelectionRef = useRef<{ start: number; end: number; text: string } | null>(null);
 
 	useEffect(() => {
 		const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
@@ -227,16 +229,36 @@ export default function MarkdownToolbar({
 		return () => textarea.removeEventListener("keydown", handleKeyDown);
 	}, [textareaRef, insertMarkdown]);
 
+	// Capture selection before opening the AI menu to avoid losing it on blur
+	const captureSelection = useCallback(() => {
+		const textarea = textareaRef.current;
+		if (!textarea) {
+			lastSelectionRef.current = null;
+			return;
+		}
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const text = content.substring(start, end);
+		lastSelectionRef.current = { start, end, text };
+	}, [textareaRef, content]);
+
 	const triggerAI = useCallback(
 		(action: "improve" | "summarize" | "explain") => {
 			if (!onAIAction) return;
-			const textarea = textareaRef.current;
-			let selected = content;
-			if (textarea) {
-				const { selectionStart: s, selectionEnd: e } = textarea;
-				if (s !== e) selected = content.substring(s, e);
+			// Prefer the last captured selection (set on menu trigger pointer down)
+			let selected = lastSelectionRef.current?.text ?? "";
+			// Fallback to live selection if present
+			if (!selected) {
+				const textarea = textareaRef.current;
+				if (textarea) {
+					const { selectionStart: s, selectionEnd: e } = textarea;
+					if (s !== e) selected = content.substring(s, e);
+				}
 			}
-			if (!selected.trim()) return;
+			if (!selected.trim()) {
+				toast.info("请选择需要处理的文本，或先输入内容");
+				return;
+			}
 			onAIAction(action, selected, aiLanguage);
 		},
 		[onAIAction, textareaRef, content, aiLanguage],
@@ -301,6 +323,7 @@ export default function MarkdownToolbar({
 					<div className="mx-1 h-4 w-px bg-border" />
 					<DropdownMenu>
 						<DropdownMenuTrigger
+							onPointerDown={captureSelection}
 							disabled={aiDisabled || aiLoading}
 							className={cn(
 								"flex items-center gap-1 rounded-md px-2 h-8 sm:h-7",

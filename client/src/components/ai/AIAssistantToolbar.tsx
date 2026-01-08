@@ -1,6 +1,6 @@
 import { ChevronDown, Loader2, Sparkles, Wand2 } from "lucide-react";
 import type { RefObject } from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
 import { cn } from "@/lib/utils";
+import { toast } from "@/components/ui/toast";
 
 export type AIAction = "improve" | "summarize" | "explain";
 
@@ -58,6 +59,7 @@ export default function AIAssistantToolbar({
 	disabled = false,
 }: AIAssistantToolbarProps) {
 	const [_modKey, _setModKey] = useState("⌘");
+	const lastSelectionRef = useRef<{ start: number; end: number; text: string } | null>(null);
 
 	const getActions = useCallback((): AIActionConfig[] => {
 		const baseActions = [...ACTIONS];
@@ -73,20 +75,36 @@ export default function AIAssistantToolbar({
 		return baseActions;
 	}, [language]);
 
+	const captureSelection = useCallback(() => {
+		const textarea = textareaRef.current;
+		if (!textarea) {
+			lastSelectionRef.current = null;
+			return;
+		}
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const text = content.substring(start, end);
+		lastSelectionRef.current = { start, end, text };
+	}, [textareaRef, content]);
+
 	const handleAction = useCallback(
 		(actionConfig: AIActionConfig) => {
-			const textarea = textareaRef.current;
-			let selectedContent = content;
-
-			if (textarea) {
-				const start = textarea.selectionStart;
-				const end = textarea.selectionEnd;
-				if (start !== end) {
-					selectedContent = content.substring(start, end);
+			// Prefer captured selection to avoid losing it after blur
+			let selectedContent = lastSelectionRef.current?.text ?? "";
+			// Fallback to live selection
+			if (!selectedContent) {
+				const textarea = textareaRef.current;
+				if (textarea) {
+					const start = textarea.selectionStart;
+					const end = textarea.selectionEnd;
+					if (start !== end) {
+						selectedContent = content.substring(start, end);
+					}
 				}
 			}
 
 			if (!selectedContent.trim()) {
+				toast.info("请选择需要处理的文本，或先输入内容");
 				return;
 			}
 
@@ -107,6 +125,7 @@ export default function AIAssistantToolbar({
 			{/* Compact AI dropdown trigger */}
 			<DropdownMenu>
 				<DropdownMenuTrigger
+					onPointerDown={captureSelection}
 					disabled={disabled || isLoading}
 					className={cn(
 						"flex items-center gap-1 rounded-md px-2 h-8 sm:h-7",

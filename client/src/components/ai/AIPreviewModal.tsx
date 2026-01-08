@@ -78,10 +78,10 @@ export default function AIPreviewModal({
 	return (
 		<DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
 			<DialogPrimitive.Portal>
-				<DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[starting-style]:animate-out data-[starting-style]:fade-out data-[ending-style]:animate-in data-[ending-style]:fade-in" />
+				<DialogPrimitive.Backdrop className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm data-[starting-style]:animate-out data-[starting-style]:fade-out data-[ending-style]:animate-in data-[ending-style]:fade-in" />
 				<DialogPrimitive.Popup
 					className={cn(
-						"fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2",
+						"fixed left-1/2 top-1/2 z-[70] w-full max-w-2xl -translate-x-1/2 -translate-y-1/2",
 						"rounded-2xl bg-card shadow-2xl",
 						"border border-border/50",
 						"data-[starting-style]:animate-out data-[starting-style]:fade-out data-[starting-style]:zoom-out-95 data-[ending-style]:animate-in data-[ending-style]:fade-in data-[ending-style]:zoom-in-95",
