@@ -4,6 +4,7 @@ import com.synapse.service.OAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import jakarta.servlet.DispatcherType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -38,6 +39,9 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
+                // Important for SSE/async: allow subsequent ASYNC dispatches to flow without re-auth.
+                // Initial request is still fully secured; this prevents AccessDenied on async writes.
+                .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
                 // Public endpoints
                 .requestMatchers(
                     "/",

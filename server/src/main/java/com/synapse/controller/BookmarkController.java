@@ -34,13 +34,19 @@ public class BookmarkController {
     @GetMapping
     @Operation(summary = "Get user bookmarks", description = "Returns paginated bookmarks for current user")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Bookmarks retrieved successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Bookmarks retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated")
     })
     public ResponseEntity<ApiResponse<Page<BookmarkDto>>> getUserBookmarks(
             HttpServletRequest request,
-            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size (max 50)") @RequestParam(defaultValue = "20") int size) {
+            @Parameter(description = "Page number (0-based)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (max 50)")
+            @RequestParam(defaultValue = "20") int size) {
         Long userId = (Long) request.getAttribute("userId");
         if (userId == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
@@ -55,12 +61,17 @@ public class BookmarkController {
     @GetMapping("/posts/{postId}")
     @Operation(summary = "Check bookmark status", description = "Checks if a post is bookmarked by current user")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Status retrieved successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Status retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated")
     })
     public ResponseEntity<ApiResponse<Boolean>> checkBookmark(
             HttpServletRequest request,
-            @Parameter(description = "Post ID", required = true) @PathVariable Long postId) {
+            @Parameter(description = "Post ID", required = true)
+            @PathVariable Long postId) {
         Long userId = (Long) request.getAttribute("userId");
         if (userId == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
@@ -73,9 +84,13 @@ public class BookmarkController {
     @GetMapping("/posts/{postId}/count")
     @Operation(summary = "Get bookmark count", description = "Returns total bookmark count for a post")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Count retrieved successfully")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Count retrieved successfully")
     })
-    public ResponseEntity<ApiResponse<Long>> getBookmarkCount(@Parameter(description = "Post ID", required = true) @PathVariable Long postId) {
+    public ResponseEntity<ApiResponse<Long>> getBookmarkCount(
+            @Parameter(description = "Post ID", required = true)
+            @PathVariable Long postId) {
         long count = bookmarkService.getBookmarkCount(postId);
         return ResponseEntity.ok(ApiResponse.success(count));
     }
@@ -83,13 +98,20 @@ public class BookmarkController {
     @PostMapping("/posts/{postId}")
     @Operation(summary = "Add bookmark", description = "Adds a post to current user's bookmarks")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Bookmark added successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Bookmark added successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "Invalid request")
     })
     public ResponseEntity<ApiResponse<BookmarkDto>> addBookmark(
             HttpServletRequest request,
-            @Parameter(description = "Post ID", required = true) @PathVariable Long postId) {
+            @Parameter(description = "Post ID", required = true)
+            @PathVariable Long postId) {
         Long userId = (Long) request.getAttribute("userId");
         if (userId == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));
@@ -106,13 +128,20 @@ public class BookmarkController {
     @DeleteMapping("/posts/{postId}")
     @Operation(summary = "Remove bookmark", description = "Removes a post from current user's bookmarks")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Bookmark removed successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Bookmark removed successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "Invalid request")
     })
     public ResponseEntity<ApiResponse<Void>> removeBookmark(
             HttpServletRequest request,
-            @Parameter(description = "Post ID", required = true) @PathVariable Long postId) {
+            @Parameter(description = "Post ID", required = true)
+            @PathVariable Long postId) {
         Long userId = (Long) request.getAttribute("userId");
         if (userId == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));

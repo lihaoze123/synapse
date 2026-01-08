@@ -1,10 +1,12 @@
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import { useRef, useState } from "react";
+import { AIPreviewModal } from "@/components/ai";
 import MarkdownPreview from "@/components/editor/MarkdownPreview";
 import MarkdownToolbar from "@/components/editor/MarkdownToolbar";
 import { Button } from "@/components/ui/button";
 import { ImageUploader } from "@/components/upload/ImageUploader";
+import { useAIPreview } from "@/hooks";
 import { cn } from "@/lib/utils";
 
 interface ArticleEditorProps {
@@ -34,8 +36,44 @@ export default function ArticleEditor({
 	const [imageDialogOpen, setImageDialogOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState<TabType>("edit");
 
+	const {
+		preview: aiPreview,
+		generate: aiGenerate,
+		applySuggestion: aiApply,
+		closePreview: aiClose,
+		retry: aiRetry,
+	} = useAIPreview();
+
 	const handleCoverChange = (urls: string[]) => {
 		onCoverImageChange?.(urls[0] || undefined);
+	};
+
+	const handleAIAction = (
+		action: typeof aiPreview.action,
+		selectedContent: string,
+	) => {
+		aiGenerate(action, selectedContent);
+	};
+
+	const handleAIApply = () => {
+		aiApply((suggestion) => {
+			const textarea = textareaRef.current;
+			if (!textarea) return;
+
+			const start = textarea.selectionStart;
+			const end = textarea.selectionEnd;
+			const currentContent = content;
+
+			if (start === end) {
+				onContentChange(suggestion);
+			} else {
+				const newContent =
+					currentContent.substring(0, start) +
+					suggestion +
+					currentContent.substring(end);
+				onContentChange(newContent);
+			}
+		});
 	};
 
 	const insertImageAtCursor = (url: string) => {
@@ -162,12 +200,16 @@ export default function ArticleEditor({
 				<div className="flex-1 flex min-h-0 gap-6">
 					{/* Editor Pane */}
 					<div className="flex-1 flex flex-col min-w-0">
-						<MarkdownToolbar
-							textareaRef={textareaRef}
-							content={content}
-							onContentChange={onContentChange}
-							onImageClick={() => setImageDialogOpen(true)}
-						/>
+						<div className="flex items-stretch">
+							<MarkdownToolbar
+								textareaRef={textareaRef}
+								content={content}
+								onContentChange={onContentChange}
+								onImageClick={() => setImageDialogOpen(true)}
+								onAIAction={handleAIAction}
+								aiLoading={aiPreview.isLoading}
+							/>
+						</div>
 						<textarea
 							ref={textareaRef}
 							value={content}
@@ -256,6 +298,17 @@ export default function ArticleEditor({
 						</DialogPrimitive.Popup>
 					</DialogPrimitive.Portal>
 				</DialogPrimitive.Root>
+				<AIPreviewModal
+					open={aiPreview.isOpen}
+					onOpenChange={aiClose}
+					action={aiPreview.action}
+					originalContent={aiPreview.originalContent}
+					suggestion={aiPreview.suggestion}
+					isLoading={aiPreview.isLoading}
+					error={aiPreview.error}
+					onApply={handleAIApply}
+					onRetry={aiRetry}
+				/>
 			</div>
 		);
 	}
@@ -319,12 +372,16 @@ export default function ArticleEditor({
 			<div className="flex-1 flex flex-col min-h-0">
 				{activeTab === "edit" ? (
 					<div className="flex flex-col">
-						<MarkdownToolbar
-							textareaRef={textareaRef}
-							content={content}
-							onContentChange={onContentChange}
-							onImageClick={() => setImageDialogOpen(true)}
-						/>
+						<div className="flex items-stretch">
+							<MarkdownToolbar
+								textareaRef={textareaRef}
+								content={content}
+								onContentChange={onContentChange}
+								onImageClick={() => setImageDialogOpen(true)}
+								onAIAction={handleAIAction}
+								aiLoading={aiPreview.isLoading}
+							/>
+						</div>
 						<textarea
 							ref={textareaRef}
 							value={content}
@@ -399,6 +456,18 @@ export default function ArticleEditor({
 					</DialogPrimitive.Popup>
 				</DialogPrimitive.Portal>
 			</DialogPrimitive.Root>
+
+			<AIPreviewModal
+				open={aiPreview.isOpen}
+				onOpenChange={aiClose}
+				action={aiPreview.action}
+				originalContent={aiPreview.originalContent}
+				suggestion={aiPreview.suggestion}
+				isLoading={aiPreview.isLoading}
+				error={aiPreview.error}
+				onApply={handleAIApply}
+				onRetry={aiRetry}
+			/>
 		</div>
 	);
 }
