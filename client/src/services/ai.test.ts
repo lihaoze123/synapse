@@ -26,14 +26,14 @@ describe("aiService", () => {
 			const prompt = aiService.buildPrompt("improve", "test text");
 
 			expect(prompt).toContain("test text");
-			expect(prompt).toContain("improve");
+			expect(prompt).toContain("改进");
 		});
 
 		it("should build summarize prompt", () => {
 			const prompt = aiService.buildPrompt("summarize", "long content");
 
 			expect(prompt).toContain("long content");
-			expect(prompt).toContain("summary");
+			expect(prompt).toContain("摘要");
 		});
 
 		it("should build explain code prompt with language", () => {
@@ -45,6 +45,7 @@ describe("aiService", () => {
 
 			expect(prompt).toContain("const x = 1;");
 			expect(prompt).toContain("javascript");
+			expect(prompt).toContain("解释");
 		});
 
 		it("should handle unknown action type", () => {
