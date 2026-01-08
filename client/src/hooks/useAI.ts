@@ -15,7 +15,7 @@ export function useAI(options: UseAIOptions = {}) {
 	const improveWriting = useCallback(
 		(text: string) => {
 			sendMessage(
-				`Please improve the following text, making it clearer and more engaging while preserving the original meaning:\n\n${text}`,
+				`请改进以下文本，使其更清晰、更吸引人，同时保留原意：\n\n${text}`,
 			);
 		},
 		[sendMessage],
@@ -24,7 +24,7 @@ export function useAI(options: UseAIOptions = {}) {
 	const summarize = useCallback(
 		(content: string) => {
 			sendMessage(
-				`Please provide a concise summary of the following content:\n\n${content}`,
+				`请为以下内容提供简洁的摘要：\n\n${content}`,
 			);
 		},
 		[sendMessage],
@@ -33,7 +33,7 @@ export function useAI(options: UseAIOptions = {}) {
 	const explainCode = useCallback(
 		(code: string, language: string) => {
 			sendMessage(
-				`Please explain the following ${language} code in simple terms:\n\n\`\`\`${language}\n${code}\n\`\`\``,
+				`请用通俗易懂的语言解释以下 ${language} 代码：\n\n\`\`\`${language}\n${code}\n\`\`\``,
 			);
 		},
 		[sendMessage],
