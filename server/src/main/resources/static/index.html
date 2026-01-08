@@ -2,9 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="theme-color" content="#000000" />
+    <script>
+      (() => {
+        const theme = localStorage.getItem('theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (theme === 'dark' || (!theme && systemDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
     <meta
       name="description"
       content="Synapse - A topic-based content aggregation platform combining code snippets, articles, and micro-posts"
@@ -12,8 +21,19 @@
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.json" />
     <title>Synapse - Content Aggregation Platform</title>
-    <script type="module" crossorigin src="/assets/index-Bm4W7kcw.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DMvy0gcd.css">
+    <script type="module" crossorigin src="/assets/index-DduVl1FH.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-react-Cgg2GOmP.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-router-DR7juJkl.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-ui-ApdCT3Hg.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-katex-ClxlXyPc.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-markdown-GwxgWlbG.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-syntax-Bsdtt6S1.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-codemirror-X4GV4_4A.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-cm-lang-web-DDnsbmDb.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-cm-lang-systems-DcV62IqV.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-cm-lang-other-OHHyd5Uw.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-cm-lang-scripting-CAMgd2Rk.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CE3FTJ5Z.css">
   </head>
   <body>
     <div id="app"></div>

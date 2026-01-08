@@ -3,6 +3,7 @@ package com.synapse.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.dto.AiChatRequest;
+import com.synapse.dto.AiStreamChunk;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -33,9 +34,11 @@ public class AiService {
         return apiKey != null && !apiKey.isBlank();
     }
 
-    public void streamChat(AiChatRequest request, Consumer<String> onData, Runnable onComplete) {
+    public void streamChat(AiChatRequest request, Consumer<AiStreamChunk> onData, Runnable onComplete) {
+        HttpURLConnection conn = null;
+        StringBuilder contentBuilder = new StringBuilder();
         try {
-            HttpURLConnection conn = (HttpURLConnection) URI.create(baseUrl + "/chat/completions")
+            conn = (HttpURLConnection) URI.create(baseUrl + "/chat/completions")
                     .toURL().openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
@@ -44,10 +47,30 @@ public class AiService {
 
             Map<String, Object> body = new HashMap<>();
             body.put("model", model);
-            body.put("messages", request.getMessages());
+            body.put("messages", request.getMessages().stream()
+                    .filter(m -> m.getContent() != null && !m.getContent().isBlank())
+                    .toList());
             body.put("stream", true);
 
+            String requestBody = objectMapper.writeValueAsString(body);
+            log.debug("AI request URL: {}", baseUrl + "/chat/completions");
+            log.debug("AI request body: {}", requestBody);
             conn.getOutputStream().write(objectMapper.writeValueAsBytes(body));
+
+            int responseCode = conn.getResponseCode();
+            log.debug("AI response code: {}", responseCode);
+
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                String errorResponse = readErrorStream(conn);
+                log.error("AI API error - Code: {}, Response: {}", responseCode, errorResponse);
+                onData.accept(AiStreamChunk.builder()
+                        .type("error")
+                        .delta("[Error: API returned " + responseCode + " - " + errorResponse + "]")
+                        .content("[Error: API returned " + responseCode + " - " + errorResponse + "]")
+                        .build());
+                onComplete.run();
+                return;
+            }
 
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(conn.getInputStream()))) {
@@ -61,7 +84,16 @@ public class AiService {
                         JsonNode node = objectMapper.readTree(data);
                         JsonNode delta = node.path("choices").path(0).path("delta").path("content");
                         if (!delta.isMissingNode() && !delta.isNull()) {
-                            onData.accept(delta.asText());
+                            String deltaText = delta.asText();
+                            contentBuilder.append(deltaText);
+                            onData.accept(AiStreamChunk.builder()
+                                    .type("content")
+                                    .delta(deltaText)
+                                    .content(contentBuilder.toString())
+                                    .role("assistant")
+                                    .model(model)
+                                    .timestamp(System.currentTimeMillis())
+                                    .build());
                         }
                     }
                 }
@@ -69,8 +101,28 @@ public class AiService {
             onComplete.run();
         } catch (Exception e) {
             log.error("AI chat error", e);
-            onData.accept("[Error: " + e.getMessage() + "]");
+            onData.accept(AiStreamChunk.builder()
+                    .type("error")
+                    .delta("[Error: " + e.getMessage() + "]")
+                    .content("[Error: " + e.getMessage() + "]")
+                    .build());
             onComplete.run();
+        }
+    }
+
+    private String readErrorStream(HttpURLConnection conn) {
+        try {
+            BufferedReader errorReader = new BufferedReader(
+                    new InputStreamReader(conn.getErrorStream()));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = errorReader.readLine()) != null) {
+                response.append(line);
+            }
+            errorReader.close();
+            return response.toString();
+        } catch (Exception e) {
+            return "Failed to read error: " + e.getMessage();
         }
     }
 }
