@@ -17,34 +17,38 @@ describe("useAI hook", () => {
 		vi.clearAllMocks();
 	});
 
+	const createMockChatReturn = (overrides = {}) =>
+		({
+			messages: [],
+			sendMessage: vi.fn(),
+			isLoading: false,
+			error: undefined,
+			stop: vi.fn(),
+			reload: vi.fn(),
+			append: vi.fn(),
+			addToolResult: vi.fn(),
+			addToolApprovalResponse: vi.fn(),
+			setMessages: vi.fn(),
+			clear: vi.fn(),
+			...overrides,
+		}) as any;
+
 	describe("useAI", () => {
 		it("should initialize with empty messages", () => {
-			mockUseChat.mockReturnValue({
-				messages: [],
-				sendMessage: vi.fn(),
-				isLoading: false,
-				error: null,
-				stop: vi.fn(),
-				reload: vi.fn(),
-			});
+			mockUseChat.mockReturnValue(createMockChatReturn());
 
 			const { result } = renderHook(() => useAI());
 
 			expect(result.current.messages).toEqual([]);
 			expect(result.current.isLoading).toBe(false);
-			expect(result.current.error).toBeNull();
+			expect(result.current.error).toBeUndefined();
 		});
 
 		it("should send message and update loading state", async () => {
 			const mockSendMessage = vi.fn();
-			mockUseChat.mockReturnValue({
-				messages: [],
-				sendMessage: mockSendMessage,
-				isLoading: false,
-				error: null,
-				stop: vi.fn(),
-				reload: vi.fn(),
-			});
+			mockUseChat.mockReturnValue(
+				createMockChatReturn({ sendMessage: mockSendMessage }),
+			);
 
 			const { result } = renderHook(() => useAI());
 
@@ -57,14 +61,7 @@ describe("useAI hook", () => {
 
 		it("should handle error state", () => {
 			const testError = new Error("AI request failed");
-			mockUseChat.mockReturnValue({
-				messages: [],
-				sendMessage: vi.fn(),
-				isLoading: false,
-				error: testError,
-				stop: vi.fn(),
-				reload: vi.fn(),
-			});
+			mockUseChat.mockReturnValue(createMockChatReturn({ error: testError }));
 
 			const { result } = renderHook(() => useAI());
 
@@ -73,14 +70,9 @@ describe("useAI hook", () => {
 
 		it("should provide stop function", () => {
 			const mockStop = vi.fn();
-			mockUseChat.mockReturnValue({
-				messages: [],
-				sendMessage: vi.fn(),
-				isLoading: true,
-				error: null,
-				stop: mockStop,
-				reload: vi.fn(),
-			});
+			mockUseChat.mockReturnValue(
+				createMockChatReturn({ stop: mockStop, isLoading: true }),
+			);
 
 			const { result } = renderHook(() => useAI());
 
@@ -92,14 +84,7 @@ describe("useAI hook", () => {
 		});
 
 		it("should use custom endpoint when provided", () => {
-			mockUseChat.mockReturnValue({
-				messages: [],
-				sendMessage: vi.fn(),
-				isLoading: false,
-				error: null,
-				stop: vi.fn(),
-				reload: vi.fn(),
-			});
+			mockUseChat.mockReturnValue(createMockChatReturn());
 
 			renderHook(() => useAI({ endpoint: "/api/custom-ai" }));
 
@@ -111,14 +96,7 @@ describe("useAI hook", () => {
 		});
 
 		it("should use default endpoint /api/ai/chat", () => {
-			mockUseChat.mockReturnValue({
-				messages: [],
-				sendMessage: vi.fn(),
-				isLoading: false,
-				error: null,
-				stop: vi.fn(),
-				reload: vi.fn(),
-			});
+			mockUseChat.mockReturnValue(createMockChatReturn());
 
 			renderHook(() => useAI());
 
@@ -133,14 +111,9 @@ describe("useAI hook", () => {
 	describe("AI helper functions", () => {
 		it("should provide improveWriting helper", async () => {
 			const mockSendMessage = vi.fn();
-			mockUseChat.mockReturnValue({
-				messages: [],
-				sendMessage: mockSendMessage,
-				isLoading: false,
-				error: null,
-				stop: vi.fn(),
-				reload: vi.fn(),
-			});
+			mockUseChat.mockReturnValue(
+				createMockChatReturn({ sendMessage: mockSendMessage }),
+			);
 
 			const { result } = renderHook(() => useAI());
 
@@ -155,14 +128,9 @@ describe("useAI hook", () => {
 
 		it("should provide summarize helper", async () => {
 			const mockSendMessage = vi.fn();
-			mockUseChat.mockReturnValue({
-				messages: [],
-				sendMessage: mockSendMessage,
-				isLoading: false,
-				error: null,
-				stop: vi.fn(),
-				reload: vi.fn(),
-			});
+			mockUseChat.mockReturnValue(
+				createMockChatReturn({ sendMessage: mockSendMessage }),
+			);
 
 			const { result } = renderHook(() => useAI());
 
@@ -177,14 +145,9 @@ describe("useAI hook", () => {
 
 		it("should provide explainCode helper", async () => {
 			const mockSendMessage = vi.fn();
-			mockUseChat.mockReturnValue({
-				messages: [],
-				sendMessage: mockSendMessage,
-				isLoading: false,
-				error: null,
-				stop: vi.fn(),
-				reload: vi.fn(),
-			});
+			mockUseChat.mockReturnValue(
+				createMockChatReturn({ sendMessage: mockSendMessage }),
+			);
 
 			const { result } = renderHook(() => useAI());
 

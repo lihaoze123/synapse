@@ -1,4 +1,5 @@
 export { useAI } from "./useAI";
+export { useAIPreview } from "./useAIPreview";
 export { useAuth } from "./useAuth";
 export {
 	useBookmarkCount,
