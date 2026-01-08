@@ -37,7 +37,21 @@ export function useAIPreview(): UseAIPreviewReturn {
 		improveWriting,
 		summarize,
 		explainCode,
-	} = useAI();
+	} = useAI({
+		// Mark preview done exactly when stream finishes
+		onFinish: () =>
+			setPreview((prev) => ({
+				...prev,
+				isLoading: false,
+				error: null,
+			})),
+		// Defensive: on error, stop loading
+		onError: () =>
+			setPreview((prev) => ({
+				...prev,
+				isLoading: false,
+			})),
+	});
 
 	const lastActionRef = useRef<{
 		action: AIAction;
@@ -49,7 +63,9 @@ export function useAIPreview(): UseAIPreviewReturn {
 	});
 
 	useEffect(() => {
-		if (!aiLoading && preview.isOpen && !aiError && messages.length > 0) {
+		// Update suggestion incrementally while streaming.
+		// We intentionally do NOT gate on !aiLoading here so UI can render partial text.
+		if (preview.isOpen && !aiError && messages.length > 0) {
 			const lastMessage = messages[messages.length - 1];
 			if (lastMessage?.role === "assistant") {
 				const textPart = lastMessage.parts.find(
@@ -60,13 +76,24 @@ export function useAIPreview(): UseAIPreviewReturn {
 					setPreview((prev) => ({
 						...prev,
 						suggestion: textPart.content,
-						isLoading: false,
+						// Keep isLoading as-is here; we only flip it off when the stream finishes.
 						error: null,
 					}));
 				}
 			}
 		}
-	}, [messages, aiLoading, aiError, preview.isOpen]);
+	}, [messages, aiError, preview.isOpen]);
+
+	// When the stream finishes (aiLoading becomes false), mark the preview as not loading.
+	useEffect(() => {
+		if (!aiLoading && preview.isOpen && !aiError) {
+			setPreview((prev) => ({
+				...prev,
+				isLoading: false,
+				error: null,
+			}));
+		}
+	}, [aiLoading, aiError, preview.isOpen]);
 
 	useEffect(() => {
 		if (aiError && preview.isOpen) {

@@ -1,5 +1,6 @@
 import {
 	Bold,
+	ChevronDown,
 	Code,
 	ImagePlus,
 	Italic,
@@ -9,11 +10,9 @@ import {
 	Sigma,
 	Sparkles,
 	Wand2,
-	ChevronDown,
 } from "lucide-react";
 import type { RefObject } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -22,6 +21,7 @@ import {
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
+import { cn } from "@/lib/utils";
 
 interface MarkdownToolbarProps {
 	textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -317,6 +317,8 @@ export default function MarkdownToolbar({
 									viewBox="0 0 24 24"
 									fill="none"
 									stroke="currentColor"
+									role="img"
+									aria-label="加载中"
 								>
 									<circle cx="12" cy="12" r="10" className="opacity-10" />
 									<path d="M12 2a10 10 0 0 1 10 10" />
@@ -336,8 +338,9 @@ export default function MarkdownToolbar({
 								<Wand2 className="opacity-80" />
 								润色
 								<DropdownMenuShortcut>⌘⇧A</DropdownMenuShortcut>
-                                <DropdownMenuItem onClick={() => triggerAI("summarize")}>
-							</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={() => triggerAI("summarize")}
+								></DropdownMenuItem>
 								<Sparkles className="opacity-80" />
 								总结
 								<DropdownMenuShortcut>⌘⇧S</DropdownMenuShortcut>

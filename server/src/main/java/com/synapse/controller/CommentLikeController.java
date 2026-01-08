@@ -28,14 +28,20 @@ public class CommentLikeController {
     @PostMapping("/{commentId}")
     @Operation(summary = "Toggle comment like", description = "Likes or unlikes a comment")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Like toggled successfully"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Not authenticated"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Like toggled successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Not authenticated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "Invalid request")
     })
     public ResponseEntity<ApiResponse<Map<String, Object>>> toggleCommentLike(
             HttpServletRequest request,
-            @Parameter(description = "Comment ID", required = true) @PathVariable Long commentId
-    ) {
+            @Parameter(description = "Comment ID", required = true)
+            @PathVariable Long commentId) {
         Long userId = (Long) request.getAttribute("userId");
         if (userId == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated"));

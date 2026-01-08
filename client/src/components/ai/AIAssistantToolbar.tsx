@@ -1,7 +1,6 @@
-import { Loader2, Sparkles, Wand2, ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2, Sparkles, Wand2 } from "lucide-react";
 import type { RefObject } from "react";
 import { useCallback, useState } from "react";
-import { cn } from "@/lib/utils";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,6 +9,7 @@ import {
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
+import { cn } from "@/lib/utils";
 
 export type AIAction = "improve" | "summarize" | "explain";
 
@@ -134,10 +134,7 @@ export default function AIAssistantToolbar({
 					{getActions().map((a) => {
 						const Icon = a.icon;
 						return (
-							<DropdownMenuItem
-								key={a.action}
-								onClick={() => handleAction(a)}
-							>
+							<DropdownMenuItem key={a.action} onClick={() => handleAction(a)}>
 								<Icon className="opacity-80" />
 								{a.label}
 								{a.shortcut && (

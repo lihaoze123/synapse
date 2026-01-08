@@ -114,24 +114,7 @@ export default function AIPreviewModal({
 					</div>
 
 					<div className="px-6 py-4">
-						{isLoading ? (
-							<div className="flex min-h-[200px] flex-col items-center justify-center gap-4 py-8">
-								<div className="relative">
-									<div className="absolute inset-0 animate-pulse rounded-full bg-amber-400/20 blur-xl" />
-									<div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg">
-										<Loader2 className="h-6 w-6 animate-spin" />
-									</div>
-								</div>
-								<div className="text-center">
-									<p className="text-sm font-medium text-foreground">
-										AI 正在思考中...
-									</p>
-									<p className="mt-1 text-xs text-muted-foreground">
-										这可能需要几秒钟
-									</p>
-								</div>
-							</div>
-						) : error ? (
+						{error ? (
 							<div className="flex min-h-[200px] flex-col items-center justify-center gap-4 py-8">
 								<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
 									<X className="h-6 w-6" />
@@ -156,6 +139,22 @@ export default function AIPreviewModal({
 							</div>
 						) : (
 							<div className="space-y-4">
+								{isLoading && (
+									<div className="flex items-center gap-3 rounded-lg border border-border/50 bg-muted/40 px-3 py-2">
+										<div className="relative">
+											<div className="absolute inset-0 animate-pulse rounded-full bg-amber-400/20 blur-md" />
+											<div className="relative flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-amber-400 to-orange-500 text-white">
+												<Loader2 className="h-4 w-4 animate-spin" />
+											</div>
+										</div>
+										<div className="text-xs">
+											<p className="font-medium text-foreground">
+												AI 正在思考中...
+											</p>
+											<p className="text-muted-foreground/80">内容将实时显示</p>
+										</div>
+									</div>
+								)}
 								<div className="flex items-center justify-between">
 									<span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
 										原始内容
@@ -171,7 +170,7 @@ export default function AIPreviewModal({
 									<span className="text-xs font-medium text-foreground uppercase tracking-wider">
 										AI 建议
 									</span>
-									{!isLoading && !error && suggestion && (
+									{suggestion && (
 										<Button
 											variant="ghost"
 											size="sm"
@@ -222,7 +221,7 @@ export default function AIPreviewModal({
 								</>
 							) : (
 								<Button
-                                    variant="outline"
+									variant="outline"
 									onClick={() => onOpenChange(false)}
 									className="min-w-[80px]"
 								>

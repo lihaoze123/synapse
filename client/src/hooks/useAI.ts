@@ -1,8 +1,13 @@
+import type { StreamChunk } from "@tanstack/ai";
+import type { UIMessage } from "@tanstack/ai-client";
 import { fetchServerSentEvents, useChat } from "@tanstack/ai-react";
 import { useCallback } from "react";
 
 interface UseAIOptions {
 	endpoint?: string;
+	onFinish?: (message: UIMessage) => void;
+	onChunk?: (chunk: StreamChunk) => void;
+	onError?: (error: Error) => void;
 }
 
 export function useAI(options: UseAIOptions = {}) {
@@ -10,6 +15,9 @@ export function useAI(options: UseAIOptions = {}) {
 
 	const { messages, sendMessage, isLoading, error, stop, reload } = useChat({
 		connection: fetchServerSentEvents(endpoint),
+		onFinish: options.onFinish,
+		onChunk: options.onChunk,
+		onError: options.onError,
 	});
 
 	const improveWriting = useCallback(
@@ -23,9 +31,7 @@ export function useAI(options: UseAIOptions = {}) {
 
 	const summarize = useCallback(
 		(content: string) => {
-			sendMessage(
-				`请为以下内容提供简洁的摘要：\n\n${content}`,
-			);
+			sendMessage(`请为以下内容提供简洁的摘要：\n\n${content}`);
 		},
 		[sendMessage],
 	);

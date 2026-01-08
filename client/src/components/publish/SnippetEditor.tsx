@@ -1,7 +1,6 @@
+import { ChevronDown, Sparkles, Wand2 } from "lucide-react";
 import { AIPreviewModal } from "@/components/ai";
 import CodeMirrorEditor from "@/components/editor/CodeMirrorEditor";
-import { useAIPreview } from "@/hooks";
-import { cn } from "@/lib/utils";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,7 +9,8 @@ import {
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
-import { ChevronDown, Sparkles, Wand2 } from "lucide-react";
+import { useAIPreview } from "@/hooks";
+import { cn } from "@/lib/utils";
 
 interface SnippetEditorProps {
 	title: string;
@@ -104,6 +104,8 @@ export default function SnippetEditor({
 											viewBox="0 0 24 24"
 											fill="none"
 											stroke="currentColor"
+											role="img"
+											aria-label="加载中"
 										>
 											<circle cx="12" cy="12" r="10" className="opacity-10" />
 											<path d="M12 2a10 10 0 0 1 10 10" />
@@ -111,9 +113,11 @@ export default function SnippetEditor({
 									) : (
 										<Sparkles className="h-4 w-4" />
 									)}
-									<span className="hidden sm:inline text-xs font-medium">AI</span>
+									<span className="hidden sm:inline text-xs font-medium">
+										AI
+									</span>
 									<ChevronDown className="h-3.5 w-3.5 opacity-70" />
-                                </DropdownMenuTrigger>
+								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end" sideOffset={6}>
 									<div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
 										AI 助手
