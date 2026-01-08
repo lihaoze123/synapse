@@ -50,6 +50,7 @@ describe("useAIPreview hook", () => {
 			mockUseAI.mockReturnValue(
 				createMockAIReturn({
 					improveWriting: mockImprove,
+					isLoading: true,
 				}),
 			);
 

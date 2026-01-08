@@ -33,7 +33,7 @@ describe("AIPreviewModal", () => {
 			render(<AIPreviewModal {...defaultProps} isLoading suggestion="" />);
 
 			expect(screen.getByText("AI 正在思考中...")).toBeInTheDocument();
-			expect(screen.getByText(/这可能需要几秒钟/)).toBeInTheDocument();
+			expect(screen.getByText("内容将实时显示")).toBeInTheDocument();
 		});
 
 		it("should render error state when error is provided", () => {
