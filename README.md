@@ -9,6 +9,7 @@
 [![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=openjdk)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-6DB33F?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev/)
+[![TanStack](https://img.shields.io/badge/TanStack-AI-FF4154?style=flat-square)](https://tanstack.com/ai/latest)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
 [![Docker](https://img.shields.io/badge/docker-supported-2496ED?style=flat-square&logo=docker)]()
@@ -159,6 +160,8 @@ bun run dev
 | **Redis 缓存** | 可选缓存层，提升响应速度（Demo 模式） |
 | **监控观测** | Prometheus + Grafana 指标可视化（Demo 模式） |
 | **API 文档** | Swagger/OpenAPI 交互式文档（开发模式） |
+| **AI 辅助** | TanStack AI 集成，支持文本改写、总结和代码解释 |
+| **OAuth2 登录** | 支持 GitHub、Google 等第三方登录 |
 
 ---
 

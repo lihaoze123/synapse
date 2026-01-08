@@ -16,7 +16,7 @@ This is a course project (课程设计). Implementation is in progress - basic C
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | React 19, Vite 7, Tailwind CSS 4, Coss UI, TanStack Query + Router |
+| Frontend | React 19, Vite 7, Tailwind CSS 4, Coss UI, TanStack Query + Router + AI |
 | Real-time | WebSocket (Spring WebSocket + react-use-websocket) |
 | Code/Text | CodeMirror (code editor with syntax highlighting), react-markdown |
 | Lint/Format | Biome (frontend), Checkstyle (backend) |
@@ -135,6 +135,7 @@ com.synapse/
 │   └── JwtConfig.java (legacy)
 ├── controller/       # REST API endpoints
 │   ├── AuthController.java
+│   ├── OAuth2Controller.java
 │   ├── PostController.java
 │   ├── CommentController.java
 │   ├── UserController.java
@@ -168,10 +169,11 @@ src/
 │   ├── profile/      # AvatarUpload
 │   ├── comments/     # CommentSection, CommentItem
 │   ├── notifications/ # NotificationItem, NotificationsPanel
+│   ├── ai/           # AI features (AIAssistantToolbar, PostAIActions, AIPreviewModal)
 │   └── ui/           # UI components (Card, Button, Input, PasswordModal, etc.)
-├── hooks/            # useAuth, usePosts, useNotifications, useNotificationRealtime, useTheme
+├── hooks/            # useAuth, usePosts, useNotifications, useNotificationRealtime, useTheme, useAI, useAIPreview
 ├── routes/           # TanStack Router definitions (index, login, search, profile, posts/$id, users/$userId.*, notifications)
-├── services/         # Axios API client (notificationsService, etc.)
+├── services/         # Axios API client (notificationsService, aiService, etc.)
 └── utils/            # draftStorage, privatePost
 ```
 
@@ -194,6 +196,11 @@ src/
 # Authentication
 POST /api/auth/login     # JWT authentication
 POST /api/auth/register  # User registration
+GET  /api/oauth2/authorize        # OAuth2 authorization
+GET  /api/oauth2/callback/{provider}  # OAuth2 callback (GitHub, Google)
+
+# AI (optional, requires OpenAI API key)
+POST /api/ai/chat        # AI chat completion endpoint
 
 # Posts (CRUD + Search)
 GET  /api/posts          # Feed (filterable by tag, type)
@@ -302,6 +309,19 @@ Frontend dynamically renders cards based on `post.type`:
 - Searches post titles and content
 - Optional type filter (Snippet/Article/Moment)
 - URL-synced search state
+
+### AI Features
+- **TanStack AI Integration**: Uses OpenAI-compatible API for AI features
+- **AI Actions**: Improve (rewrite text), Summarize, Explain code
+- **AI Preview Modal**: Preview AI-generated content before applying
+- **AI Assistant Toolbar**: Quick access to AI actions in editors
+- **Environment-based**: Requires `OPENAI_API_KEY` to enable
+
+### OAuth2 Authentication
+- **Supported Providers**: GitHub, Google
+- **Spring Security OAuth2**: Standard OAuth2 client implementation
+- **JWT Integration**: OAuth2 login issues JWT tokens for API access
+- **Enhanced Login UI**: OAuth2 buttons with provider icons and loading states
 
 ### File Upload (MinIO S3-compatible Storage)
 Files are stored in MinIO object storage with the following features:

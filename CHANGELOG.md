@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- TanStack AI integration for AI-assisted content creation
+- AI Assistant Toolbar for quick access to AI actions
+- AI Preview Modal for reviewing AI-generated content before applying
+- Post AI Actions (improve text, summarize content, explain code)
+- OAuth2 login support with GitHub and Google providers
+- Enhanced authentication UI with OAuth2 provider buttons
+
 ## [0.1.0] - 2026-01-05
 
 ### First Stable Release
