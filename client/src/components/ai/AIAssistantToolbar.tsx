@@ -1,8 +1,15 @@
-import { Loader2, Sparkles, Wand2 } from "lucide-react";
+import { Loader2, Sparkles, Wand2, ChevronDown } from "lucide-react";
 import type { RefObject } from "react";
 import { useCallback, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuShortcut,
+	DropdownMenuTrigger,
+} from "@/components/ui/menu";
 
 export type AIAction = "improve" | "summarize" | "explain";
 
@@ -91,42 +98,56 @@ export default function AIAssistantToolbar({
 	return (
 		<div
 			className={cn(
-				"flex items-center gap-1.5 overflow-x-auto",
-				"px-2 py-1.5",
-				"border-l border-border/60",
+				// Visually attach to MarkdownToolbar: same container; only needs right rounding
+				"flex items-center gap-1 bg-muted/40 px-2 py-1.5",
+				"border border-input border-l-0 rounded-tr-lg",
 				className,
 			)}
 		>
-			{getActions().map((actionConfig) => {
-				const Icon = actionConfig.icon;
-				const isExplain = actionConfig.action === "explain";
-
-				return (
-					<Button
-						key={actionConfig.action}
-						variant="ghost"
-						size="sm"
-						disabled={disabled || isLoading}
-						onClick={() => handleAction(actionConfig)}
-						className={cn(
-							"h-8 gap-1.5 px-2.5 text-xs font-medium",
-							"text-muted-foreground",
-							"hover:text-primary hover:bg-primary/5",
-							"disabled:opacity-50",
-							isExplain &&
-								"text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300",
-						)}
-						title={`${actionConfig.label} (${actionConfig.shortcut})`}
-					>
-						{isLoading ? (
-							<Loader2 className="h-3.5 w-3.5 animate-spin" />
-						) : (
-							<Icon className="h-3.5 w-3.5" />
-						)}
-						<span className="hidden sm:inline">{actionConfig.label}</span>
-					</Button>
-				);
-			})}
+			{/* Compact AI dropdown trigger */}
+			<DropdownMenu>
+				<DropdownMenuTrigger
+					disabled={disabled || isLoading}
+					className={cn(
+						"flex items-center gap-1 rounded-md px-2 h-8 sm:h-7",
+						"text-muted-foreground",
+						"hover:bg-background hover:text-foreground hover:shadow-sm",
+						"active:scale-95 transition-all duration-150",
+						"disabled:opacity-50",
+					)}
+					aria-label="AI 工具"
+					title="AI 工具"
+				>
+					{isLoading ? (
+						<Loader2 className="h-4 w-4 animate-spin" />
+					) : (
+						<Sparkles className="h-4 w-4" />
+					)}
+					<span className="hidden sm:inline text-xs font-medium">AI</span>
+					<ChevronDown className="h-3.5 w-3.5 opacity-70" />
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end" sideOffset={6}>
+					<div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+						AI 助手
+					</div>
+					<DropdownMenuSeparator />
+					{getActions().map((a) => {
+						const Icon = a.icon;
+						return (
+							<DropdownMenuItem
+								key={a.action}
+								onClick={() => handleAction(a)}
+							>
+								<Icon className="opacity-80" />
+								{a.label}
+								{a.shortcut && (
+									<DropdownMenuShortcut>{a.shortcut}</DropdownMenuShortcut>
+								)}
+							</DropdownMenuItem>
+						);
+					})}
+				</DropdownMenuContent>
+			</DropdownMenu>
 		</div>
 	);
 }

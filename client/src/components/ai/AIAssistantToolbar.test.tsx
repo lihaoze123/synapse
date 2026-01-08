@@ -15,25 +15,28 @@ describe("AIAssistantToolbar", () => {
 	});
 
 	describe("rendering", () => {
-		it("should render toolbar with improve and summarize buttons", () => {
+		it("should render AI trigger and show improve/summarize in menu", () => {
 			render(<AIAssistantToolbar {...defaultProps} />);
 
-			expect(screen.getByTitle("润色 (⌘⇧A)")).toBeInTheDocument();
-			expect(screen.getByTitle("总结 (⌘⇧S)")).toBeInTheDocument();
+			const trigger = screen.getByTitle("AI 工具");
+			expect(trigger).toBeInTheDocument();
+			fireEvent.click(trigger);
+			expect(screen.getByText("润色")).toBeInTheDocument();
+			expect(screen.getByText("总结")).toBeInTheDocument();
 		});
 
 		it("should render explain button when language is provided", () => {
 			render(<AIAssistantToolbar {...defaultProps} language="javascript" />);
 
-			const buttons = screen.getAllByRole("button");
-			expect(buttons.length).toBeGreaterThan(2);
+			fireEvent.click(screen.getByTitle("AI 工具"));
 			expect(screen.getByText("解释")).toBeInTheDocument();
 		});
 
 		it("should not render explain button when language is not provided", () => {
 			render(<AIAssistantToolbar {...defaultProps} />);
 
-			expect(screen.queryByTitle(/解释/)).not.toBeInTheDocument();
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			expect(screen.queryByText("解释")).not.toBeInTheDocument();
 		});
 
 		it("should apply custom className", () => {
@@ -47,23 +50,22 @@ describe("AIAssistantToolbar", () => {
 		it("should disable buttons when disabled prop is true", () => {
 			render(<AIAssistantToolbar {...defaultProps} disabled />);
 
-			expect(screen.getByTitle("润色 (⌘⇧A)")).toBeDisabled();
-			expect(screen.getByTitle("总结 (⌘⇧S)")).toBeDisabled();
+			expect(screen.getByTitle("AI 工具")).toBeDisabled();
 		});
 
 		it("should disable buttons when isLoading is true", () => {
 			render(<AIAssistantToolbar {...defaultProps} isLoading />);
 
-			expect(screen.getByTitle("润色 (⌘⇧A)")).toBeDisabled();
-			expect(screen.getByTitle("总结 (⌘⇧S)")).toBeDisabled();
+			expect(screen.getByTitle("AI 工具")).toBeDisabled();
 		});
 	});
 
 	describe("interactions", () => {
-		it("should call onAction with improve action when improve button is clicked", () => {
+		it("should call onAction with improve action when improve menu item is clicked", () => {
 			render(<AIAssistantToolbar {...defaultProps} content="Test content" />);
 
-			fireEvent.click(screen.getByTitle("润色 (⌘⇧A)"));
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			fireEvent.click(screen.getByText("润色"));
 
 			expect(defaultProps.onAction).toHaveBeenCalledWith(
 				"improve",
@@ -72,10 +74,11 @@ describe("AIAssistantToolbar", () => {
 			);
 		});
 
-		it("should call onAction with summarize action when summarize button is clicked", () => {
+		it("should call onAction with summarize action when summarize menu item is clicked", () => {
 			render(<AIAssistantToolbar {...defaultProps} content="Test content" />);
 
-			fireEvent.click(screen.getByTitle("总结 (⌘⇧S)"));
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			fireEvent.click(screen.getByText("总结"));
 
 			expect(defaultProps.onAction).toHaveBeenCalledWith(
 				"summarize",
@@ -84,7 +87,7 @@ describe("AIAssistantToolbar", () => {
 			);
 		});
 
-		it("should call onAction with explain action when explain button is clicked", () => {
+		it("should call onAction with explain action when explain menu item is clicked", () => {
 			render(
 				<AIAssistantToolbar
 					{...defaultProps}
@@ -93,13 +96,8 @@ describe("AIAssistantToolbar", () => {
 				/>,
 			);
 
-			const buttons = screen.getAllByRole("button");
-			const explainButton = buttons.find((b) =>
-				b.textContent?.includes("解释"),
-			);
-			expect(explainButton).toBeDefined();
-
-			fireEvent.click(explainButton!);
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			fireEvent.click(screen.getByText("解释"));
 
 			expect(defaultProps.onAction).toHaveBeenCalledWith(
 				"explain",
@@ -117,7 +115,8 @@ describe("AIAssistantToolbar", () => {
 
 			render(<AIAssistantToolbar {...defaultProps} textareaRef={ref} />);
 
-			fireEvent.click(screen.getByTitle("润色 (⌘⇧A)"));
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			fireEvent.click(screen.getByText("润色"));
 
 			expect(defaultProps.onAction).toHaveBeenCalledWith(
 				"improve",
@@ -129,7 +128,8 @@ describe("AIAssistantToolbar", () => {
 		it("should not call onAction when content is empty", () => {
 			render(<AIAssistantToolbar {...defaultProps} content="" />);
 
-			fireEvent.click(screen.getByTitle("润色 (⌘⇧A)"));
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			fireEvent.click(screen.getByText("润色"));
 
 			expect(defaultProps.onAction).not.toHaveBeenCalled();
 		});
@@ -137,15 +137,16 @@ describe("AIAssistantToolbar", () => {
 		it("should not call onAction when content is only whitespace", () => {
 			render(<AIAssistantToolbar {...defaultProps} content="   " />);
 
-			fireEvent.click(screen.getByTitle("润色 (⌘⇧A)"));
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			fireEvent.click(screen.getByText("润色"));
 
 			expect(defaultProps.onAction).not.toHaveBeenCalled();
 		});
 
-		it("should not call onAction when button is disabled", () => {
+		it("should not call onAction when trigger is disabled", () => {
 			render(<AIAssistantToolbar {...defaultProps} disabled />);
 
-			fireEvent.click(screen.getByTitle("润色 (⌘⇧A)"));
+			fireEvent.click(screen.getByTitle("AI 工具"));
 
 			expect(defaultProps.onAction).not.toHaveBeenCalled();
 		});
@@ -153,30 +154,30 @@ describe("AIAssistantToolbar", () => {
 		it("should not call onAction when isLoading is true", () => {
 			render(<AIAssistantToolbar {...defaultProps} isLoading />);
 
-			fireEvent.click(screen.getByTitle("润色 (⌘⇧A)"));
+			fireEvent.click(screen.getByTitle("AI 工具"));
 
 			expect(defaultProps.onAction).not.toHaveBeenCalled();
 		});
 	});
 
 	describe("accessibility", () => {
-		it("should have proper button titles with shortcuts", () => {
+		it("should expose shortcuts in menu items", () => {
 			render(<AIAssistantToolbar {...defaultProps} />);
 
-			expect(screen.getByTitle("润色 (⌘⇧A)")).toBeInTheDocument();
-			expect(screen.getByTitle("总结 (⌘⇧S)")).toBeInTheDocument();
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			// Presence of labels
+			expect(screen.getByText("润色")).toBeInTheDocument();
+			expect(screen.getByText("总结")).toBeInTheDocument();
+			// Shortcuts appear on the right
+			expect(screen.getByText("⌘⇧A")).toBeInTheDocument();
+			expect(screen.getByText("⌘⇧S")).toBeInTheDocument();
 		});
 
-		it("should have explain button with language in title", () => {
+		it("should show explain item when language provided", () => {
 			render(<AIAssistantToolbar {...defaultProps} language="typescript" />);
 
-			const buttons = screen.getAllByRole("button");
-			const explainButton = buttons.find((b) =>
-				b.textContent?.includes("解释"),
-			);
-			expect(explainButton).toBeDefined();
-			const title = explainButton?.getAttribute("title") || "";
-			expect(title).toContain("解释");
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			expect(screen.getByText("解释")).toBeInTheDocument();
 		});
 	});
 
@@ -189,7 +190,8 @@ describe("AIAssistantToolbar", () => {
 				/>,
 			);
 
-			fireEvent.click(screen.getByTitle("润色 (⌘⇧A)"));
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			fireEvent.click(screen.getByText("润色"));
 
 			expect(defaultProps.onAction).toHaveBeenCalledWith(
 				"improve",
@@ -213,12 +215,8 @@ describe("AIAssistantToolbar", () => {
 				/>,
 			);
 
-			const buttons = screen.getAllByRole("button");
-			const improveButton = buttons.find((b) =>
-				b.textContent?.includes("润色"),
-			);
-			expect(improveButton).toBeDefined();
-			fireEvent.click(improveButton!);
+			fireEvent.click(screen.getByTitle("AI 工具"));
+			fireEvent.click(screen.getByText("润色"));
 
 			expect(defaultProps.onAction).toHaveBeenCalledWith(
 				"improve",

@@ -219,6 +219,16 @@ describe("AIPreviewModal", () => {
 			expect(screen.getByText("取消")).toBeInTheDocument();
 		});
 
+		it("should not render Apply for summarize action", () => {
+			render(<AIPreviewModal {...defaultProps} action="summarize" />);
+			expect(screen.queryByText("应用")).not.toBeInTheDocument();
+		});
+
+		it("should not render Apply for explain action", () => {
+			render(<AIPreviewModal {...defaultProps} action="explain" />);
+			expect(screen.queryByText("应用")).not.toBeInTheDocument();
+		});
+
 		it("should not render copy button when loading", () => {
 			render(<AIPreviewModal {...defaultProps} isLoading suggestion="" />);
 

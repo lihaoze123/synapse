@@ -1,7 +1,7 @@
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import { useRef, useState } from "react";
-import { AIAssistantToolbar, AIPreviewModal } from "@/components/ai";
+import { AIPreviewModal } from "@/components/ai";
 import MarkdownPreview from "@/components/editor/MarkdownPreview";
 import MarkdownToolbar from "@/components/editor/MarkdownToolbar";
 import { Button } from "@/components/ui/button";
@@ -206,12 +206,8 @@ export default function ArticleEditor({
 								content={content}
 								onContentChange={onContentChange}
 								onImageClick={() => setImageDialogOpen(true)}
-							/>
-							<AIAssistantToolbar
-								textareaRef={textareaRef}
-								content={content}
-								onAction={handleAIAction}
-								isLoading={aiPreview.isLoading}
+								onAIAction={handleAIAction}
+								aiLoading={aiPreview.isLoading}
 							/>
 						</div>
 						<textarea
@@ -371,12 +367,8 @@ export default function ArticleEditor({
 								content={content}
 								onContentChange={onContentChange}
 								onImageClick={() => setImageDialogOpen(true)}
-							/>
-							<AIAssistantToolbar
-								textareaRef={textareaRef}
-								content={content}
-								onAction={handleAIAction}
-								isLoading={aiPreview.isLoading}
+								onAIAction={handleAIAction}
+								aiLoading={aiPreview.isLoading}
 							/>
 						</div>
 						<textarea

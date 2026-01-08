@@ -206,17 +206,29 @@ export default function AIPreviewModal({
 
 					{!isLoading && !error && suggestion && (
 						<div className="flex items-center justify-end gap-3 border-t border-border px-6 py-4">
-							<Button
-								variant="outline"
-								onClick={() => onOpenChange(false)}
-								className="min-w-[80px]"
-							>
-								取消
-							</Button>
-							<Button onClick={handleApply} className="min-w-[80px] gap-2">
-								<Check className="h-4 w-4" />
-								应用
-							</Button>
+							{action === "improve" ? (
+								<>
+									<Button
+										variant="outline"
+										onClick={() => onOpenChange(false)}
+										className="min-w-[80px]"
+									>
+										取消
+									</Button>
+									<Button onClick={handleApply} className="min-w-[80px] gap-2">
+										<Check className="h-4 w-4" />
+										应用
+									</Button>
+								</>
+							) : (
+								<Button
+                                    variant="outline"
+									onClick={() => onOpenChange(false)}
+									className="min-w-[80px]"
+								>
+									关闭
+								</Button>
+							)}
 						</div>
 					)}
 				</DialogPrimitive.Popup>

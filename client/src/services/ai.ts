@@ -10,8 +10,7 @@ const PROMPTS: Record<
 > = {
 	improve: (content) =>
 		`请改进以下文本，使其更清晰、更吸引人，同时保留原意：\n\n${content}`,
-	summarize: (content) =>
-		`请为以下内容提供简洁的摘要：\n\n${content}`,
+	summarize: (content) => `请为以下内容提供简洁的摘要：\n\n${content}`,
 	explain: (content, language = "code") =>
 		`请用通俗易懂的语言解释以下 ${language} 代码：\n\n\`\`\`${language}\n${content}\n\`\`\``,
 };

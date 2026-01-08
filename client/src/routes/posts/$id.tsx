@@ -6,6 +6,7 @@ import {
 	FileText,
 	Lock,
 	MessageCircle,
+	Sparkles,
 	Trash2,
 } from "lucide-react";
 import { lazy, Suspense, useEffect, useState } from "react";
@@ -14,6 +15,7 @@ import Markdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
+import AIPreviewModal from "@/components/ai/AIPreviewModal";
 import CommentSection from "@/components/comments/CommentSection";
 import { CodeBlock } from "@/components/common";
 import { AttachmentList } from "@/components/common/AttachmentList";
@@ -27,9 +29,16 @@ import PublishModal, {
 	type PublishData,
 } from "@/components/publish/PublishModal";
 import { AnimatedPage } from "@/components/ui/animations";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { useAuth, useDeletePost, usePost, useUpdatePost } from "@/hooks";
+import {
+	useAIPreview,
+	useAuth,
+	useDeletePost,
+	usePost,
+	useUpdatePost,
+} from "@/hooks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { resolveStaticUrl } from "@/services/api";
 import { postsService } from "@/services/posts";
@@ -86,6 +95,10 @@ function PostDetailPage() {
 	const [passwordError, setPasswordError] = useState("");
 	const [isVerifying, setIsVerifying] = useState(false);
 	const [unlockedPost, setUnlockedPostState] = useState<Post | null>(null);
+
+	// AI preview hook: shared UX with编辑器/卡片
+	const { preview, generate, applySuggestion, closePreview, retry } =
+		useAIPreview();
 
 	const isAuthor = currentUser && post && currentUser.id === post.user.id;
 	const isPrivateLocked = post?.isPrivate && !post?.content && !isAuthor;
@@ -205,6 +218,30 @@ function PostDetailPage() {
 
 	const showLockedView = isPrivateLocked && !unlockedPost;
 
+	// Prefer full content; for ARTICLE fallback summary; disable when locked
+	const aiSourceContent =
+		displayPost?.content?.trim() || displayPost?.summary?.trim() || "";
+	const canAISummarize = !!aiSourceContent && !showLockedView;
+	const canAIExplain =
+		!showLockedView &&
+		displayPost?.type === "SNIPPET" &&
+		!!displayPost?.content &&
+		!!displayPost?.language;
+
+	const handleAISummarize = () => {
+		if (!canAISummarize) return;
+		generate("summarize", aiSourceContent, displayPost?.language || undefined);
+	};
+
+	const handleAIExplain = () => {
+		if (!canAIExplain) return;
+		generate(
+			"explain",
+			displayPost?.content || "",
+			displayPost?.language || "code",
+		);
+	};
+
 	return (
 		<Layout>
 			<AnimatedPage transition="slideRight">
@@ -285,6 +322,30 @@ function PostDetailPage() {
 										size="md"
 									/>
 									<BookmarkButton postId={post.id} size="md" />
+									<div className="h-4 w-px bg-border" />
+									<Button
+										variant="ghost"
+										size="sm"
+										disabled={!canAISummarize}
+										onClick={handleAISummarize}
+										className="h-8 gap-1.5 px-2.5 text-xs font-medium text-muted-foreground hover:text-primary"
+										title={canAISummarize ? "AI 摘要" : "暂无可摘要的内容"}
+									>
+										<Sparkles className="h-3.5 w-3.5" />
+										<span className="hidden sm:inline">AI 摘要</span>
+									</Button>
+									{canAIExplain && (
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={handleAIExplain}
+											className="h-8 gap-1.5 px-2.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+											title="AI 解释代码"
+										>
+											<Code className="h-3.5 w-3.5" />
+											<span className="hidden sm:inline">AI 解释</span>
+										</Button>
+									)}
 									{isAuthor && (
 										<>
 											<button
@@ -490,6 +551,26 @@ function PostDetailPage() {
 					onCancel={handlePasswordCancel}
 					isLoading={isVerifying}
 					error={passwordError}
+				/>
+
+				{/* 统一 AI 预览弹窗：与编辑器/卡片一致 */}
+				<AIPreviewModal
+					open={preview.isOpen}
+					onOpenChange={(open) => (open ? null : closePreview())}
+					action={preview.action}
+					originalContent={preview.originalContent}
+					suggestion={preview.suggestion}
+					isLoading={preview.isLoading}
+					error={preview.error}
+					onApply={() =>
+						applySuggestion((s) => {
+							// 详情页默认动作为“复制建议”，避免误改正文
+							navigator.clipboard?.writeText(s).catch(() => {
+								/* ignore clipboard failures */
+							});
+						})
+					}
+					onRetry={retry}
 				/>
 
 				{isMobile && (

@@ -7,10 +7,21 @@ import {
 	List,
 	Quote,
 	Sigma,
+	Sparkles,
+	Wand2,
+	ChevronDown,
 } from "lucide-react";
 import type { RefObject } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuShortcut,
+	DropdownMenuTrigger,
+} from "@/components/ui/menu";
 
 interface MarkdownToolbarProps {
 	textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -18,6 +29,15 @@ interface MarkdownToolbarProps {
 	onContentChange: (content: string) => void;
 	onImageClick?: () => void;
 	className?: string;
+	// Optional AI integration
+	onAIAction?: (
+		action: "improve" | "summarize" | "explain",
+		content: string,
+		language?: string,
+	) => void;
+	aiLanguage?: string;
+	aiLoading?: boolean;
+	aiDisabled?: boolean;
 }
 
 interface ToolbarAction {
@@ -115,6 +135,10 @@ export default function MarkdownToolbar({
 	onContentChange,
 	onImageClick,
 	className,
+	onAIAction,
+	aiLanguage,
+	aiLoading = false,
+	aiDisabled = false,
 }: MarkdownToolbarProps) {
 	const [modKey, setModKey] = useState("⌘");
 
@@ -203,12 +227,27 @@ export default function MarkdownToolbar({
 		return () => textarea.removeEventListener("keydown", handleKeyDown);
 	}, [textareaRef, insertMarkdown]);
 
+	const triggerAI = useCallback(
+		(action: "improve" | "summarize" | "explain") => {
+			if (!onAIAction) return;
+			const textarea = textareaRef.current;
+			let selected = content;
+			if (textarea) {
+				const { selectionStart: s, selectionEnd: e } = textarea;
+				if (s !== e) selected = content.substring(s, e);
+			}
+			if (!selected.trim()) return;
+			onAIAction(action, selected, aiLanguage);
+		},
+		[onAIAction, textareaRef, content, aiLanguage],
+	);
+
 	return (
 		<div
 			className={cn(
 				"flex items-center gap-1 overflow-x-auto",
 				"rounded-t-lg border border-b-0 border-input",
-				"bg-muted/40 px-2 py-1.5",
+				"bg-muted/40 px-2 py-1.5 w-full",
 				className,
 			)}
 		>
@@ -253,6 +292,65 @@ export default function MarkdownToolbar({
 					>
 						<ImagePlus className="h-4 w-4" />
 					</button>
+				</>
+			)}
+
+			{/* AI dropdown, shown only when onAIAction is provided */}
+			{onAIAction && (
+				<>
+					<div className="mx-1 h-4 w-px bg-border" />
+					<DropdownMenu>
+						<DropdownMenuTrigger
+							disabled={aiDisabled || aiLoading}
+							className={cn(
+								"flex items-center gap-1 rounded-md px-2 h-8 sm:h-7",
+								"text-muted-foreground",
+								"hover:bg-background hover:text-foreground hover:shadow-sm",
+								"active:scale-95 transition-all duration-150",
+							)}
+							aria-label="AI 工具"
+							title="AI 工具"
+						>
+							{aiLoading ? (
+								<svg
+									className="h-4 w-4 animate-spin"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+								>
+									<circle cx="12" cy="12" r="10" className="opacity-10" />
+									<path d="M12 2a10 10 0 0 1 10 10" />
+								</svg>
+							) : (
+								<Sparkles className="h-4 w-4" />
+							)}
+							<span className="hidden sm:inline text-xs font-medium">AI</span>
+							<ChevronDown className="h-3.5 w-3.5 opacity-70" />
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end" sideOffset={6}>
+							<div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+								AI 助手
+							</div>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem onClick={() => triggerAI("improve")}>
+								<Wand2 className="opacity-80" />
+								润色
+								<DropdownMenuShortcut>⌘⇧A</DropdownMenuShortcut>
+                                <DropdownMenuItem onClick={() => triggerAI("summarize")}>
+							</DropdownMenuItem>
+								<Sparkles className="opacity-80" />
+								总结
+								<DropdownMenuShortcut>⌘⇧S</DropdownMenuShortcut>
+							</DropdownMenuItem>
+							{aiLanguage && (
+								<DropdownMenuItem onClick={() => triggerAI("explain")}>
+									<Wand2 className="opacity-80" />
+									解释
+									<DropdownMenuShortcut>⌘⇧E</DropdownMenuShortcut>
+								</DropdownMenuItem>
+							)}
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</>
 			)}
 		</div>

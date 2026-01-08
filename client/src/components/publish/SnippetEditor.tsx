@@ -1,7 +1,16 @@
-import { AIAssistantToolbar, AIPreviewModal } from "@/components/ai";
+import { AIPreviewModal } from "@/components/ai";
 import CodeMirrorEditor from "@/components/editor/CodeMirrorEditor";
 import { useAIPreview } from "@/hooks";
 import { cn } from "@/lib/utils";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuShortcut,
+	DropdownMenuTrigger,
+} from "@/components/ui/menu";
+import { ChevronDown, Sparkles, Wand2 } from "lucide-react";
 
 interface SnippetEditorProps {
 	title: string;
@@ -77,14 +86,62 @@ export default function SnippetEditor({
 					<div className="flex items-center justify-between mb-4">
 						<span className="text-sm text-muted-foreground">编写代码</span>
 						<div className="flex items-center gap-2">
-							<AIAssistantToolbar
-								textareaRef={{ current: null }}
-								content={code}
-								language={language}
-								onAction={handleAIAction}
-								isLoading={aiPreview.isLoading}
-								className="border-l-0"
-							/>
+							<DropdownMenu>
+								<DropdownMenuTrigger
+									disabled={aiPreview.isLoading}
+									className={cn(
+										"flex items-center gap-1 rounded-md px-2 h-8 sm:h-7",
+										"text-muted-foreground",
+										"hover:bg-accent hover:text-foreground",
+										"active:scale-95 transition-all duration-150",
+									)}
+									title="AI 工具"
+									aria-label="AI 工具"
+								>
+									{aiPreview.isLoading ? (
+										<svg
+											className="h-4 w-4 animate-spin"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+										>
+											<circle cx="12" cy="12" r="10" className="opacity-10" />
+											<path d="M12 2a10 10 0 0 1 10 10" />
+										</svg>
+									) : (
+										<Sparkles className="h-4 w-4" />
+									)}
+									<span className="hidden sm:inline text-xs font-medium">AI</span>
+									<ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                                </DropdownMenuTrigger>
+								<DropdownMenuContent align="end" sideOffset={6}>
+									<div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+										AI 助手
+									</div>
+									<DropdownMenuSeparator />
+									<DropdownMenuItem
+										onClick={() => handleAIAction("improve", code)}
+									>
+										<Wand2 className="opacity-80" />
+										润色
+										<DropdownMenuShortcut>⌘⇧A</DropdownMenuShortcut>
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onClick={() => handleAIAction("summarize", code)}
+									>
+										<Sparkles className="opacity-80" />
+										总结
+										<DropdownMenuShortcut>⌘⇧S</DropdownMenuShortcut>
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onClick={() => handleAIAction("explain", code)}
+									>
+										<Wand2 className="opacity-80" />
+										解释
+										<DropdownMenuShortcut>⌘⇧E</DropdownMenuShortcut>
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
 							<div className="relative shrink-0">
 								<select
 									value={language}
@@ -212,16 +269,7 @@ export default function SnippetEditor({
 					minHeight="280px"
 				/>
 
-				<div className="flex justify-end">
-					<AIAssistantToolbar
-						textareaRef={{ current: null }}
-						content={code}
-						language={language}
-						onAction={handleAIAction}
-						isLoading={aiPreview.isLoading}
-						className="border-l-0"
-					/>
-				</div>
+				{/* Bottom AI bar removed for a cleaner code editor layout */}
 			</div>
 
 			<AIPreviewModal
