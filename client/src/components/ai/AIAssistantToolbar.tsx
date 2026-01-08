@@ -9,8 +9,8 @@ import {
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
-import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 
 export type AIAction = "improve" | "summarize" | "explain";
 
@@ -59,7 +59,11 @@ export default function AIAssistantToolbar({
 	disabled = false,
 }: AIAssistantToolbarProps) {
 	const [_modKey, _setModKey] = useState("⌘");
-	const lastSelectionRef = useRef<{ start: number; end: number; text: string } | null>(null);
+	const lastSelectionRef = useRef<{
+		start: number;
+		end: number;
+		text: string;
+	} | null>(null);
 
 	const getActions = useCallback((): AIActionConfig[] => {
 		const baseActions = [...ACTIONS];
@@ -103,8 +107,13 @@ export default function AIAssistantToolbar({
 				}
 			}
 
+			// If no selection, use full content
 			if (!selectedContent.trim()) {
-				toast.info("请选择需要处理的文本，或先输入内容");
+				selectedContent = content;
+			}
+
+			if (!selectedContent.trim()) {
+				toast.info("请先输入内容");
 				return;
 			}
 

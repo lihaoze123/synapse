@@ -151,9 +151,10 @@ bun run dev
 | 功能 | 描述 |
 |:----|:-----|
 | **对象存储** | MinIO S3-compatible 存储，支持多文件附件 |
-| **图片上传** | 头像和封面图，UUID 命名防冲突 |
+| **文件附件** | 支持 PDF、Office、压缩包等多种文件类型 |
+| **图片上传** | 头像和封面图，UUID 命名防冲突，支持预览 |
 | **代码高亮** | 基于 CodeMirror 的语法高亮，支持 20+ 语言 |
-| **响应式设计** | 移动端优先，自适应布局 |
+| **响应式设计** | 移动端优先，自适应布局，底部导航栏 |
 | **草稿自动保存** | 编辑器自动保存草稿，防止丢失内容 |
 | **暗色模式** | 支持亮色/暗色/跟随系统三种主题 |
 | **私密帖子** | 支持密码保护的私密内容 |
@@ -162,6 +163,10 @@ bun run dev
 | **API 文档** | Swagger/OpenAPI 交互式文档（开发模式） |
 | **AI 辅助** | TanStack AI 集成，支持文本改写、总结和代码解释 |
 | **OAuth2 登录** | 支持 GitHub、Google 等第三方登录 |
+| **表情选择器** | 集成 Emoji Picker，支持在内容和评论中添加表情 |
+| **消息通知** | Toast 通知系统，支持成功/错误/信息/警告提示 |
+| **动画效果** | Framer Motion 页面过渡和列表动画 |
+| **用户设置** | 设置页面，支持修改昵称、简介和头像 |
 
 ---
 
@@ -199,6 +204,16 @@ CREATE DATABASE synapse ENCODING 'UTF8';
 # 2. 配置环境变量
 cp .env.example .env
 vim .env  # 修改 DB_URL, DB_USERNAME, DB_PASSWORD
+
+# 可选：配置 AI 功能
+# OPENAI_API_KEY=your-openai-api-key
+# OPENAI_BASE_URL=https://api.openai.com/v1
+
+# 可选：配置 OAuth2 登录
+# GITHUB_CLIENT_ID=your-github-client-id
+# GITHUB_CLIENT_SECRET=your-github-client-secret
+# GOOGLE_CLIENT_ID=your-google-client-id
+# GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # 3. 启动（不启动 demo profile 的 MySQL）
 docker compose up -d --build

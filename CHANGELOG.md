@@ -9,11 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - TanStack AI integration for AI-assisted content creation
-- AI Assistant Toolbar for quick access to AI actions
+- AI Assistant Toolbar (consolidated dropdown) for quick access to AI actions
 - AI Preview Modal for reviewing AI-generated content before applying
 - Post AI Actions (improve text, summarize content, explain code)
 - OAuth2 login support with GitHub and Google providers
-- Enhanced authentication UI with OAuth2 provider buttons
+- Enhanced authentication UI with OAuth2 provider buttons and loading states
+- Settings page for user profile management (display name, bio, avatar)
+- Emoji picker integration for posts and comments
+- File attachment support for various file types (PDF, Office, archives, images)
+- File upload progress tracking for multiple files
+- Toast notification system with success/error/info/warning variants
+- Mobile bottom navigation and action bar
+- Image preview modal for full-size viewing
+- Blur placeholder for progressive image loading
+- Error boundary for graceful error handling
+- Framer Motion animations for page transitions and staggered lists
+
+### Changed
+- AI prompts localized to Chinese
+- AI toolbar consolidated into dropdown menu
+- SSE format compatible with TanStack AI protocol
+- Text selection preserved when triggering AI actions
+
+### Fixed
+- AI chat reliability with authentication, timeouts, and thread management
+- Test expectations for AI preview modal
+- Lint and checkstyle violations
 
 ## [0.1.0] - 2026-01-05
 

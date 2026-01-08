@@ -159,21 +159,23 @@ com.synapse/
 ```
 src/
 ├── components/
-│   ├── common/       # Reusable UI (Button, Input, Tag, CodeBlock, FollowButton, FollowStats, UserInfo, UserListItem, ThemeToggle)
-│   ├── layout/       # Navbar, Sidebar, Layout, TopBar
-│   ├── editor/       # MarkdownEditor, CodeMirrorEditor
+│   ├── common/       # Reusable UI (Button, Input, Tag, CodeBlock, FollowButton, FollowStats, UserInfo, UserListItem, ThemeToggle, Avatar, EmojiPicker)
+│   ├── layout/       # Navbar, Sidebar, Layout, TopBar, BottomNav
+│   ├── editor/       # MarkdownEditor, CodeMirrorEditor, EmojiPicker
 │   ├── cards/        # PostCardFactory, SnippetCard, ArticleCard, MomentCard, PostCard
 │   ├── feed/         # Feed, ComposeCard, EmptyState
 │   ├── publish/      # PublishModal, SnippetEditor, ArticleEditor, MomentEditor, TagInput, RestoreDraftModal
-│   ├── upload/       # ImageUploader
+│   ├── upload/       # ImageUploader, FileUploader, AttachmentList
 │   ├── profile/      # AvatarUpload
 │   ├── comments/     # CommentSection, CommentItem
 │   ├── notifications/ # NotificationItem, NotificationsPanel
 │   ├── ai/           # AI features (AIAssistantToolbar, PostAIActions, AIPreviewModal)
-│   └── ui/           # UI components (Card, Button, Input, PasswordModal, etc.)
+│   ├── settings/     # Settings page components
+│   ├── auth/         # OAuth2Button, Login forms
+│   └── ui/           # UI components (Card, Button, Input, PasswordModal, Sheet, Tooltip, Skeleton, ConfirmDialog)
 ├── hooks/            # useAuth, usePosts, useNotifications, useNotificationRealtime, useTheme, useAI, useAIPreview
-├── routes/           # TanStack Router definitions (index, login, search, profile, posts/$id, users/$userId.*, notifications)
-├── services/         # Axios API client (notificationsService, aiService, etc.)
+├── routes/           # TanStack Router definitions (index, login, search, profile, posts/$id, users/$userId.*, notifications, settings, bookmarks)
+├── services/         # Axios API client (notificationsService, aiService, authService, etc.)
 └── utils/            # draftStorage, privatePost
 ```
 
@@ -247,7 +249,8 @@ POST /api/notifications/read-all   # Mark all notifications as read
 GET  /api/users/{id}               # Get user by ID
 GET  /api/users/username/{username} # Get user by username
 GET  /api/users/{id}/posts         # Get user posts (paginated)
-PUT  /api/users/profile            # Update current user profile
+PUT  /api/users/profile            # Update current user profile (display_name, bio, avatar)
+PUT  /api/users/avatar             # Update avatar image
 
 # Tags
 GET  /api/tags                     # Popular topics for sidebar
@@ -273,9 +276,10 @@ Frontend dynamically renders cards based on `post.type`:
 ### Social Features
 - **Comments**: Nested under posts, owner can edit/delete their comments, like/unlike comments
 - **Likes**: Toggle like on posts and comments, real-time like count
-- **Bookmarks**: Toggle bookmark on posts, separate bookmarks page
+- **Bookmarks**: Toggle bookmark on posts, dedicated bookmarks page with pagination
 - **Follows**: Follow/unfollow users, view followers/following lists with stats
 - **User Profiles**: Public profile pages with user info and posts
+- **Settings**: User settings page for profile management (display name, bio, avatar)
 - **Notifications**: Real-time notifications for likes, comments, follows, and mentions with unread count badge
 
 ### Real-time Features
@@ -312,10 +316,17 @@ Frontend dynamically renders cards based on `post.type`:
 
 ### AI Features
 - **TanStack AI Integration**: Uses OpenAI-compatible API for AI features
-- **AI Actions**: Improve (rewrite text), Summarize, Explain code
-- **AI Preview Modal**: Preview AI-generated content before applying
-- **AI Assistant Toolbar**: Quick access to AI actions in editors
-- **Environment-based**: Requires `OPENAI_API_KEY` to enable
+- **AI Actions**:
+  - **Improve**: Rewrite and enhance text content
+  - **Summarize**: Generate concise summaries
+  - **Explain Code**: Analyze and explain code snippets
+- **AI Preview Modal**: Preview AI-generated content before applying to post
+- **AI Assistant Toolbar**: Quick access to AI actions in editors (consolidated dropdown)
+- **SSE Streaming**: Server-Sent Events for real-time AI responses
+- **Thread Management**: Request tracking with unique chat IDs
+- **Timeout Handling**: 60-second timeout for AI requests
+- **Chinese Localization**: AI prompts and responses in Chinese
+- **Environment-based**: Requires `OPENAI_API_KEY` and `OPENAI_BASE_URL` to enable
 
 ### OAuth2 Authentication
 - **Supported Providers**: GitHub, Google
@@ -329,6 +340,9 @@ Files are stored in MinIO object storage with the following features:
 - **Public read policy**: Uploaded files are publicly accessible via MinIO
 - **UUID naming**: Files are renamed with UUID to prevent conflicts
 - **Multiple file support**: Posts can have multiple file attachments
+- **File types**: Support for PDF, Word, Excel, PowerPoint, archives, images
+- **File icons**: Visual indicators based on MIME type
+- **Progress tracking**: Upload progress indicators for multiple files
 - **Environment-based configuration**: Supports external MinIO for production
 
 Configure via environment variables:
@@ -384,6 +398,35 @@ For development/demo with Docker, MinIO is included in the demo profile.
 - Soft shadows (`shadow-sm` to `shadow-md`), rounded corners (`rounded-xl`)
 - TanStack Router Loader for data pre-loading
 - Responsive design with mobile-first approach
+
+### Enhanced UI Components
+- **Toast Notifications**: Using `sonner` library with success/error/info/warning variants
+- **Emoji Picker**: `@emoji-mart` integration for adding emojis to posts and comments
+- **Form Components**: Reusable form, label, field components with validation
+- **Avatar**: Avatar component with upload support and fallback initials
+- **Sheet/Drawer**: Side panel component for mobile menus and settings
+- **Tooltip**: Hover tooltips for additional context
+- **Skeleton**: Loading placeholders for content loading states
+- **Confirm Dialog**: Modal for confirming destructive actions
+
+### Mobile Features
+- **Bottom Navigation**: Mobile-optimized bottom navigation bar
+- **Mobile Action Bar**: Context-aware action buttons for mobile
+- **Responsive Layout**: Mobile-first design with breakpoints
+
+### Animation System
+- **Framer Motion**: Smooth page transitions and element animations
+- **Stagger Effects**: Sequential animation for lists and cards
+- **Page Transitions**: Animated navigation between routes
+
+### Error Handling
+- **Error Boundary**: Prevents app crashes from unhandled errors
+- **Graceful Degradation**: App continues working when optional services fail
+
+### Image Features
+- **Blur Placeholder**: Progressive image loading with blur effect
+- **Image Preview Modal**: Full-size image viewing
+- **Lazy Loading**: Images load as needed for performance
 
 ## Important Constraints
 

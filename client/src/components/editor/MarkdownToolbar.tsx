@@ -21,8 +21,8 @@ import {
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "@/components/ui/menu";
-import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 
 interface MarkdownToolbarProps {
 	textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -142,7 +142,11 @@ export default function MarkdownToolbar({
 	aiDisabled = false,
 }: MarkdownToolbarProps) {
 	const [modKey, setModKey] = useState("⌘");
-	const lastSelectionRef = useRef<{ start: number; end: number; text: string } | null>(null);
+	const lastSelectionRef = useRef<{
+		start: number;
+		end: number;
+		text: string;
+	} | null>(null);
 
 	useEffect(() => {
 		const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;

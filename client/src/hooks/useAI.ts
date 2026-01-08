@@ -14,7 +14,9 @@ interface UseAIOptions {
 
 export function useAI(options: UseAIOptions = {}) {
 	const { endpoint = "/api/ai/chat" } = options;
-	const token = options.token ?? (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+	const token =
+		options.token ??
+		(typeof window !== "undefined" ? localStorage.getItem("token") : null);
 
 	const { messages, sendMessage, isLoading, error, stop, reload } = useChat({
 		// Include auth header for protected /api/** endpoints and same-origin credentials for cookies if any.
