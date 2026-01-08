@@ -338,9 +338,8 @@ export default function MarkdownToolbar({
 								<Wand2 className="opacity-80" />
 								润色
 								<DropdownMenuShortcut>⌘⇧A</DropdownMenuShortcut>
-								<DropdownMenuItem
-									onClick={() => triggerAI("summarize")}
-								></DropdownMenuItem>
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => triggerAI("summarize")}>
 								<Sparkles className="opacity-80" />
 								总结
 								<DropdownMenuShortcut>⌘⇧S</DropdownMenuShortcut>

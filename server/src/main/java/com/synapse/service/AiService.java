@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapse.dto.AiChatRequest;
 import com.synapse.dto.AiStreamChunk;
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -43,6 +45,9 @@ public class AiService {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+            // Defensive networking: set timeouts to avoid hanging threads
+            conn.setConnectTimeout(10_000);
+            conn.setReadTimeout(60_000);
             conn.setDoOutput(true);
 
             Map<String, Object> body = new HashMap<>();
@@ -55,7 +60,10 @@ public class AiService {
             String requestBody = objectMapper.writeValueAsString(body);
             log.debug("AI request URL: {}", baseUrl + "/chat/completions");
             log.debug("AI request body: {}", requestBody);
-            conn.getOutputStream().write(objectMapper.writeValueAsBytes(body));
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(objectMapper.writeValueAsBytes(body));
+                os.flush();
+            }
 
             int responseCode = conn.getResponseCode();
             log.debug("AI response code: {}", responseCode);
@@ -76,6 +84,11 @@ public class AiService {
                     new InputStreamReader(conn.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    // Allow cooperative cancellation if the caller interrupts the thread
+                    if (Thread.currentThread().isInterrupted()) {
+                        log.debug("AI stream interrupted by caller");
+                        break;
+                    }
                     if (line.startsWith("data: ")) {
                         String data = line.substring(6);
                         if ("[DONE]".equals(data)) {
@@ -107,6 +120,13 @@ public class AiService {
                     .content("[Error: " + e.getMessage() + "]")
                     .build());
             onComplete.run();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.disconnect();
+                } catch (Exception ignored) {
+                }
+            }
         }
     }
 

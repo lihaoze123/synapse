@@ -5,6 +5,8 @@ import { useCallback } from "react";
 
 interface UseAIOptions {
 	endpoint?: string;
+	// Optional: explicitly pass a token; if omitted we'll read from localStorage
+	token?: string | null;
 	onFinish?: (message: UIMessage) => void;
 	onChunk?: (chunk: StreamChunk) => void;
 	onError?: (error: Error) => void;
@@ -12,9 +14,14 @@ interface UseAIOptions {
 
 export function useAI(options: UseAIOptions = {}) {
 	const { endpoint = "/api/ai/chat" } = options;
+	const token = options.token ?? (typeof window !== "undefined" ? localStorage.getItem("token") : null);
 
 	const { messages, sendMessage, isLoading, error, stop, reload } = useChat({
-		connection: fetchServerSentEvents(endpoint),
+		// Include auth header for protected /api/** endpoints and same-origin credentials for cookies if any.
+		connection: fetchServerSentEvents(endpoint, {
+			headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+			credentials: "same-origin",
+		}),
 		onFinish: options.onFinish,
 		onChunk: options.onChunk,
 		onError: options.onError,
